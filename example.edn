@@ -2,14 +2,14 @@
 ;; would look like.
 {:name "idk"
  :output "publish/"
- :pages [{:type 'saison.page.static
-          :source-path "public/"
-          :output-root "/"}
-         {:type 'page.blog
-          :rss true
-          :base-path "/writing"
-          :any-info-to-pass-to-fn "bleh"}
-         {:type 'saison.clojurescript
-          :output "/writing/something.js"
-          :build-config {}}
-         ]}
+ :sources [{:type 'saison.sources/static
+            :source-path "public/"
+            :output-root "/"}
+           {:type 'page.blog
+            :rss true
+            :base-path "/writing"
+            :any-info-to-pass-to-fn "bleh"}
+           {:type 'saison.sources/clojurescript
+            :output "/writing/something.js"
+            :build-config {}}
+           ]}
