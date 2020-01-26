@@ -77,3 +77,58 @@ No server side interactivity. No database.
 * How can I compile page-specific ClojureScript on the fly?
 * What's the plan for photos and photo galleries?
 * How do I automatically handle linking to posts?
+
+### Page resolution
+
+How does Saison identify pages? Actually, what exactly is a page?
+
+Here's my working idea. There is a top-level .edn file with an
+arbitrary name. the name indicates the name of the static site that
+can be generated. this allows for multiple to exist within the same
+repository.
+
+```
+{:output "ehh"
+:publish "ehh"
+:asset-folder "public/"
+:special-pages ['my-special.namespace/function]}
+:pages [{:type 'something-}]
+```
+
+each function will be invoked with the page options map as well as the
+configuration edn as a whole.
+
+the set of paths can be computed by running through each item in
+pages. they can return multiple paths for each page, but presumably
+this is stable because it is generated from content on the file
+system.
+
+Before we even render any of the content, it should be possible to
+detect whether there are any conflicting paths, whether dynamically
+generated or simply static assets.
+
+### Hoisting of meta information?
+
+A particular case that I don't think this design accounts for is the
+embedding of the RSS URL into a top level page.
+
+A quick and shoddy approach to this: simply hard code the URL into
+however the actual index URL is generated.
+
+To paper over this, it's possible that I could implement a scanner
+that identifies local URLs in the generated files and matches them to
+known paths.
+
+### Automatic links to other paths
+
+Given that the generate function will not be invoked until after all
+paths are known, I think I have a solution for this as well.
+
+Each page generator function, when invoked, can also receive the list
+of all known pages with information about them. Each item will be the
+same map that is output by the discovery function.
+
+Additionally, we can fabricate a type that represents each static
+file. Perhaps another approach altogether is to make this its own page
+generator. This would increase the overall symmetry.
+
