@@ -132,3 +132,19 @@ Additionally, we can fabricate a type that represents each static
 file. Perhaps another approach altogether is to make this its own page
 generator. This would increase the overall symmetry.
 
+### Reusable components
+
+* multiple slots, a-la svelte?
+* backed by code and also css?
+
+Idea: for all output that is html, parse the html. Use special
+non-valid tags for components. Find these and replace with component
+content.
+
+perhaps I'm thinking about this all the wrong way. i should just
+leverage enlive to do all the templating and then rely on custom
+functions for more interesting pages?
+
+it's still interesting to think about how the navigation case could
+work. would it rely on each page that wants to use navigation links to
+have knowledge of how to render them? is that bad?

@@ -8,23 +8,22 @@
 
 (s/def :saison.path/path string?)
 (s/def :saison.path/short-name string?)
-(s/def :saison.path/compile
-  fn?
-  #_(s/fspec :args (s/cat :path :saison.core/path)))
-;; i think that what i'm grappling with here is that there are no good
-;; ways to dynamically identify what computation to perform.
+
+(s/def :saison.path/generator qualified-symbol?)
+(s/def :saison.path/data map?)
 
 (s/def :saison.core/path
   (s/keys :req [:saison.path/path
-                :saison.path/compile]
-          :opt [:saison.path/short-name]))
+                :saison.path/generator]
+          :opt [:saison.path/short-name
+                :saison.path/data]))
 
 ;; Generator
 ;; ==================================================
-;; generators take a Path map and some options and write out
+;; generators take a Path map and the site context and write out
 ;; the content
 
-
+;; (s/def :saison.core/generator (s/fspec :args (s/cat :path)))
 
 ;; Source
 ;; ==================================================
@@ -52,10 +51,10 @@
 
 
 (comment
-  (s/valid? :saison.core/resolver {:type 'hello})
   (s/valid? :saison.core/path #:saison.path{:path "/hello"
                                             :short-name "something"
-                                            :compile (fn [x] 4)})
+                                            :generator 'do/wat
+                                            :data {:woah :buddy}})
 
   (s/valid? :saison.core/path
             #:saison.path
