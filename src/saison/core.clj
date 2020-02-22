@@ -31,10 +31,8 @@
 
 (s/def :saison.source/type qualified-symbol?)
 
-(defmulti source :saison.source/type)
-
 (s/def :saison.core/source
-  (s/multi-spec source :saison.source/type))
+  (s/keys :req-un [:saison.source/type]))
 
 ;; Site
 ;; ==================================================
@@ -46,9 +44,4 @@
 ;; 
 ;; ==================================================
 
-(defn eh []
-  (inc (dec 42)))
 
-
-(comment
-  )
