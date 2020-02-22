@@ -51,14 +51,4 @@
 
 
 (comment
-  (s/valid? :saison.core/path #:saison.path{:path "/hello"
-                                            :short-name "something"
-                                            :generator 'do/wat
-                                            :data {:woah :buddy}})
-
-  (s/valid? :saison.core/path
-            #:saison.path
-            {:path "/"
-             :short-name "root"
-             :compile (fn [p] "Hello")})
   )
