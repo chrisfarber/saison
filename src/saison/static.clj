@@ -9,9 +9,12 @@
   (let [{:keys [path]} source-config
         files (util/list-files path)]
     (map (fn [[name f]]
-           {:saison.path/path name
-            :saison.path/generator 'saison.static/generator
-            :saison.path/data {:file f}})
+           {:path name
+            :generator 'saison.static/generator
+            :data {:file f}})
          files)))
+
+(defn generate
+  [site-config paths path])
 
 

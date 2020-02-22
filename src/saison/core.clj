@@ -13,10 +13,10 @@
 (s/def :saison.path/data map?)
 
 (s/def :saison.core/path
-  (s/keys :req [:saison.path/path
-                :saison.path/generator]
-          :opt [:saison.path/short-name
-                :saison.path/data]))
+  (s/keys :req-un [:saison.path/path
+                   :saison.path/generator]
+          :opt-un [:saison.path/short-name
+                   :saison.path/data]))
 
 ;; Generator
 ;; ==================================================
