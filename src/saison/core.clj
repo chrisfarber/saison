@@ -39,9 +39,15 @@
 
 (s/def :saison.site/name string?)
 (s/def :saison.site/output string?)
-(s/def :saison.site/sources :saison.core/source)
+(s/def :saison.site/sources (s/* :saison.core/source))
 
 ;; 
 ;; ==================================================
 
-
+(defn discover-paths
+  "Given the definition of a site, discover all paths."
+  [site]
+  (mapcat (fn [source]
+            (let [source-fn (requiring-resolve (:type source))]
+              (source-fn source)))
+          (:sources site)))
