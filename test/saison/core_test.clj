@@ -5,10 +5,10 @@
 
 (t/deftest path-specs
   (t/is (s/valid? :saison.core/path
-                  #:saison.path {:path "/"
-                                 :short-name "root"
-                                 :generator 'saison/not-real}))
-  (t/is (s/valid? :saison.core/path #:saison.path{:path "/hello"
-                                                  :short-name "something"
-                                                  :generator 'do/wat
-                                                  :data {:woah :buddy}})))
+                  {:path "/"
+                   :short-name "root"
+                   :generator 'saison/not-real}))
+  (t/is (s/valid? :saison.core/path {:path "/hello"
+                                     :short-name "something"
+                                     :generator 'do/wat
+                                     :data {:woah :buddy}})))

@@ -16,7 +16,7 @@
       (fn [[^String relPath ^java.io.File f]] (.isDirectory f))
       (fn [[^String relPath ^java.io.File d]]
         (map (fn [^java.io.File f]
-               [(str relPath "/" (.getName f)) f])
+               [(str relPath java.io.File/separator (.getName f)) f])
              (.listFiles d)))
       ["" root]))))
 

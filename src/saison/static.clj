@@ -10,7 +10,7 @@
         files (util/list-files path)]
     (map (fn [[name f]]
            {:path name
-            :generator 'saison.static/generator
+            :generator 'saison.static/generate
             :data {:file f}})
          files)))
 
