@@ -51,3 +51,9 @@
             (let [source-fn (requiring-resolve (:type source))]
               (source-fn source)))
           (:sources site)))
+
+(defn compile-path
+  "Compile the given path. TBD."
+  [site paths path]
+  (let [generator (requiring-resolve (:generator path))]
+    (generator site paths path)))

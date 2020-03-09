@@ -15,6 +15,9 @@
          files)))
 
 (defn generate
-  [site-config paths path)
+  [site-config paths path]
+  (-> path
+      :data
+      :file))
 
 
