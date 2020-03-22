@@ -4,19 +4,9 @@
   Primarily, this provides some ring middleware and server."
   (:require [saison.core :as sn]
             [ring.adapter.jetty :refer [run-jetty]]
-            [ring.middleware.content-type :refer [wrap-content-type]]))
-
-(defn path-matches?
-  "Does the second path match the first?
-
-  This is slightly more complex than an equality check, as we have to
-  deal with some issues like matching index.html and trailing slashes."
-
-  [target actual]
-  (let [actual actual])
-  (cond
-    (= target actual) 1
-    ))
+            [ring.middleware.content-type :refer [wrap-content-type]]
+            [saison.util :as util]
+            [ring.util.mime-type :as mime]))
 
 (defn site-handler
   "Creates a ring handler that renders any discoverable path."
@@ -25,13 +15,17 @@
   (fn [req]
     (let [path (:uri req)
           paths (sn/discover-paths site)
-          matches (filter #(= path (:path %)) paths)]
+          matches (filter #(or (= path (:path %))
+                               (= (util/add-path-component path "index.html") (:path %))) paths)
+          match (first matches)]
       (println "uri:" path)
       (println "matches:" (count matches))
       (println "paths:" paths)
-      (if (not-empty matches)
+      (if (some? match)
         {:status 200
-         :body (sn/compile-path site paths (first matches))}
+         :body (sn/compile-path site paths match)
+         ;; specify the mime type based on the matching path; this allows index.html to work.
+         :headers {"Content-Type" (mime/ext-mime-type (:path match))}}
         {:status 404
          :headers {"Content-Type" "text/html"}
          :body "not found."}))))

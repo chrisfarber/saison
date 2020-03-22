@@ -1,5 +1,6 @@
 (ns saison.util
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (defn list-files
   "Return a seq of files in a directory.
@@ -20,3 +21,10 @@
              (.listFiles d)))
       ["" root]))))
 
+(defn add-path-component
+  "Add a path component to a string. Handles trailing slashes on the base."
+  [base addition]
+  (str base
+       (if-not (str/ends-with? base "/")
+         "/")
+       addition))
