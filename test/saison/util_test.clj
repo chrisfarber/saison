@@ -4,8 +4,9 @@
 
 (t/deftest list-files
   (let [paths (sut/list-files "./fixtures/a")
-        relative-paths (set (map first paths))]
-    (t/is (= (disj relative-paths "/.DS_Store")
+        relative-paths (set (remove #(.endsWith % ".DS_Store")
+                                    (map first paths)))]
+    (t/is (= relative-paths
              #{"/image.png"
                "/robots.txt"
                "/sub/thing.html"}))))
@@ -14,4 +15,10 @@
   (t/is (= (sut/add-path-component "/" "index.html")
            "/index.html"))
   (t/is (= (sut/add-path-component "/hello/there" "thing.html")
-           "/hello/there/thing.html")))
+           "/hello/there/thing.html"))
+  (t/is (= (sut/add-path-component "/thing" "/thing2")
+           "/thing/thing2"))
+  (t/is (= (sut/add-path-component "/thing/" "/thing2/")
+           "/thing/thing2"))
+  (t/is (= (sut/add-path-component "/thing/" "./what.thing/ind")
+           "/thing/./what.thing/ind")))

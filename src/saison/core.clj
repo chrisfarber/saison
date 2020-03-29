@@ -53,7 +53,7 @@
           (:sources site)))
 
 (defn compile-path
-  "Compile the given path. TBD."
+  "Compile the given path using its generator"
   [site paths path]
   (let [generator (requiring-resolve (:generator path))]
     (generator site paths path)))

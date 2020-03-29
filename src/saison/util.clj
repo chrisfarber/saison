@@ -27,4 +27,4 @@
   (str base
        (if-not (str/ends-with? base "/")
          "/")
-       addition))
+       (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition))))

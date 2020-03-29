@@ -18,9 +18,6 @@
           matches (filter #(or (= path (:path %))
                                (= (util/add-path-component path "index.html") (:path %))) paths)
           match (first matches)]
-      (println "uri:" path)
-      (println "matches:" (count matches))
-      (println "paths:" paths)
       (if (some? match)
         {:status 200
          :body (sn/compile-path site paths match)
