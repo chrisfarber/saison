@@ -34,18 +34,16 @@
     (write-file dest-file data)))
 
 (defn build-site
-  [site output-path]
-  (let [all-paths (sn/discover-paths site)]
-    (doseq [p all-paths]
-      (let [output-path (util/add-path-component output-path (:path p))]
-        (write-path site all-paths p output-path)))))
+  ([site] (build-site site (:output site)))
+  ([site output-path]
+   (let [all-paths (sn/discover-paths site)]
+     (doseq [p all-paths]
+       (let [output-path (util/add-path-component output-path (:path p))]
+         (write-path site all-paths p output-path))))))
 
 (comment
   (build-site {:sources [{:type 'saison.static/source
-                          :path "./fixtures/b"}]} "test-output")
+                          :path "./fixtures/b"}]
+               :output "dist"})
 
-  (-> "stuff/a/bc/cd.txt"
-      (java.io.File.)
-      (.getParentFile)
-      (.mkdirs))
   )
