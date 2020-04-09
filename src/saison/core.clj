@@ -1,5 +1,11 @@
 (ns saison.core
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [saison.util :as util]))
+
+(s/def ::callable
+  (s/or :symbol qualified-symbol?
+        :fn var?
+        :fn fn?))
 
 ;; Paths
 ;; ==================================================
@@ -9,7 +15,7 @@
 (s/def :saison.path/path string?)
 (s/def :saison.path/short-name string?)
 
-(s/def :saison.path/generator qualified-symbol?)
+(s/def :saison.path/generator ::callable)
 (s/def :saison.path/data map?)
 
 (s/def :saison.core/path
@@ -29,7 +35,7 @@
 ;; ==================================================
 ;; these identify and output paths.
 
-(s/def :saison.source/type qualified-symbol?)
+(s/def :saison.source/type ::callable)
 
 (s/def :saison.core/source
   (s/keys :req-un [:saison.source/type]))
@@ -48,12 +54,15 @@
   "Given the definition of a site, discover all paths."
   [site]
   (mapcat (fn [source]
-            (let [source-fn (requiring-resolve (:type source))]
-              (source-fn source)))
+            (util/invoke (:type source) source))
           (:sources site)))
+
+(s/fdef discover-paths
+  :args (s/cat :site :saison.core/site)
+  :ret (s/* :saison.core/path))
 
 (defn compile-path
   "Compile the given path using its generator"
   [site paths path]
-  (let [generator (requiring-resolve (:generator path))]
-    (generator site paths path)))
+  (util/invoke (:generator path)
+               site paths path))

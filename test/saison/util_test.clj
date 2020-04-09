@@ -22,3 +22,15 @@
            "/thing/thing2"))
   (t/is (= (sut/add-path-component "/thing/" "./what.thing/ind")
            "/thing/./what.thing/ind")))
+
+(def test-fn identity)
+(defn test-fn2
+  [a b c]
+  (+ a b c))
+
+(t/deftest invoke
+  (t/is (= 42 (sut/invoke 'saison.util-test/test-fn 42)))
+  (t/is (= 43 (sut/invoke 'saison.util-test/test-fn 43)))
+  (t/is (= 15 (sut/invoke 'saison.util-test/test-fn2 3 7 5)))
+  (t/is (= 15 (sut/invoke #'+ 3 5 7)))
+  (t/is (= 15 (sut/invoke + 3 5 7))))
