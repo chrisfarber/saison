@@ -14,7 +14,7 @@
     (filter
      (fn [[_ f]] (.isFile f))
      (tree-seq
-      (fn [[^String relPath ^java.io.File f]] (.isDirectory f))
+      (fn [[^String _ ^java.io.File f]] (.isDirectory f))
       (fn [[^String relPath ^java.io.File d]]
         (map (fn [^java.io.File f]
                [(str relPath java.io.File/separator (.getName f)) f])
@@ -25,7 +25,7 @@
   "Add a path component to a string. Handles trailing slashes on the base."
   [base addition]
   (str base
-       (if-not (str/ends-with? base "/")
+       (when-not (str/ends-with? base "/")
          "/")
        (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition))))
 
