@@ -4,18 +4,18 @@
             [clojure.spec.alpha :as s]))
 
 (t/deftest path-specs
-  (t/is (s/valid? :saison.core/path
-                  {:path "/"
+  (t/is (s/valid? :saison.path/path
+                  {:full-path "/"
                    :short-name "root"
                    :generator 'saison/not-real}))
-  (t/is (s/valid? :saison.core/path {:path "/hello"
+  (t/is (s/valid? :saison.path/path {:full-path "/hello"
                                      :short-name "something"
                                      :generator 'do/wat
                                      :data {:woah :buddy}})))
 
 (defn test-source-1
   "A source that identifies one page with simple content"
-  [source-config]
+  [_]
 
   (list {:path "/index.html"
          :generator 'saison.core-test/test-generate-1}))

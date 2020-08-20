@@ -4,7 +4,7 @@
             [clojure.spec.alpha :as s]))
 
 (defn find-path [paths name]
-  (first (filter #(= name (:path %)) paths)))
+  (first (filter #(= name (:full-path %)) paths)))
 
 (t/deftest source-test
   (let [path "./fixtures/a"
@@ -13,9 +13,9 @@
         sub-thing (find-path results "/sub/thing.html")]
     (t/is (= 3 (count results)))
     (t/is (not (nil? sub-thing)))
+    (t/is (not (nil? image-png)))
     (t/is (= (:generator sub-thing) 'saison.static/generate))
-    (t/is (s/valid? (s/* :saison.core/path) results))))
+    (t/is (s/valid? (s/* :saison.path/path) results))))
 
 (comment
-  (sut/source {:path "src"})
-  )
+  (sut/source {:path "./fixtures/a"}))

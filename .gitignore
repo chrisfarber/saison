@@ -1,3 +1,4 @@
+/.calva/output-window
 .cljs_node_repl
 .cpcache
 .nrepl-port

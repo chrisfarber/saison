@@ -1,28 +1,8 @@
 (ns saison.core
   (:require [clojure.spec.alpha :as s]
-            [saison.util :as util]))
+            [saison.path]
+            [saison.callable :refer [invoke]]))
 
-(s/def ::callable
-  (s/or :symbol qualified-symbol?
-        :fn var?
-        :fn fn?))
-
-;; Paths
-;; ==================================================
-;; Paths are maps that describe precise, individual pages
-;; that can be generated.
-
-(s/def :saison.path/path string?)
-(s/def :saison.path/short-name string?)
-
-(s/def :saison.path/generator ::callable)
-(s/def :saison.path/data map?)
-
-(s/def :saison.core/path
-  (s/keys :req-un [:saison.path/path
-                   :saison.path/generator]
-          :opt-un [:saison.path/short-name
-                   :saison.path/data]))
 
 ;; Generator
 ;; ==================================================
@@ -35,7 +15,7 @@
 ;; ==================================================
 ;; these identify and output paths.
 
-(s/def :saison.source/type ::callable)
+(s/def :saison.source/type :saison.callable/ref)
 
 (s/def :saison.core/source
   (s/keys :req-un [:saison.source/type]))
@@ -54,15 +34,15 @@
   "Given the definition of a site, discover all paths."
   [site]
   (mapcat (fn [source]
-            (util/invoke (:type source) source))
+            (invoke (:type source) source))
           (:sources site)))
 
 (s/fdef discover-paths
   :args (s/cat :site :saison.core/site)
-  :ret (s/* :saison.core/path))
+  :ret (s/* :saison.path/path))
 
 (defn compile-path
   "Compile the given path using its generator"
   [site paths path]
-  (util/invoke (:generator path)
-               site paths path))
+  (invoke (:generator path)
+          site paths path))
