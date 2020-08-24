@@ -2,7 +2,7 @@
   "Tools for running a live preview of a saison site.
 
   Primarily, this provides some ring middleware and server."
-  (:require [saison.core :as sn]
+  (:require [saison.site :as sn]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [saison.util :as util]
@@ -48,7 +48,6 @@
   (def testing-site
     (live-preview {:sources [{:type 'saison.static/source
                               :path "./fixtures/b"}]}))
-  
+
   ;; to stop
-  (.stop testing-site)
-  )
+  (.stop testing-site))

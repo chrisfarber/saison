@@ -1,6 +1,6 @@
 (ns saison.build
   "Tools for statically outputting a site."
-  (:require [saison.core :as sn]
+  (:require [saison.site :as sn]
             [saison.util :as util]
             [clojure.java.io :as io]))
 
@@ -12,7 +12,8 @@
 (defn write-file
   "Write data to an ouput file.
 
-  Intermediate directories will automatically be created."
+   Calls io/as-file on the destination, and path-stream on its contents
+   Intermediate directories will automatically be created."
   [dest contents]
   (-> dest
       io/as-file
