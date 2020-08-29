@@ -1,11 +1,7 @@
 (ns saison.static
   (:require [saison.util :as util]))
 
-(defn- static-path
-  [[name f]]
-  {:full-path name
-   :generator 'saison.static/generate
-   :data {:file f}})
+(declare static-path)
 
 (defn source
   "A source for static, unprocessed files."
@@ -20,3 +16,9 @@
   (-> path
       :data
       :file))
+
+(defn- static-path
+  [[name f]]
+  {:full-path name
+   :generator 'saison.static/generate
+   :data {:file f}})

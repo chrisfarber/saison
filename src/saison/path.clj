@@ -7,17 +7,11 @@
   (:require [clojure.spec.alpha :as s]
             [saison.callable]))
 
-;; Paths
-;; ==================================================
-;; Paths are maps that describe precise, individual pages
-;; that can be generated.
-
 (s/def ::full-path string?)
 (s/def ::short-name string?)
 
 (s/def ::generator :saison.callable/ref)
 (s/def ::data map?)
-(s/def ::metadata map?)
 
 (s/def ::title string?)
 (s/def ::date-created inst?)

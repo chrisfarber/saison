@@ -10,7 +10,7 @@
         path-b {:full-path "/hello"
                 :short-name "something"
                 :generator 'do/wat
-                :data {:woah :buddy}}]
+                :data {:flag true}}]
 
     (t/is (s/valid? :saison.path/path
                     path-a))

@@ -2,15 +2,22 @@
   "Source and generator for basic markdown-templated files"
   (:require [net.cgrand.enlive-html :as html]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [saison.util :as util]))
 
-(defn source [source-config])
+(defn source [source-config]
+  (let [path (:path source-config)
+        all-files (util/list-files path)
+        markdown-files (filter (fn [[rel full]]
+                                 (str/ends-with? rel ".md"))
+                               all-files)]
+    (map (fn [[rel full]]
+           {:full-path full
+            :generator 'saison.markdown/generate}) markdown-files)))
 
-(defn generate [] 42)
-
-
-
-
+(defn generate [_ _ path]
+  (io/input-stream
+   (.getBytes (str "hello this is " (:full-path path)))))
 
 (comment
   (def r (html/html-resource (io/as-file "./fixtures/b/index.html")))

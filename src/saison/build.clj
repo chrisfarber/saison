@@ -45,4 +45,6 @@
 (comment
   (build-site {:sources [{:type 'saison.static/source
                           :path "./fixtures/b"}]
-               :output "dist"}))
+               :output "dist"})
+  (write-file "what.txt" (io/input-stream (io/reader "stuff")))
+  )
