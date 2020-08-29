@@ -4,15 +4,10 @@
             [saison.util :as util]
             [clojure.java.io :as io]))
 
-(defn path-stream [path-out]
-  (cond
-    (= (type path-out) java.io.File) (io/input-stream path-out)
-    (= (type path-out) java.io.InputStream) path-out))
-
 (defn write-file
   "Write data to an ouput file.
 
-   Calls io/as-file on the destination, and path-stream on its contents
+   Calls io/as-file on the destination, and to-input-stream on its contents
    Intermediate directories will automatically be created."
   [dest contents]
   (-> dest
@@ -20,7 +15,7 @@
       (.getParentFile)
       (.mkdirs))
   (with-open [out (io/output-stream dest)
-              in (path-stream contents)]
+              in (util/to-input-stream contents)]
     (io/copy in out)))
 
 (defn write-path

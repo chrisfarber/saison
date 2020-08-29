@@ -1,6 +1,6 @@
 (ns saison.site-test
   (:require [saison.site :as sut]
-            [clojure.test :as t]))
+            [clojure.test :as t :refer [deftest is]]))
 
 (defn test-source-1
   "A source that identifies one page with simple content"
@@ -17,20 +17,20 @@
           :generator 'saison.site-test/test-generate-1})
        (:paths config)))
 
-(t/deftest discover-paths-simple
+(deftest discover-paths-simple
   (let [site {:sources [{:type 'saison.site-test/test-source-1}]}
         paths (sut/discover-paths site)
         path (first paths)]
-    (t/is (= 1 (count paths)))
-    (t/is (= "/index.html" (:path path)))))
+    (is (= 1 (count paths)))
+    (is (= "/index.html" (:path path)))))
 
-(t/deftest discover-paths-compound
+(deftest discover-paths-compound
   (let [site {:sources [{:type 'saison.site-test/test-source-1}
                         {:type 'saison.site-test/test-source-2
                          :paths ["/alpha" "/beta"]}]}
         paths (sut/discover-paths site)
         [index alpha beta] paths]
-    (t/is (= 3 (count paths)))
-    (t/is (= "/index.html" (:path index)))
-    (t/is (= "/alpha" (:path alpha)))
-    (t/is (= "/beta" (:path beta)))))
+    (is (= 3 (count paths)))
+    (is (= "/index.html" (:path index)))
+    (is (= "/alpha" (:path alpha)))
+    (is (= "/beta" (:path beta)))))

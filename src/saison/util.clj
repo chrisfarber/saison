@@ -28,3 +28,9 @@
        (when-not (str/ends-with? base "/")
          "/")
        (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition))))
+
+(defn to-input-stream [file-path-or-stream]
+  (cond
+    (= (type file-path-or-stream) java.lang.String) (recur (io/file file-path-or-stream))
+    (= (type file-path-or-stream) java.io.File) (io/input-stream file-path-or-stream)
+    (= (type file-path-or-stream) java.io.InputStream) file-path-or-stream))

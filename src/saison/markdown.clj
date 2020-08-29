@@ -3,6 +3,7 @@
   (:require [net.cgrand.enlive-html :as html]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [markdown.core :refer [md-to-html md-to-html-string md-to-meta]]
             [saison.util :as util]))
 
 (defn source [source-config]
@@ -11,13 +12,20 @@
         markdown-files (filter (fn [[rel full]]
                                  (str/ends-with? rel ".md"))
                                all-files)]
-    (map (fn [[rel full]]
-           {:full-path full
+    (map (fn [[name file]]
+           {:full-path name
+            :data {:file file}
             :generator 'saison.markdown/generate}) markdown-files)))
 
+(defn parse-markdown-file [f]
+  (with-open [file-stream (util/to-input-stream f)]
+    (let [output (java.io.StringWriter.)]
+      (md-to-html file-stream output)
+      (.toString output))))
+
 (defn generate [_ _ path]
-  (io/input-stream
-   (.getBytes (str "hello this is " (:full-path path)))))
+  (let [markdown-file (get-in path [:data :file])]
+    (parse-markdown-file markdown-file)))
 
 (comment
   (def r (html/html-resource (io/as-file "./fixtures/b/index.html")))

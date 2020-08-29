@@ -1,21 +1,22 @@
 (ns saison.markdown-test
   (:require [saison.markdown :as sut]
-            [clojure.test :as t]
+            [clojure.test :as t :refer [deftest is]]
             [saison.site :as sn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (def markdown-1
   {:sources [{:type 'saison.markdown/source
               :path "./fixtures/markdown1"}]})
 
-(t/deftest source-test
+(deftest source-test
   (let [paths (sn/discover-paths markdown-1)
         md (first paths)
-        output (sn/compile-path markdown-1 paths md)
-        output-str (with-open [rdr (io/reader output)]
-                     (slurp rdr))]
-    (t/is (= 4 output-str))
-    (t/is (= 1 (count paths)))))
+        output (sn/compile-path markdown-1 paths md)]
+    (is (str/includes? output "Hello"))
+    (is (= 1 (count paths)))))
 
-(with-open [rdr (io/reader (sut/generate nil nil {:full-path "hello"}))]
-  (doall (line-seq rdr)))
+(comment
+  (let [f (io/file "./fixtures/markdown1/test.md")]
+    (sut/parse-file f)))
+
