@@ -1,8 +1,24 @@
 (ns saison.source
   (:require [clojure.spec.alpha :as s]
-            [saison.callable]))
+            [saison.util :as util]))
 
-(s/def :saison.source/type :saison.callable/ref)
+(defprotocol Source
+  (scan [this])
+  (watch [this changed]))
 
-(s/def :saison.core/source
-  (s/keys :req-un [:saison.source/type]))
+(defrecord MappedSource
+    [origin path-mapper]
+
+  Source
+  (scan [this]
+    (map path-mapper (scan origin)))
+
+  (watch [this changed]
+    (watch origin changed)))
+
+(defn map-source
+  "derive a new source that applies a mapping fn to all of its paths"
+  [source map-fn]
+  (map->MappedSource
+   {:origin source
+    :path-mapper map-fn}))

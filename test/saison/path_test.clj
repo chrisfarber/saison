@@ -1,17 +1,10 @@
 (ns saison.path-test
   (:require saison.path
-            [clojure.test :as t]
+            [clojure.test :as t :refer [deftest is]]
             [clojure.spec.alpha :as s]))
 
-(t/deftest path-specs
-  (let [path-a {:full-path "/"
-                :short-name "root"
-                :generator 'saison/not-real}
-        path-b {:full-path "/hello"
-                :short-name "something"
-                :generator 'do/wat
-                :data {:flag true}}]
-
-    (t/is (s/valid? :saison.path/path
-                    path-a))
-    (t/is (s/valid? :saison.path/path path-b))))
+(deftest common-metadata
+  (let [meta1 {:short-name "fancy"
+               :title "feast"}]
+    (is (s/valid? :saison.path/metadata
+                  meta1))))
