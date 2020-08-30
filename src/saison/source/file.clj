@@ -4,9 +4,9 @@
             [saison.util :as util]))
 
 (defrecord FilePath
-           [file url-path metadata]
+    [file base-path path metadata]
   Path
-  (url-path [this] url-path)
+  (url-path [this] (util/add-path-component base-path path))
   (metadata [this] metadata)
   (generate [this paths site]
     file))
@@ -18,6 +18,7 @@
     (let [files (util/list-files file-root)]
       (map (fn [[name f]]
              (map->FilePath {:file f
+                             :base-path base-path
                              :path name
                              :metadata metadata}))
            files)))
@@ -30,11 +31,11 @@
   "create a source from files on the filesystem"
   [{:keys [root
            base-path
-           meta]}]
+           metadata]}]
   (map->FileSource
    {:file-root root
     :base-path base-path
-    :metadata meta}))
+    :metadata metadata}))
 
 (comment
   (satisfies? Path

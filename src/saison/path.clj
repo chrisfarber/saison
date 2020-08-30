@@ -44,3 +44,7 @@
                    ::date-created
                    ::date-updated]))
 
+(defn find-by-path
+  "Given a list of paths, find the first exact match"
+  [paths path-name]
+  (first (filter #(= path-name (url-path %)) paths)))

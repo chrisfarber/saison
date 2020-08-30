@@ -24,10 +24,15 @@
 (defn add-path-component
   "Add a path component to a string. Handles trailing slashes on the base."
   [base addition]
-  (str base
-       (when-not (str/ends-with? base "/")
-         "/")
-       (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition))))
+  (let [base (or base "")
+        base (if-not (str/starts-with? base "/")
+               (str "/" base)
+               base)
+        addition (or addition "")]
+    (str base
+         (when-not (str/ends-with? base "/")
+           "/")
+         (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition)))))
 
 (defn to-input-stream [file-path-or-stream]
   (cond

@@ -1,27 +1,33 @@
 (ns saison.util-test
   (:require [saison.util :as sut]
-            [clojure.test :as t]))
+            [clojure.test :as t :refer [deftest is]]))
 
-(t/deftest list-files
+(deftest list-files
   (let [paths (sut/list-files "./fixtures/a")
         relative-paths (set (remove #(.endsWith % ".DS_Store")
                                     (map first paths)))]
-    (t/is (= relative-paths
-             #{"/image.png"
-               "/robots.txt"
-               "/sub/thing.html"}))))
+    (is (= relative-paths
+           #{"/image.png"
+             "/robots.txt"
+             "/sub/thing.html"}))))
 
-(t/deftest add-path-component
-  (t/is (= (sut/add-path-component "/" "index.html")
-           "/index.html"))
-  (t/is (= (sut/add-path-component "/hello/there" "thing.html")
-           "/hello/there/thing.html"))
-  (t/is (= (sut/add-path-component "/thing" "/thing2")
-           "/thing/thing2"))
-  (t/is (= (sut/add-path-component "/thing/" "/thing2/")
-           "/thing/thing2"))
-  (t/is (= (sut/add-path-component "/thing/" "./what.thing/ind")
-           "/thing/./what.thing/ind")))
+(deftest add-path-component
+  (is (= (sut/add-path-component nil nil)
+         "/"))
+  (is (= (sut/add-path-component nil "hello")
+         "/hello"))
+  (is (= (sut/add-path-component "a" "b")
+         "/a/b"))
+  (is (= (sut/add-path-component "/" "index.html")
+         "/index.html"))
+  (is (= (sut/add-path-component "/hello/there" "thing.html")
+         "/hello/there/thing.html"))
+  (is (= (sut/add-path-component "/thing" "/thing2")
+         "/thing/thing2"))
+  (is (= (sut/add-path-component "/thing/" "/thing2/")
+         "/thing/thing2"))
+  (is (= (sut/add-path-component "/thing/" "./what.thing/ind")
+         "/thing/./what.thing/ind")))
 
 (def test-fn identity)
 (defn test-fn2
