@@ -1,15 +1,14 @@
 (ns saison.source
-  (:require [clojure.spec.alpha :as s]
+  (:require [saison.proto :as types]
             [saison.util :as util]))
 
-(defprotocol Source
-  (scan [this])
-  (watch [this changed]))
+(def scan types/scan)
+(def watch types/watch)
 
 (defrecord MappedSource
     [origin path-mapper]
 
-  Source
+  types/Source
   (scan [this]
     (map path-mapper (scan origin)))
 

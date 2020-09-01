@@ -1,4 +1,4 @@
-(ns saison.markdown
+(ns saison.transform.markdown
   "Source and generator for basic markdown-templated files"
   (:require [net.cgrand.enlive-html :as html]
             [clojure.java.io :as io]

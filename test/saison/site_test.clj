@@ -1,36 +1,26 @@
 (ns saison.site-test
   (:require [saison.site :as sut]
-            [clojure.test :as t :refer [deftest is]]))
+            [clojure.test :as t :refer [deftest is]]
+            [saison.path :as path]
+            [saison.source.data :refer [data-paths]]
+            [saison.proto :as proto]))
 
-(defn test-source-1
-  "A source that identifies one page with simple content"
-  [_]
-
-  (list {:path "/index.html"
-         :generator 'saison.site-test/test-generate-1}))
-
-(defn test-source-2
-  [config]
-
-  (map (fn [path]
-         {:path path
-          :generator 'saison.site-test/test-generate-1})
-       (:paths config)))
+(def test-site-1
+  {:sources [(data-paths
+              {:path "/index.html"
+               :data "this is index"}
+              {:path "/robots.txt"
+               :data "hi robots"})
+             (data-paths
+              {:path "/alpha"
+               :data "alpha"})]})
 
 (deftest discover-paths-simple
-  (let [site {:sources [{:type 'saison.site-test/test-source-1}]}
+  (let [site test-site-1
         paths (sut/discover-paths site)
         path (first paths)]
-    (is (= 1 (count paths)))
-    (is (= "/index.html" (:path path)))))
-
-(deftest discover-paths-compound
-  (let [site {:sources [{:type 'saison.site-test/test-source-1}
-                        {:type 'saison.site-test/test-source-2
-                         :paths ["/alpha" "/beta"]}]}
-        paths (sut/discover-paths site)
-        [index alpha beta] paths]
     (is (= 3 (count paths)))
-    (is (= "/index.html" (:path index)))
-    (is (= "/alpha" (:path alpha)))
-    (is (= "/beta" (:path beta)))))
+    (is (= "/index.html" (proto/url-path path)))
+    (is (= (proto/generate path paths site)
+           "this is index"))))
+

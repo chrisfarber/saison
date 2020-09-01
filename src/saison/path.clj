@@ -1,33 +1,20 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
-  (:require [clojure.spec.alpha :as s]))
-
-(defprotocol Path
-  (url-path [this]
-    "retrieve the path component of the URL")
-  (metadata [this]
-    "retrieve a metadata map for this path")
-  (generate [this paths site]
-    "compiles the path
-    a string, or an input stream, is returned.
-
-    the `paths` argument should be a list of all other paths identified
-    for the site. this enables the path to dynamically compute content or
-    references to other paths. it is probably not good practice for a path
-    to generate another path, at the risk of causing an infinite loop."))
+  (:require [clojure.spec.alpha :as s]
+            [saison.proto :as proto]))
 
 (defrecord MappedPath
            [origin map-path map-meta]
 
-  Path
+  proto/Path
   (url-path [this]
-    (url-path origin))
+    (proto/url-path origin))
 
   (metadata [this]
-    (metadata origin))
+    (proto/metadata origin))
 
   (generate [this paths site]
-    (generate origin paths site)))
+    (proto/generate origin paths site)))
 
 (s/def ::full-path string?)
 (s/def ::short-name string?)
@@ -47,4 +34,4 @@
 (defn find-by-path
   "Given a list of paths, find the first exact match"
   [paths path-name]
-  (first (filter #(= path-name (url-path %)) paths)))
+  (first (filter #(= path-name (proto/url-path %)) paths)))

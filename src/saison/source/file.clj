@@ -1,11 +1,13 @@
 (ns saison.source.file
-  (:require [saison.path :as path :refer [Path]]
-            [saison.source :as source :refer [Source]]
-            [saison.util :as util]))
+  (:require [saison.proto :as types]
+            [saison.path :as path]
+            [saison.source :as source]
+            [saison.util :as util]
+            [saison.proto :as types]))
 
 (defrecord FilePath
     [file base-path path metadata]
-  Path
+  types/Path
   (url-path [this] (util/add-path-component base-path path))
   (metadata [this] metadata)
   (generate [this paths site]
@@ -13,7 +15,7 @@
 
 (defrecord FileSource
            [file-root base-path metadata]
-  Source
+  types/Source
   (scan [this]
     (let [files (util/list-files file-root)]
       (map (fn [[name f]]

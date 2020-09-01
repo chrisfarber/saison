@@ -6,7 +6,7 @@
 - saison.path
 - saison.source
 - saison.source.file
-- saison.source.mock
+- saison.source.data
 - saison.source.cljs
 - saison.transform.html-template
 - saison.transform.markdown

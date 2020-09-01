@@ -1,6 +1,7 @@
 (ns saison.site
   (:require [clojure.spec.alpha :as s]
             [saison.path :as path]
+            [saison.proto :as proto]
             [saison.source :as source]))
 
 (s/def ::name string?)
@@ -17,7 +18,7 @@
 (defn discover-paths
   "Given the definition of a site, discover all paths."
   [site]
-  (mapcat source/scan
+  (mapcat proto/scan
           (:sources site)))
 
 (s/fdef discover-paths
@@ -27,4 +28,4 @@
 (defn compile-path
   "Compile the given path using its generator"
   [site paths path]
-  (path/generate path paths site))
+  (proto/generate path paths site))
