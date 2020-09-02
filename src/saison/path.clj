@@ -3,18 +3,22 @@
   (:require [clojure.spec.alpha :as s]
             [saison.proto :as proto]))
 
+(defn- wrap
+  [fn-or-nil value]
+  ((or fn-or-nil identity) value))
+
 (defrecord MappedPath
-           [origin map-path map-meta]
+           [original map-path map-metadata map-generate]
 
   proto/Path
   (url-path [this]
-    (proto/url-path origin))
+    (wrap map-path (proto/url-path original)))
 
   (metadata [this]
-    (proto/metadata origin))
+    (wrap map-metadata (proto/metadata original)))
 
   (generate [this paths site]
-    (proto/generate origin paths site)))
+    (wrap map-generate (proto/generate original paths site))))
 
 (s/def ::full-path string?)
 (s/def ::short-name string?)
