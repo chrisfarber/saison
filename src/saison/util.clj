@@ -56,3 +56,7 @@
   (-> data
       .getBytes
       java.io.ByteArrayInputStream.))
+
+(defn input-stream->string
+  [is]
+  (slurp is))

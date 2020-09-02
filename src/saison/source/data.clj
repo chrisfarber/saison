@@ -11,7 +11,7 @@
   (url-path [this] path)
   (metadata [this] metadata)
   (generate [this paths site]
-    data))
+    (util/data->input-stream data)))
 
 (defrecord DataSource
            [items]

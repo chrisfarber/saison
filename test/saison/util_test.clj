@@ -39,3 +39,10 @@
   (is (= "stuff"
          (with-open [stream (sut/data->input-stream "stuff")]
            (slurp stream)))))
+
+(deftest input-stream->string
+  (let [v "aoentuhaoenuth"]
+    (= v
+       (-> v
+           sut/data->input-stream
+           sut/input-stream->string))))

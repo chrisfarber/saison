@@ -3,7 +3,8 @@
             [clojure.test :as t :refer [deftest is]]
             [saison.path :as path]
             [saison.source.data :refer [data-paths]]
-            [saison.proto :as proto]))
+            [saison.proto :as proto]
+            [saison.util :as util]))
 
 (def test-site-1
   {:sources [(data-paths
@@ -18,9 +19,10 @@
 (deftest discover-paths-simple
   (let [site test-site-1
         paths (sut/discover-paths site)
-        path (first paths)]
+        path (first paths)
+        path-data (util/input-stream->string (proto/generate path paths site))]
     (is (= 3 (count paths)))
     (is (= "/index.html" (proto/url-path path)))
-    (is (= (proto/generate path paths site)
+    (is (= path-data
            "this is index"))))
 
