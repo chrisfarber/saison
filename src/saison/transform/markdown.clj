@@ -18,10 +18,10 @@
             :generator 'saison.markdown/generate}) markdown-files)))
 
 (defn parse-markdown-file [f]
-  (with-open [file-stream (util/to-input-stream f)]
+  (with-open [file-stream (util/->input-stream f)]
     (let [output (java.io.StringWriter.)]
       (md-to-html file-stream output)
-      (.toString output))))
+      (str output))))
 
 (defn generate [_ _ path]
   (let [markdown-file (get-in path [:data :file])]

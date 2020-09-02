@@ -3,7 +3,8 @@
             [saison.path :as path]
             [saison.source :as source]
             [saison.util :as util]
-            [saison.proto :as types]))
+            [saison.proto :as types]
+            [saison.proto :as proto]))
 
 (defrecord FilePath
     [file base-path path metadata]
@@ -14,7 +15,8 @@
     file))
 
 (defrecord FileSource
-           [file-root base-path metadata]
+    [file-root base-path metadata]
+
   types/Source
   (scan [this]
     (let [files (util/list-files file-root)]
@@ -41,4 +43,4 @@
 
 (comment
   (satisfies? Path
-              (first (source/scan (map->FileSource {:file-root "./"})))))
+              (first (proto/scan (map->FileSource {:file-root "./"})))))

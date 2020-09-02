@@ -34,8 +34,25 @@
            "/")
          (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition)))))
 
-(defn to-input-stream [file-path-or-stream]
-  (cond
-    (= (type file-path-or-stream) java.lang.String) (recur (io/file file-path-or-stream))
-    (= (type file-path-or-stream) java.io.File) (io/input-stream file-path-or-stream)
-    (= (type file-path-or-stream) java.io.InputStream) file-path-or-stream))
+(defmulti ->input-stream
+  "Convert the item to an input stream."
+  type)
+
+(defmethod ->input-stream java.lang.String
+  [path]
+  (->input-stream (io/file path)))
+
+(defmethod ->input-stream java.io.File
+  [f]
+  (io/input-stream f))
+
+(defmethod ->input-stream java.io.InputStream
+  [stream]
+  stream)
+
+(defn data->input-stream
+  "take some string data and make an input stream out of it"
+  [data]
+  (-> data
+      .getBytes
+      java.io.ByteArrayInputStream.))

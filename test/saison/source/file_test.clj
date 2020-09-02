@@ -27,4 +27,9 @@
            true))))
 
 (deftest generate-reads-file
-  )
+  (let [source (sut/files {:root "fixtures/"})
+        site {:sources [source]}
+        paths (proto/scan source)
+        robots (path/find-by-path paths "/a/robots.txt")
+        content (proto/generate robots paths site)]
+    (is (some? content))))

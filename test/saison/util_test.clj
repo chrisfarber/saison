@@ -29,7 +29,13 @@
   (is (= (sut/add-path-component "/thing/" "./what.thing/ind")
          "/thing/./what.thing/ind")))
 
-(def test-fn identity)
-(defn test-fn2
-  [a b c]
-  (+ a b c))
+(deftest ->input-stream
+  (let [data (with-open [stream (sut/->input-stream "fixtures/a/robots.txt")]
+               (slurp stream))]
+    (is (= data
+           "hi robots\n"))))
+
+(deftest data->input-stream
+  (is (= "stuff"
+         (with-open [stream (sut/data->input-stream "stuff")]
+           (slurp stream)))))
