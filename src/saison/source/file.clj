@@ -7,7 +7,7 @@
             [saison.proto :as proto]))
 
 (defrecord FilePath
-    [file base-path path metadata]
+           [file base-path path metadata]
   types/Path
   (url-path [this] (util/add-path-component base-path path))
   (metadata [this] metadata)
@@ -15,7 +15,7 @@
     file))
 
 (defrecord FileSource
-    [file-root base-path metadata]
+           [file-root base-path metadata]
 
   types/Source
   (scan [this]

@@ -16,6 +16,13 @@
 - saison.live
 
 
+source -> mapper -> mapper -> filter -> [paths]
+
+source -> splitter -> [paths]
+           -> mapper
+           -> filter -> mapper
+
+
 "
 
   ;; sketching out some options below...

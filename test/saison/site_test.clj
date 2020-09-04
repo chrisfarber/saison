@@ -2,17 +2,17 @@
   (:require [saison.site :as sut]
             [clojure.test :as t :refer [deftest is]]
             [saison.path :as path]
-            [saison.source.data :refer [data-paths]]
+            [saison.source.data :refer [data-source]]
             [saison.proto :as proto]
             [saison.util :as util]))
 
 (def test-site-1
-  {:sources [(data-paths
+  {:sources [(data-source
               {:path "/index.html"
                :data "this is index"}
               {:path "/robots.txt"
                :data "hi robots"})
-             (data-paths
+             (data-source
               {:path "/alpha"
                :data "alpha"})]})
 

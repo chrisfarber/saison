@@ -34,6 +34,10 @@
            "/")
          (second (re-find #"^/*([^/]?.*[^/]+)/*$" addition)))))
 
+(defn path-extension
+  [url-path]
+  (second (re-find #"(\..+)$" url-path)))
+
 (defmulti ->input-stream
   "Convert the item to an input stream."
   type)

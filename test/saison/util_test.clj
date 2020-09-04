@@ -29,6 +29,12 @@
   (is (= (sut/add-path-component "/thing/" "./what.thing/ind")
          "/thing/./what.thing/ind")))
 
+(deftest path-extension
+  (is (= (sut/path-extension "aoenuthoeu.pdf")
+         ".pdf"))
+  (is (= (sut/path-extension "/hello/a/b/c/index.html")
+         ".html")))
+
 (deftest ->input-stream
   (let [data (with-open [stream (sut/->input-stream "fixtures/a/robots.txt")]
                (slurp stream))]

@@ -1,5 +1,5 @@
 (ns saison.source.data
-  (:require [saison.proto :refer [Path Source]]
+  (:require [saison.proto :refer [Path Source scan]]
             [saison.path :as path]
             [saison.source :as source]
             [saison.util :as util]
@@ -22,7 +22,7 @@
   (watch [this cb]
     (fn [])))
 
-(defn data-paths
+(defn data-source
   "A source of paths from literal data.
 
   Accepts any number of maps. Each map is expected to have the keys:
@@ -31,3 +31,13 @@
   :metadata (optional)"
   [& paths]
   (map->DataSource {:items paths}))
+
+(defn literal-paths
+  "create a list of paths.
+
+  generates a data source from the supplied data using `data-source`, and
+  then invokes `scan` on it."
+  [& path-defs]
+  (-> path-defs
+      data-source
+      scan))
