@@ -27,9 +27,11 @@
                :data "eh"}
               {:path "/stuff.md"
                :data "..."})
+        xform #(sut/filter-source % (fn [path]
+                                      (not= "/bye.md"
+                                            (proto/url-path path))))
         mapped-source (sut/map-source-by-file-ext
                        data
-                       {".md" identity})
+                       {".md" xform})
         outputs (proto/scan mapped-source)]
-    ;; todo, actually transform the source
-    (is (= 4 outputs))))
+    (is (= 1 (count outputs)))))
