@@ -1,12 +1,14 @@
 (ns saison.new-approach
   (:require [saison.source.file :refer [files]]
-            [saison.build :as build]))
+            [saison.build :as build]
+            [saison.transform.edn-metadata :refer [file-metadata]]))
 
 (comment
 
   (def simple-site
     {:output-to "./dist1"
-     :sources [(files {:root "./fixtures"})]})
+     :sources [(-> (files {:root "./fixtures"})
+                   file-metadata)]})
   (build/build-site simple-site)
 
   

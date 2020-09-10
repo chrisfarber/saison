@@ -8,7 +8,8 @@
 (deftest parse-metadata-test
   (let [src (data/data-source
              {:path "/hello/index.html"
-              :data ""}
+              :data ""
+              :metadata {:cool true}}
              {:path "/hello/index.html.edn"
               :data (pr-str {:title "Hello"
                              :mime-type "bogus"})}
@@ -21,8 +22,12 @@
         subject (path/find-by-path paths "/hello/index.html")
         subject-meta (proto/metadata subject)
         meta-path (path/find-by-path paths "/hello/index.html.edn")]
+    ;; the metadata file should not be output:
     (is (nil? meta-path))
+    ;; but its contents should be put in its target path meta:
     (is (= "Hello"
            (:title subject-meta)))
     (is (= "bogus"
-           (:mime-type subject-meta)))))
+           (:mime-type subject-meta)))
+    ;; and its original metadata should be retained:
+    (is (true? (:cool subject-meta)))))
