@@ -40,7 +40,3 @@
    {:file-root root
     :base-path base-path
     :metadata metadata}))
-
-(comment
-  (satisfies? Path
-              (first (proto/scan (map->FileSource {:file-root "./"})))))

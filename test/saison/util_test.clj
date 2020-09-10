@@ -33,7 +33,13 @@
   (is (= (sut/path-extension "aoenuthoeu.pdf")
          "pdf"))
   (is (= (sut/path-extension "/hello/a/b/c/index.html")
+         "html"))
+  (is (= (sut/path-extension "/meh.what/a/b.thing.meh/thing.mD.htMl")
          "html")))
+
+(deftest compound-path-extension
+  (is (= (sut/compound-path-extension "/meh.what/a/b.thing.meh/thing.Md.HTml")
+         "md.html")))
 
 (deftest ->input-stream
   (let [data (with-open [stream (sut/->input-stream "fixtures/a/robots.txt")]
