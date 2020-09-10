@@ -5,13 +5,16 @@
 (defn transform-source
   "derive a new source path invokes paths-modfier on the scanned
   paths"
-  [source paths-modifier]
-  (reify
-    proto/Source
-    (scan [this]
-      (paths-modifier (proto/scan source)))
-    (watch [this changed]
-      (proto/watch source changed))))
+  ([paths-modifier]
+   (fn [source]
+     (transform-source source paths-modifier)))
+  ([source paths-modifier]
+   (reify
+     proto/Source
+     (scan [this]
+       (paths-modifier (proto/scan source)))
+     (watch [this changed]
+       (proto/watch source changed)))))
 
 (defn concat-sources
   [& sources]
@@ -26,12 +29,16 @@
             (close-fn)))))))
 
 (defn map-paths
-  [source map-path]
-  (transform-source source #(map map-path %)))
+  ([map-path]
+   (transform-source #(map map-path %)))
+  ([source map-path]
+   (transform-source source #(map map-path %))))
 
 (defn filter-source
-  [source filter-path]
-  (transform-source source #(filter filter-path %)))
+  ([filter-path]
+   (transform-source #(filter filter-path %)))
+  ([source filter-path]
+   (transform-source source #(filter filter-path %))))
 
 (defn filter-source-by-file-ext
   [source ext]
