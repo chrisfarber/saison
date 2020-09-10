@@ -2,7 +2,8 @@
   "Tools for statically outputting a site."
   (:require [saison.site :as sn]
             [saison.util :as util]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [saison.proto :as proto]))
 
 (defn write-file
   "Write data to an ouput file.
@@ -31,15 +32,11 @@
 
 (defn build-site
   ([site]
-   (let [output-path (:output site)
+   (let [dest-path (:output-to site)
+         dest-file (io/file dest-path)
          all-paths (sn/discover-paths site)]
      (doseq [p all-paths]
-       (let [output-path (util/add-path-component output-path (:full-path p))]
-         (write-path site all-paths p output-path))))))
+       (let [output-path (str "." (proto/url-path p))
+             output-file (io/file dest-file output-path)]
+         (write-path site all-paths p output-file))))))
 
-(comment
-  (build-site {:sources [{:type 'saison.static/source
-                          :path "./fixtures/b"}]
-               :output "dist"})
-  (write-file "what.txt" (io/input-stream (io/reader "stuff")))
-  )

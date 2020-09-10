@@ -1,7 +1,15 @@
-(ns saison.new-approach)
+(ns saison.new-approach
+  (:require [saison.source.file :refer [files]]
+            [saison.build :as build]))
 
 (comment
 
+  (def simple-site
+    {:output-to "./dist1"
+     :sources [(files {:root "./fixtures"})]})
+  (build/build-site simple-site)
+
+  
   "organization...
 - saison.path
 - saison.source

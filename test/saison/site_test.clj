@@ -25,4 +25,3 @@
     (is (= "/index.html" (proto/url-path path)))
     (is (= path-data
            "this is index"))))
-
