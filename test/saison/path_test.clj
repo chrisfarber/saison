@@ -6,14 +6,14 @@
             [saison.proto :as proto]))
 
 (deftest common-metadata
- (is (s/valid? :saison.path/metadata
+  (is (s/valid? :saison.path/metadata
                 {:short-name "fancy"
                  :title "feast"})))
 
 (deftest derive-path-metadata
   (let [paths (data/literal-paths {:path "/hello"
-                               :metadata {:a true}
-                               :data "hi."})
+                                   :metadata {:a true}
+                                   :data "hi."})
         hello (first paths)
         derived (sut/derive-path
                  hello {:metadata (fn [o] (assoc (proto/metadata o)

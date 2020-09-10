@@ -32,6 +32,6 @@
                                             (proto/url-path path))))
         mapped-source (sut/map-source-by-file-ext
                        data
-                       {".md" xform})
+                       {"md" xform})
         outputs (proto/scan mapped-source)]
     (is (= 1 (count outputs)))))

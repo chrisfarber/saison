@@ -31,9 +31,9 @@
 
 (deftest path-extension
   (is (= (sut/path-extension "aoenuthoeu.pdf")
-         ".pdf"))
+         "pdf"))
   (is (= (sut/path-extension "/hello/a/b/c/index.html")
-         ".html")))
+         "html")))
 
 (deftest ->input-stream
   (let [data (with-open [stream (sut/->input-stream "fixtures/a/robots.txt")]

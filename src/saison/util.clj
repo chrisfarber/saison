@@ -36,7 +36,9 @@
 
 (defn path-extension
   [url-path]
-  (second (re-find #"(\..+)$" url-path)))
+  ;; stolen from ring:
+  (if-let [ext (second (re-find #"\.([^./\\]+)$" url-path))]
+    (str/lower-case ext)))
 
 (defmulti ->input-stream
   "Convert the item to an input stream."
