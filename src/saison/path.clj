@@ -24,6 +24,7 @@
 
 (s/def ::full-path string?)
 (s/def ::short-name string?)
+(s/def ::mime-type string?)
 
 (s/def ::data map?)
 
@@ -34,6 +35,7 @@
 (s/def ::metadata
   (s/keys :opt-un [::short-name
                    ::title
+                   ::mime-type
                    ::date-created
                    ::date-updated]))
 

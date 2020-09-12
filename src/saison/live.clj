@@ -6,7 +6,9 @@
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [saison.util :as util]
-            [ring.util.mime-type :as mime]))
+            [ring.util.mime-type :as mime]
+            [saison.path :as path]
+            [saison.proto :as proto]))
 
 (defn site-handler
   "Creates a ring handler that renders any discoverable path."
@@ -15,14 +17,17 @@
   (fn [req]
     (let [path (:uri req)
           paths (sn/discover-paths site)
-          matches (filter #(or (= path (:path %))
-                               (= (util/add-path-component path "index.html") (:path %))) paths)
-          match (first matches)]
+          match (or (path/find-by-path paths path)
+                    (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
-        {:status 200
-         :body (sn/compile-path site paths match)
-         ;; specify the mime type based on the matching path; this allows index.html to work.
-         :headers {"Content-Type" (mime/ext-mime-type (:path match))}}
+        (let [pathname (proto/url-path match)
+              metadata (proto/metadata match)
+              mime (or (:mime-type metadata)
+                       (mime/ext-mime-type pathname))]
+          {:status 200
+           :body (sn/compile-path site paths match)
+           ;; specify the mime type based on the matching path; this allows index.html to work.
+           :headers {"Content-Type" mime}})
         {:status 404
          :headers {"Content-Type" "text/html"}
          :body "not found."}))))

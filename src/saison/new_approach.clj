@@ -3,12 +3,14 @@
             [saison.build :as build]
             [saison.transform.edn-metadata :refer [file-metadata]]))
 
-(comment
-
-  (def simple-site
+(def simple-site
     {:output-to "./dist1"
      :sources [(-> (files {:root "./fixtures"})
                    file-metadata)]})
+
+(comment
+
+  
   (build/build-site simple-site)
 
   

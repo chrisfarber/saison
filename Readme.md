@@ -14,6 +14,15 @@ My vision for Saison is roughly the following features:
 - Support the generation of RSS feeds from pages
 - Allow for embedding of photos (or photo galleries) in a page.
 
+## Running
+
+To run, use the `saison.main` namespace. It can be launched using the
+Clojure CLI tools:
+
+```sh
+clj -m saison.main -s my.site/config build
+```
+
 ## Problems to solve
 
 - What's the plan for photos and photo galleries?
