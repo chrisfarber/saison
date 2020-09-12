@@ -1,9 +1,8 @@
 (ns saison.site-test
-  (:require [saison.site :as sut]
-            [clojure.test :as t :refer [deftest is]]
-            [saison.path :as path]
-            [saison.source.data :refer [data-source]]
+  (:require [clojure.test :as t :refer [deftest is]]
             [saison.proto :as proto]
+            [saison.site :as sut]
+            [saison.source.data :refer [data-source]]
             [saison.util :as util]))
 
 (def test-site-1

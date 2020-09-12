@@ -1,9 +1,9 @@
 (ns saison.transform.edn-metadata
-  (:require [saison.source :as source]
-            [saison.proto :as proto]
-            [saison.util :as util]
+  (:require [clojure.edn :as edn]
             [saison.path :as path]
-            [clojure.edn :as edn]))
+            [saison.proto :as proto]
+            [saison.source :as source]
+            [saison.util :as util]))
 
 (defn read-meta [entry]
   ;; TODO this is an abuse of the generate fn ....

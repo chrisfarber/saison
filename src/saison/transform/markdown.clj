@@ -1,12 +1,10 @@
 (ns saison.transform.markdown
   "Source and generator for basic markdown-templated files"
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [markdown.core :refer [md-to-html md-to-html-string md-to-meta]]
-            [saison.util :as util]
-            [saison.source :as source]
+  (:require [markdown.core :refer [md-to-html-string]]
+            [saison.path :as path]
             [saison.proto :as proto]
-            [saison.path :as path]))
+            [saison.source :as source]
+            [saison.util :as util]))
 
 (defn rename-path-extension [path]
   (-> path

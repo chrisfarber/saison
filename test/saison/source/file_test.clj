@@ -1,9 +1,8 @@
 (ns saison.source.file-test
-  (:require [saison.source.file :as sut]
-            [clojure.test :as t :refer [deftest is]]
-            [saison.source :as source]
+  (:require [clojure.test :as t :refer [deftest is]]
             [saison.path :as path]
-            [saison.proto :as proto]))
+            [saison.proto :as proto]
+            [saison.source.file :as sut]))
 
 (deftest no-base-path
   (let [source (sut/files {:root "./fixtures"})

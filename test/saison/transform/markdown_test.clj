@@ -20,12 +20,7 @@
                     (proto/generate paths src)
                     (util/input-stream->string))]
     (is (str/index-of content "<h1>"))
-    (is (str/index-of content "Hello")))
-  #_(let [paths (sn/discover-paths markdown-1)
-        md (first paths)
-        output (sn/compile-path markdown-1 paths md)]
-    (is (str/includes? output "Hello"))
-    (is (= 1 (count paths)))))
+    (is (str/index-of content "Hello"))))
 
 (comment
   (let [f (io/file "./fixtures/markdown1/test.md")]

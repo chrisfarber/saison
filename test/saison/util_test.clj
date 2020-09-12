@@ -1,6 +1,6 @@
 (ns saison.util-test
-  (:require [saison.util :as sut]
-            [clojure.test :as t :refer [deftest is]]))
+  (:require [clojure.test :as t :refer [deftest is]]
+            [saison.util :as sut]))
 
 (deftest list-files
   (let [paths (sut/list-files "./fixtures/a")

@@ -1,9 +1,9 @@
 (ns saison.path-test
-  (:require [saison.path :as sut]
-            [saison.source.data :as data]
+  (:require [clojure.spec.alpha :as s]
             [clojure.test :as t :refer [deftest is]]
-            [clojure.spec.alpha :as s]
-            [saison.proto :as proto]))
+            [saison.path :as sut]
+            [saison.proto :as proto]
+            [saison.source.data :as data]))
 
 (deftest common-metadata
   (is (s/valid? :saison.path/metadata
