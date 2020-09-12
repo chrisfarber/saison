@@ -18,7 +18,10 @@
     (str without-ext ".html")))
 
 (defn parse-markdown [path paths site]
-  #_(let [oc (proto/generate path paths site)-]))
+  (let [oc (proto/generate path paths site)
+        oc-stream (util/->input-stream oc)
+        oc-string (util/input-stream->string oc-stream)]
+    (util/data->input-stream (md-to-html-string oc-string))))
 
 (defn map-markdown
   [source-path]

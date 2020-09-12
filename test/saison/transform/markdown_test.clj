@@ -18,8 +18,7 @@
         path (path/find-by-path paths "/index.html")
         content (-> path
                     (proto/generate paths src)
-                    util/->input-stream
-                    util/input-stream->string)]
+                    (util/input-stream->string))]
     (is (str/index-of content "<h1>"))
     (is (str/index-of content "Hello")))
   #_(let [paths (sn/discover-paths markdown-1)
