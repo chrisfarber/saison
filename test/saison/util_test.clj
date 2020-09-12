@@ -42,6 +42,12 @@
   (is (= (sut/compound-path-extension "/meh.what/a/b.thing.meh/thing.Md.HTml")
          "md.html")))
 
+(deftest set-path-extension
+  (is (= "/thing/thing1.html"
+         (sut/set-path-extension "/thing/thing1.md" "html")))
+  (is (= "/thing/thing1.test.html"
+         (sut/set-path-extension "/thing/thing1.test.css" "html"))))
+
 (deftest ->input-stream
   (let [data (with-open [stream (sut/->input-stream "fixtures/a/robots.txt")]
                (slurp stream))]

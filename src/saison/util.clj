@@ -45,6 +45,10 @@
   (if-let [ext (second (re-find #"\.([^/\\]+)$" url-path))]
     (str/lower-case ext)))
 
+(defn set-path-extension [url-path new-ext]
+  (str/replace url-path #"\.[^./\\]+$"
+               (str "." new-ext)))
+
 (defmulti ->input-stream
   "Convert the item to an input stream."
   type)
