@@ -24,6 +24,8 @@
               metadata (proto/metadata match)
               mime (or (:mime-type metadata)
                        (mime/ext-mime-type pathname))]
+          (println "serving:" pathname)
+          (println "metadata:" metadata)
           {:status 200
            :body (sn/compile-path site paths match)
            ;; specify the mime type based on the matching path; this allows index.html to work.
