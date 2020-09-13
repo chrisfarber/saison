@@ -11,7 +11,8 @@
         requiring-resolve
         deref)
     (catch Exception e
-      (throw (ex-info "Could not find site definition" {:site ns-str})))))
+      (throw (ex-info "Could not find site definition" {:site ns-str
+                                                        :underlying-error e})))))
 
 (defn build [{:keys [site output-to]}]
   (let [site (resolve-site site)

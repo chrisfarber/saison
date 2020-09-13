@@ -31,12 +31,14 @@
          "/thing/./what.thing/ind")))
 
 (deftest path-extension
-  (is (= (sut/path-extension "aoenuthoeu.pdf")
-         "pdf"))
-  (is (= (sut/path-extension "/hello/a/b/c/index.html")
-         "html"))
-  (is (= (sut/path-extension "/meh.what/a/b.thing.meh/thing.mD.htMl")
-         "html")))
+  (is (= "pdf"
+         (sut/path-extension "aoenuthoeu.pdf")))
+  (is (= "html"
+         (sut/path-extension "/hello/a/b/c/index.html")))
+  (is (= "html"
+         (sut/path-extension "/meh.what/a/b.thing.meh/thing.mD.htMl")))
+  (is (= nil
+         (sut/path-extension "/hello/there"))))
 
 (deftest compound-path-extension
   (is (= (sut/compound-path-extension "/meh.what/a/b.thing.meh/thing.Md.HTml")

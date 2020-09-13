@@ -6,11 +6,27 @@
             [saison.proto :as types]
             [saison.proto :as proto]))
 
+(def mime-types
+  {"htm" "text/html"
+   "html" "text/html"
+   "css" "text/css"
+   "edn" "application/edn"
+   "ico" "image/x-icon"
+   "js" "text/javascript"
+   "json" "application/json"
+   "gz" "application/gzip"})
+
 (defrecord FilePath
            [file base-path path metadata]
   types/Path
   (url-path [this] (util/add-path-component base-path path))
-  (metadata [this] metadata)
+  (metadata [this]
+    (let [url-path (proto/url-path this)
+          extension (util/path-extension url-path)
+          known-mime (get mime-types extension)]
+      (merge (when known-mime
+               {:mime-type known-mime})
+             metadata)))
   (generate [this paths site]
     file))
 

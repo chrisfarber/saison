@@ -2,13 +2,12 @@
   "Tools for running a live preview of a saison site.
 
   Primarily, this provides some ring middleware and server."
-  (:require [saison.site :as sn]
-            [ring.adapter.jetty :refer [run-jetty]]
+  (:require [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.content-type :refer [wrap-content-type]]
-            [saison.util :as util]
-            [ring.util.mime-type :as mime]
             [saison.path :as path]
-            [saison.proto :as proto]))
+            [saison.proto :as proto]
+            [saison.site :as sn]
+            [saison.util :as util]))
 
 (defn site-handler
   "Creates a ring handler that renders any discoverable path."
@@ -23,7 +22,7 @@
         (let [pathname (proto/url-path match)
               metadata (proto/metadata match)
               mime (or (:mime-type metadata)
-                       (mime/ext-mime-type pathname))]
+                       "text/plain")]
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
