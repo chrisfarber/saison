@@ -51,3 +51,15 @@
   "Given a list of paths, find the first exact match"
   [paths path-name]
   (first (filter #(= path-name (proto/url-path %)) paths)))
+
+(defn short-name-expansion-map
+  [paths]
+  (reduce (fn [short-names path]
+            (let [short-name (-> path
+                                 proto/metadata
+                                 :short-name)]
+              (if short-name
+                (assoc short-names short-name (proto/url-path path))
+                short-names)))
+          {}
+          paths))
