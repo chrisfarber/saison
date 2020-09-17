@@ -19,8 +19,8 @@
   (let [site test-site-1
         paths (sut/discover-paths site)
         path (first paths)
-        path-data (util/input-stream->string (proto/generate path paths site))]
+        path-data (util/input-stream->string (proto/content path paths site))]
     (is (= 3 (count paths)))
-    (is (= "/index.html" (proto/url-path path)))
+    (is (= "/index.html" (proto/path path)))
     (is (= path-data
            "this is index"))))

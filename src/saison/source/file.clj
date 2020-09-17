@@ -19,15 +19,15 @@
 (defrecord FilePath
            [file base-path path metadata]
   types/Path
-  (url-path [this] (util/add-path-component base-path path))
+  (path [this] (util/add-path-component base-path path))
   (metadata [this]
-    (let [url-path (proto/url-path this)
-          extension (util/path-extension url-path)
+    (let [path (proto/path this)
+          extension (util/path-extension path)
           known-mime (get mime-types extension)]
       (merge (when known-mime
                {:mime-type known-mime})
              metadata)))
-  (generate [this paths site]
+  (content [this paths site]
     file))
 
 (defrecord FileSource

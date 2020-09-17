@@ -28,4 +28,4 @@
 (defn compile-path
   "Compile the given path using its generator"
   [site paths path]
-  (proto/generate path paths site))
+  (proto/content path paths site))

@@ -6,8 +6,8 @@
             [saison.util :as util]))
 
 (defn read-meta [entry]
-  ;; TODO this is an abuse of the generate fn ....
-  (let [output (proto/generate entry (list entry) {})]
+  ;; TODO this is an abuse of the content fn ....
+  (let [output (proto/content entry (list entry) {})]
     (with-open [instream (util/->input-stream output)]
       (edn/read-string (util/input-stream->string instream)))))
 
@@ -16,7 +16,7 @@
   (source/transform-source
    source
    (fn [entries]
-     (let [path-for (memoize proto/url-path)
+     (let [path-for (memoize proto/path)
            probs-meta? (fn [entry] (= "edn"
                                       (util/path-extension (path-for entry))))
            normal-entries (remove probs-meta? entries)

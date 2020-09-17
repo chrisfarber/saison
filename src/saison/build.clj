@@ -38,7 +38,7 @@
          dest-file (io/file dest-path)
          all-paths (sn/discover-paths site)]
      (doseq [p all-paths]
-       (let [output-path (str "." (proto/url-path p))
+       (let [output-path (str "." (proto/path p))
              output-file (io/file dest-file output-path)]
          (if verbose? (println "Writing file:" (-> output-file
                                                    .getCanonicalFile

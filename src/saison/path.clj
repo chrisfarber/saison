@@ -4,23 +4,23 @@
             [saison.proto :as proto]))
 
 (defrecord MappedPath
-           [original map-path map-metadata map-generate]
+           [original map-path map-metadata map-content]
 
   proto/Path
-  (url-path [this]
+  (path [this]
     (if map-path
       (map-path original)
-      (proto/url-path original)))
+      (proto/path original)))
 
   (metadata [this]
     (if map-metadata
       (map-metadata original)
       (proto/metadata original)))
 
-  (generate [this paths site]
-    (if map-generate
-      (map-generate original paths site)
-      (proto/generate original paths site))))
+  (content [this paths site]
+    (if map-content
+      (map-content original paths site)
+      (proto/content original paths site))))
 
 (s/def ::full-path string?)
 (s/def ::short-name string?)
@@ -40,17 +40,17 @@
                    ::date-updated]))
 
 (defn derive-path
-  [path {:keys [url-path metadata generate]}]
+  [path-inst {:keys [path metadata content]}]
   (map->MappedPath
-   {:original path
-    :map-path url-path
+   {:original path-inst
+    :map-path path
     :map-metadata metadata
-    :map-generate generate}))
+    :map-content content}))
 
 (defn find-by-path
   "Given a list of paths, find the first exact match"
   [paths path-name]
-  (first (filter #(= path-name (proto/url-path %)) paths)))
+  (first (filter #(= path-name (proto/path %)) paths)))
 
 (defn short-name-expansion-map
   [paths]
@@ -59,7 +59,7 @@
                                  proto/metadata
                                  :short-name)]
               (if short-name
-                (assoc short-names short-name (proto/url-path path))
+                (assoc short-names short-name (proto/path path))
                 short-names)))
           {}
           paths))

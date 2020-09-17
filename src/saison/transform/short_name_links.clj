@@ -8,7 +8,7 @@
 
 (defn apply-short-links
   [path paths site]
-  (let [oc (proto/generate path paths site)
+  (let [oc (proto/content path paths site)
         oc-stream (util/->input-stream oc)
         parsed (html/html-resource oc-stream)
         url-expansion-map (path/short-name-expansion-map paths)]
@@ -24,9 +24,9 @@
 
 (defn map-short-links
   [source-path]
-  (if (#{"htm" "html"} (util/path-extension (proto/url-path source-path)))
+  (if (#{"htm" "html"} (util/path-extension (proto/path source-path)))
     (path/derive-path source-path
-                      {:generate apply-short-links})
+                      {:content apply-short-links})
     source-path))
 
 (defn short-name-links

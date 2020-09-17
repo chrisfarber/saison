@@ -8,9 +8,9 @@
 (defrecord DataPath
            [data path metadata]
   types/Path
-  (url-path [this] path)
+  (path [this] path)
   (metadata [this] metadata)
-  (generate [this paths site]
+  (content [this paths site]
     (util/data->input-stream data)))
 
 (defrecord DataSource

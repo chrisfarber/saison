@@ -29,7 +29,7 @@
                :data "..."})
         xform #(sut/filter-source % (fn [path]
                                       (not= "/bye.md"
-                                            (proto/url-path path))))
+                                            (proto/path path))))
         mapped-source (sut/map-source-by-file-ext
                        data
                        {"md" xform})

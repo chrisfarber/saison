@@ -19,7 +19,7 @@
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
-        (let [pathname (proto/url-path match)
+        (let [pathname (proto/path match)
               metadata (proto/metadata match)
               mime (or (:mime-type metadata)
                        "text/plain")]

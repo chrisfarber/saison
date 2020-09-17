@@ -1,15 +1,18 @@
 (ns saison.proto)
 
 (defprotocol Source
-  (scan [this])
-  (watch [this changed]))
+  (scan [this]
+    "return a list of Paths")
+  (watch [this changed]
+    "ask the source to invoke `changed` whenever its `scan` function
+    might return different paths"))
 
 (defprotocol Path
-  (url-path [this]
-    "retrieve the path component of the URL")
+  (path [this]
+    "compute the URL name of the path")
   (metadata [this]
-    "retrieve a metadata map for this path")
-  (generate [this paths site]
+    "retrieve the metadata for this path")
+  (content [this paths site]
     "compiles the path
     a string, or an input stream, is returned.
 

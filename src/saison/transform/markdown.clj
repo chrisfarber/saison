@@ -8,20 +8,21 @@
 
 (defn rename-path-extension [path]
   (-> path
-      proto/url-path
+      proto/path
       (util/set-path-extension "html")))
 
 (defn parse-markdown [path paths site]
-  (let [oc (proto/generate path paths site)
+  (let [oc (proto/content path paths site)
         oc-stream (util/->input-stream oc)
         oc-string (util/input-stream->string oc-stream)]
     (util/data->input-stream (md-to-html-string oc-string))))
 
 (defn map-markdown
   [source-path]
-  (if (#{"md" "markdown"} (util/path-extension (proto/url-path source-path)))
-    (path/derive-path source-path {:url-path rename-path-extension
-                            :generate parse-markdown})
+  (if (#{"md" "markdown"} (util/path-extension (proto/path source-path)))
+    (path/derive-path source-path
+                      {:path rename-path-extension
+                       :content parse-markdown})
     source-path))
 
 (defn markdown

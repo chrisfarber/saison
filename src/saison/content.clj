@@ -21,7 +21,6 @@
       java.io.ByteArrayInputStream.))
 
 (comment
-  (data-type "hi")
   (with-open [data (content->input-stream "it works?")]
     (slurp data))
   )

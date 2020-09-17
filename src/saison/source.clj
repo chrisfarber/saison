@@ -44,7 +44,7 @@
   [source ext]
   (filter-source source
                  #(= ext (-> %
-                             proto/url-path
+                             proto/path
                              util/path-extension))))
 
 ;; what should be done about 
