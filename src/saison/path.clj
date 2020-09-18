@@ -3,6 +3,14 @@
   (:require [clojure.spec.alpha :as s]
             [saison.proto :as proto]))
 
+(def ^:dynamic *paths*
+  "bound to a seq of other paths that have been discovered within the site"
+  nil)
+
+(def ^:dynamic *env*
+  "bound to a map of environment info about the site"
+  nil)
+
 (defrecord MappedPath
            [original map-path map-metadata map-content]
 
