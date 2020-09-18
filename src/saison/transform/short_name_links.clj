@@ -3,24 +3,22 @@
             [saison.util :as util]
             [saison.proto :as proto]
             [saison.path :as path]
+            [saison.content.html :refer [content->html as-html alter-html-content]]
             [net.cgrand.enlive-html :as html]
             [clojure.string :as str]))
 
 (defn apply-short-links
   [path paths site]
   (let [oc (proto/content path paths site)
-        oc-stream (util/->input-stream oc)
-        parsed (html/html-resource oc-stream)
         url-expansion-map (path/short-name-expansion-map paths)]
-    (util/data->input-stream
-     (str/join
-      (html/emit*
-       (html/at parsed [#{:link :a}]
-                (fn [node]
-                  (let [full-href (get url-expansion-map (get-in node [:attrs :href]))]
-                    (if full-href
-                      (assoc-in node [:attrs :href] full-href)
-                      node)))))))))
+    (alter-html-content
+     [html oc]
+     (html/at html [#{:link :a}]
+              (fn [node]
+                (let [full-href (get url-expansion-map (get-in node [:attrs :href]))]
+                  (if full-href
+                    (assoc-in node [:attrs :href] full-href)
+                    node)))))))
 
 (defn map-short-links
   [source-path]

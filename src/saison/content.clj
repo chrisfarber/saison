@@ -2,9 +2,13 @@
   (:require [clojure.java.io :as io]))
 
 (defmulti content->input-stream
-  "Coerce data to an input stream.
+  "Coerce content to an input stream.
 
   Should be used with with-open to ensure that the stream is closed."
+  type)
+
+(defmulti content->string
+  "Soerce content to a string."
   type)
 
 (derive java.io.File ::streamable)
@@ -20,8 +24,13 @@
       .getBytes
       java.io.ByteArrayInputStream.))
 
-(comment
-  (with-open [data (content->input-stream "it works?")]
-    (slurp data))
-  )
+(defmethod content->string ::streamable
+  [streamable]
+  (with-open [stream (io/input-stream streamable)]
+    (slurp stream)))
+
+(defmethod content->string java.lang.String
+  [s]
+  s)
+
 

@@ -5,7 +5,8 @@
             [saison.proto :as proto]
             [saison.path :as path]
             [saison.util :as util]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [saison.content :as content]))
 
 (deftest short-name-links-test
   (let [src (sut/short-name-links
@@ -22,6 +23,6 @@
         path (path/find-by-path paths "/index.html")
         content (-> path
                     (proto/content paths src)
-                    (util/input-stream->string))]
+                    content/content->string)]
     (is (str/index-of content "href=\"/about.html\""))
     (is (str/index-of content "href=\"/thereee\""))))
