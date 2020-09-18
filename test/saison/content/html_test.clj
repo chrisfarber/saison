@@ -1,8 +1,8 @@
 (ns saison.content.html-test
-  (:require [saison.content.html :as sut]
-            [clojure.test :as t :refer [deftest is]]
+  (:require [clojure.test :as t :refer [deftest is]]
+            [net.cgrand.enlive-html :as html]
             [saison.content :as content]
-            [net.cgrand.enlive-html :as html]))
+            [saison.content.html :as sut]))
 
 (deftest converting-to-from-html
   (let [original "<p>hi <a>there</a></p>"

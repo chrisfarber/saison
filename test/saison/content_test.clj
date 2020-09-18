@@ -1,6 +1,6 @@
 (ns saison.content-test
-  (:require [saison.content :as sut]
-            [clojure.test :as t :refer [deftest is]]))
+  (:require [clojure.test :as t :refer [deftest is]]
+            [saison.content :as sut]))
 
 (deftest strings-in-and-out
   (is (= "hello"

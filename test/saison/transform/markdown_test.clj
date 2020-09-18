@@ -1,14 +1,11 @@
 (ns saison.transform.markdown-test
-  (:require [saison.transform.markdown :as sut]
+  (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
-            [saison.site :as sn]
-            [clojure.java.io :as io]
-            [clojure.string :as str]
-            [saison.source.data :as data]
-            [saison.proto :as proto]
+            [saison.content :as content]
             [saison.path :as path]
-            [saison.util :as util]
-            [saison.content :as content]))
+            [saison.proto :as proto]
+            [saison.source.data :as data]
+            [saison.transform.markdown :as sut]))
 
 (deftest source-test
   (let [src (sut/markdown

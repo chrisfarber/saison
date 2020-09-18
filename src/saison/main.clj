@@ -1,6 +1,5 @@
 (ns saison.main
   (:require [cli-matic.core :refer [run-cmd]]
-            [clojure.pprint :as pprint]
             [saison.build :as build]
             [saison.live :as live]))
 

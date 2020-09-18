@@ -1,12 +1,11 @@
 (ns saison.transform.short-name-links-test
-  (:require [saison.transform.short-name-links :as sut]
+  (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
-            [saison.source.data :as data]
-            [saison.proto :as proto]
+            [saison.content :as content]
             [saison.path :as path]
-            [saison.util :as util]
-            [clojure.string :as str]
-            [saison.content :as content]))
+            [saison.proto :as proto]
+            [saison.source.data :as data]
+            [saison.transform.short-name-links :as sut]))
 
 (deftest short-name-links-test
   (let [src (sut/short-name-links

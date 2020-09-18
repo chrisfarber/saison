@@ -1,10 +1,10 @@
 (ns saison.transform.edn-metadata
   (:require [clojure.edn :as edn]
+            [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
-            [saison.util :as util]
-            [saison.content :as content]))
+            [saison.util :as util]))
 
 (defn read-meta [entry]
   ;; TODO this is an abuse of the content fn ....

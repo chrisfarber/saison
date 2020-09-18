@@ -1,8 +1,8 @@
 (ns saison.source-test
-  (:require [saison.source :as sut]
-            [clojure.test :as t :refer [deftest is]]
-            [saison.source.data :as data]
-            [saison.proto :as proto]))
+  (:require [clojure.test :as t :refer [deftest is]]
+            [saison.proto :as proto]
+            [saison.source :as sut]
+            [saison.source.data :as data]))
 
 (deftest concat-sources
   (let [s1 (data/data-source

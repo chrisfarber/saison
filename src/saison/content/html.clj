@@ -1,8 +1,7 @@
 (ns saison.content.html
-  (:require [net.cgrand.enlive-html :as html]
-            [saison.content :as content]
-            [clojure.java.io :as io]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [net.cgrand.enlive-html :as html]
+            [saison.content :as content]))
 
 (defmethod content/content->string ::html
   [html-seq]

@@ -1,9 +1,5 @@
 (ns saison.source.data
-  (:require [saison.proto :refer [Path Source scan]]
-            [saison.path :as path]
-            [saison.source :as source]
-            [saison.util :as util]
-            [saison.proto :as types]))
+  (:require [saison.proto :as types :refer [scan]]))
 
 (defrecord DataPath
            [data path metadata]

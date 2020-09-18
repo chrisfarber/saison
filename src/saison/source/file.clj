@@ -1,10 +1,6 @@
 (ns saison.source.file
-  (:require [saison.proto :as types]
-            [saison.path :as path]
-            [saison.source :as source]
-            [saison.util :as util]
-            [saison.proto :as types]
-            [saison.proto :as proto]))
+  (:require [saison.proto :as proto]
+            [saison.util :as util]))
 
 (def mime-types
   {"htm" "text/html"
@@ -18,7 +14,7 @@
 
 (defrecord FilePath
            [file base-path path metadata]
-  types/Path
+  proto/Path
   (path [this] (util/add-path-component base-path path))
   (metadata [this]
     (let [path (proto/path this)
@@ -33,7 +29,7 @@
 (defrecord FileSource
            [file-root base-path metadata]
 
-  types/Source
+  proto/Source
   (scan [this]
     (let [files (util/list-files file-root)]
       (map (fn [[name f]]

@@ -1,11 +1,10 @@
 (ns saison.site-test
   (:require [clojure.test :as t :refer [deftest is]]
+            [saison.content :as content]
             [saison.proto :as proto]
             [saison.site :as sut]
-            [saison.source.data :refer [data-source]]
-            [saison.util :as util]
-            [saison.content :as content]
-            [saison.source :as source]))
+            [saison.source :as source]
+            [saison.source.data :refer [data-source]]))
 
 (def test-site-1
   {:source (source/concat-sources

@@ -1,8 +1,7 @@
 (ns saison.site
   (:require [clojure.spec.alpha :as s]
             [saison.path :as path]
-            [saison.proto :as proto]
-            [saison.source :as source]))
+            [saison.proto :as proto]))
 
 (s/def ::name string?)
 (s/def ::output string?)

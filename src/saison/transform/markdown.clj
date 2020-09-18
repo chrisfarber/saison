@@ -1,11 +1,11 @@
 (ns saison.transform.markdown
   "Source and generator for basic markdown-templated files"
   (:require [markdown.core :refer [md-to-html-string]]
+            [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
-            [saison.util :as util]
-            [saison.content :as content]))
+            [saison.util :as util]))
 
 (defn rename-path-extension [path]
   (-> path
