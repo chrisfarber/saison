@@ -6,9 +6,9 @@
 
 (s/def ::name string?)
 (s/def ::output string?)
-(s/def ::sources (s/* :saison.core/source))
+(s/def ::source fn?)
 
-(s/def ::site (s/keys :req-un [::sources
+(s/def ::site (s/keys :req-un [::source
                                ::name
                                ::output]))
 
@@ -18,8 +18,7 @@
 (defn discover-paths
   "Given the definition of a site, discover all paths."
   [site]
-  (mapcat proto/scan
-          (:sources site)))
+  (proto/scan (:source site)))
 
 (s/fdef discover-paths
   :args (s/cat :site ::site)

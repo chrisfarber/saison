@@ -27,7 +27,7 @@
 
 (deftest content-reads-file
   (let [source (sut/files {:root "fixtures/"})
-        site {:sources [source]}
+        site {:source source}
         paths (proto/scan source)
         robots (path/find-by-path paths "/a/robots.txt")
         content (proto/content robots paths site)]

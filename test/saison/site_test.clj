@@ -4,17 +4,19 @@
             [saison.site :as sut]
             [saison.source.data :refer [data-source]]
             [saison.util :as util]
-            [saison.content :as content]))
+            [saison.content :as content]
+            [saison.source :as source]))
 
 (def test-site-1
-  {:sources [(data-source
-              {:path "/index.html"
-               :data "this is index"}
-              {:path "/robots.txt"
-               :data "hi robots"})
-             (data-source
-              {:path "/alpha"
-               :data "alpha"})]})
+  {:source (source/concat-sources
+            (data-source
+             {:path "/index.html"
+              :data "this is index"}
+             {:path "/robots.txt"
+              :data "hi robots"})
+            (data-source
+             {:path "/alpha"
+              :data "alpha"}))})
 
 (deftest discover-paths-simple
   (let [site test-site-1

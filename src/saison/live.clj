@@ -52,8 +52,7 @@
 (comment
   ;; to start
   (def testing-site
-    (live-preview {:sources [{:type 'saison.static/source
-                              :path "./fixtures/b"}]}))
+    (live-preview ...site-config...))
 
   ;; to stop
   (.stop testing-site))
