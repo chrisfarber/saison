@@ -3,13 +3,14 @@
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [saison.content :as content]))
 
 (defn read-meta [entry]
   ;; TODO this is an abuse of the content fn ....
-  (let [output (proto/content entry (list entry) {})]
-    (with-open [instream (util/->input-stream output)]
-      (edn/read-string (util/input-stream->string instream)))))
+  (let [output (proto/content entry (list entry) {})
+        metadata-str (content/content->string output)]
+    (edn/read-string metadata-str)))
 
 (defn file-metadata
   [source]

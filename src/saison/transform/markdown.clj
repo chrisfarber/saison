@@ -4,7 +4,8 @@
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [saison.content :as content]))
 
 (defn rename-path-extension [path]
   (-> path
@@ -13,9 +14,8 @@
 
 (defn parse-markdown [path paths site]
   (let [oc (proto/content path paths site)
-        oc-stream (util/->input-stream oc)
-        oc-string (util/input-stream->string oc-stream)]
-    (util/data->input-stream (md-to-html-string oc-string))))
+        oc-string (content/content->string oc)]
+    (md-to-html-string oc-string)))
 
 (defn map-markdown
   [source-path]

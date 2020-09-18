@@ -7,7 +7,8 @@
             [saison.source.data :as data]
             [saison.proto :as proto]
             [saison.path :as path]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [saison.content :as content]))
 
 (deftest source-test
   (let [src (sut/markdown
@@ -18,11 +19,8 @@
         path (path/find-by-path paths "/index.html")
         content (-> path
                     (proto/content paths src)
-                    (util/input-stream->string))]
+                    content/content->string)]
     (is (str/index-of content "<h1>"))
     (is (str/index-of content "Hello"))))
 
-(comment
-  (let [f (io/file "./fixtures/markdown1/test.md")]
-    (sut/parse-file f)))
 

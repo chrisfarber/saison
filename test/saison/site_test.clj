@@ -3,7 +3,8 @@
             [saison.proto :as proto]
             [saison.site :as sut]
             [saison.source.data :refer [data-source]]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [saison.content :as content]))
 
 (def test-site-1
   {:sources [(data-source
@@ -19,7 +20,7 @@
   (let [site test-site-1
         paths (sut/discover-paths site)
         path (first paths)
-        path-data (util/input-stream->string (proto/content path paths site))]
+        path-data (content/content->string (proto/content path paths site))]
     (is (= 3 (count paths)))
     (is (= "/index.html" (proto/path path)))
     (is (= path-data
