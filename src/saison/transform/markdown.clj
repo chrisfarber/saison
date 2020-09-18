@@ -13,9 +13,10 @@
       (util/set-path-extension "html")))
 
 (defn parse-markdown [path paths site]
-  (let [oc (proto/content path paths site)
-        oc-string (content/content->string oc)]
-    (md-to-html-string oc-string)))
+  (-> path
+      (proto/content paths site)
+      content/content->string
+      md-to-html-string))
 
 (defn map-markdown
   [source-path]

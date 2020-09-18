@@ -1,11 +1,10 @@
 (ns saison.transform.short-name-links
-  (:require [saison.source :as source]
-            [saison.util :as util]
-            [saison.proto :as proto]
+  (:require [net.cgrand.enlive-html :as html]
+            [saison.content.html :refer [alter-html-content]]
             [saison.path :as path]
-            [saison.content.html :refer [content->html as-html alter-html-content]]
-            [net.cgrand.enlive-html :as html]
-            [clojure.string :as str]))
+            [saison.proto :as proto]
+            [saison.source :as source]
+            [saison.util :as util]))
 
 (defn apply-short-links
   [path paths site]
@@ -15,9 +14,10 @@
      [html oc]
      (html/at html [#{:link :a}]
               (fn [node]
-                (let [full-href (get url-expansion-map (get-in node [:attrs :href]))]
-                  (if full-href
-                    (assoc-in node [:attrs :href] full-href)
+                (let [href (get-in node [:attrs :href])
+                      resolved-href (get url-expansion-map href)]
+                  (if resolved-href
+                    (assoc-in node [:attrs :href] resolved-href)
                     node)))))))
 
 (defn map-short-links
