@@ -71,3 +71,16 @@
                 short-names)))
           {}
           paths))
+
+(defn mime-type
+  "retrieve the mime-type from the path's metadata"
+  [path-or-meta]
+  (:mime-type (if (satisfies? proto/Path path-or-meta)
+                (proto/metadata path-or-meta)
+                path-or-meta)))
+
+(defn is-html?
+  "Return true if the path's metadata indicates it's HTML"
+  [path-or-meta]
+  (= "text/html"
+     (mime-type path-or-meta)))

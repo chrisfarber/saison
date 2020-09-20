@@ -47,6 +47,15 @@
                              proto/path
                              util/path-extension))))
 
+(defn map-paths-where
+  ([pred f]
+   #(map-paths-where % pred f))
+  ([source pred f]
+   (map-paths source (fn [path]
+                       (if (pred path)
+                         (f path)
+                         path)))))
+
 ;; what should be done about 
 (defn map-source-by-file-ext
   "accepts a source and a map of file extensions to source transformers.

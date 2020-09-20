@@ -12,6 +12,11 @@
       proto/path
       (util/set-path-extension "html")))
 
+(defn mark-as-html [path]
+  (-> path
+      proto/metadata
+      (assoc :mime-type "text/html")))
+
 (defn parse-markdown [path paths site]
   (-> path
       (proto/content paths site)
@@ -23,6 +28,7 @@
   (if (#{"md" "markdown"} (util/path-extension (proto/path source-path)))
     (path/derive-path source-path
                       {:path rename-path-extension
+                       :metadata mark-as-html
                        :content parse-markdown})
     source-path))
 
