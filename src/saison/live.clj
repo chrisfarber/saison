@@ -13,12 +13,12 @@
 (def ^{:private true}
   reload-script
   "
-fetch(\"__reload\").then(r => {
+fetch(\"/__reload\").then(r => {
 window.location.reload(true);
 })
 ")
 
-(defn site-handler
+(defn- site-handler
   "Creates a ring handler that renders any discoverable path."
 
   [site]
@@ -42,20 +42,20 @@ window.location.reload(true);
          :headers {"Content-Type" "text/html"}
          :body "not found."}))))
 
-(defn wait-for-change [changes-atom respond]
+(defn- wait-for-change [changes-atom respond]
   (let [key (gensym "wait-for-change-")]
     (add-watch changes-atom key (fn [_ _ old new]
                                   (when (not= old new)
                                     (respond {:status 204})
                                     (remove-watch changes-atom key))))))
 
-(defn use-site-handler [handler req respond raise]
+(defn- use-site-handler [handler req respond raise]
   (try
     (respond (handler req))
     (catch Exception e
       (raise e))))
 
-(defn reloading-site-handler
+(defn- reloading-site-handler
   [site]
   (let [reloadable-site (update site :source (inject-script reload-script))
         site-source (:source reloadable-site)

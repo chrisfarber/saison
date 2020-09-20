@@ -11,7 +11,6 @@
    path
    {:content (fn [path paths env]
                (let [oc (proto/content path paths env)]
-                 (println "going to injecT?" script-text)
                  (alter-html-content [html oc]
                                      (html/at html
                                               [:body] 

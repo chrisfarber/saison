@@ -43,13 +43,11 @@
 
   (watch
     [this changed]
-    (println "watching.")
     (let [notifier (fn [_ _]
                      (changed))
           watcher (hawk/watch! [{:paths [file-root]
                                  :handler notifier}])]
       (fn []
-        (println "closing.")
         (hawk/stop! watcher)))))
 
 (defn files
