@@ -6,7 +6,8 @@
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.site :as sn]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [saison.content :as content]))
 
 (defn site-handler
   "Creates a ring handler that renders any discoverable path."
@@ -25,7 +26,7 @@
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
-           :body (sn/compile-path site paths match)
+           :body (content/content->string (sn/compile-path site paths match))
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404
