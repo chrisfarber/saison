@@ -7,7 +7,16 @@
             [saison.proto :as proto]
             [saison.site :as sn]
             [saison.util :as util]
-            [saison.content :as content]))
+            [saison.content :as content]
+            [saison.transform.inject-script :refer [inject-script]]))
+
+(def ^{:private true}
+  reload-script
+  "
+fetch(\"__reload\").then(r => {
+window.location.reload(true);
+})
+")
 
 (defn site-handler
   "Creates a ring handler that renders any discoverable path."
@@ -48,9 +57,10 @@
 
 (defn reloading-site-handler
   [site]
-  (let [changes (atom 0)
-        handler (site-handler site)
-        site-source (:source site)]
+  (let [reloadable-site (update site :source (inject-script reload-script))
+        site-source (:source reloadable-site)
+        changes (atom 0)
+        handler (site-handler reloadable-site)]
     (proto/watch site-source (fn [] (swap! changes inc)))
     (fn [req respond raise]
       (let [path (:uri req)]
