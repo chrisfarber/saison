@@ -1,7 +1,7 @@
 (ns saison.source.file
   (:require [saison.proto :as proto]
             [saison.util :as util]
-            [juxt.dirwatch :refer [watch-dir close-watcher]]
+            [hawk.core :as hawk]
             [clojure.java.io :as io]))
 
 (def mime-types
@@ -44,13 +44,13 @@
   (watch
     [this changed]
     (println "watching.")
-    (let [watcher (watch-dir (fn [& args]
-                               (println "received update" args)
-                               (changed))
-                             (io/as-file file-root))]
+    (let [notifier (fn [_ _]
+                     (changed))
+          watcher (hawk/watch! [{:paths [file-root]
+                                 :handler notifier}])]
       (fn []
         (println "closing.")
-        (close-watcher watcher)))))
+        (hawk/stop! watcher)))))
 
 (defn files
   "create a source from files on the filesystem"
