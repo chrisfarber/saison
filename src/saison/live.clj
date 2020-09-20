@@ -3,7 +3,6 @@
 
   Primarily, this provides some ring middleware and server."
   (:require [ring.adapter.jetty :refer [run-jetty]]
-            [ring.middleware.content-type :refer [wrap-content-type]]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.site :as sn]
@@ -33,6 +32,31 @@
          :headers {"Content-Type" "text/html"}
          :body "not found."}))))
 
+(defn wait-for-change [changes-atom respond]
+  (let [key (gensym "wait-for-change-")]
+    (add-watch changes-atom key (fn [_ _ old new]
+                                  (when (not= old new)
+                                    (respond {:status 204})
+                                    (remove-watch changes-atom key))))))
+
+(defn use-site-handler [handler req respond raise]
+  (try
+    (respond (handler req))
+    (catch Exception e
+      (raise e))))
+
+(defn reloading-site-handler
+  [site]
+  (let [changes (atom 0)
+        handler (site-handler site)
+        site-source (:source site)]
+    (proto/watch site-source (fn [] (swap! changes inc)))
+    (fn [req respond raise]
+      (let [path (:uri req)]
+        (if (= path "/__reload")
+          (wait-for-change changes respond)
+          (use-site-handler handler req respond raise))))))
+
 (defn live-preview
   "Start a jetty server that renders a live preview of the provided saison site.
 
@@ -44,9 +68,10 @@
   ([site] (live-preview site {}))
   ([site jetty-opts]
    (let [jetty-opts (merge {:port 1931
-                            :join? false}
+                            :join? false
+                            :async? true}
                            jetty-opts)
-         handler (wrap-content-type (site-handler site))]
+         handler (reloading-site-handler site)]
      (run-jetty handler jetty-opts))))
 
 (comment

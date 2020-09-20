@@ -1,12 +1,10 @@
 (ns saison.transform.html-template
   "transform paths by templating them with enlive"
-  (:require [saison.source :as source]
-            [saison.path :as path]
-            [net.cgrand.enlive-html :as html]
-            [saison.proto :as proto]
-            [saison.content :as content]
+  (:require [clojure.string :as str]
             [saison.content.html :as htmlc]
-            [clojure.string :as str]))
+            [saison.path :as path]
+            [saison.proto :as proto]
+            [saison.source :as source]))
 
 (defn- wrap-template-fn
   [template-fn]
