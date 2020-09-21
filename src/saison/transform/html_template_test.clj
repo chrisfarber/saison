@@ -37,6 +37,6 @@
                 standard-template)
         paths (proto/scan source)
         path (first paths)
-        raw-content (proto/content path paths {})
+        raw-content (path/path->content path paths {})
         content (content/content->string raw-content)]
     (is (str/index-of content "<meta name=\"abcd\" content=\"efg\""))))

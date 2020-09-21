@@ -3,16 +3,15 @@
   (:require [clojure.string :as str]
             [saison.content.html :as htmlc]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source]))
 
 (defn- wrap-template-fn
   [template-fn]
-  (fn [path paths site]
+  (fn [path]
     (let [html-content (-> path
-                           (proto/content paths site)
+                           path/path->content
                            htmlc/content->html)
-          metadata (proto/metadata path)]
+          metadata (path/path->metadata path)]
       (str/join (template-fn html-content metadata)))))
 
 (defn- map-template

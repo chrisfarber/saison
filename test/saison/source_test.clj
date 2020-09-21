@@ -2,7 +2,8 @@
   (:require [clojure.test :as t :refer [deftest is]]
             [saison.proto :as proto]
             [saison.source :as sut]
-            [saison.source.data :as data]))
+            [saison.source.data :as data]
+            [saison.path :as path]))
 
 (deftest concat-sources
   (let [s1 (data/data-source
@@ -29,7 +30,7 @@
                :data "..."})
         xform #(sut/filter-source % (fn [path]
                                       (not= "/bye.md"
-                                            (proto/path path))))
+                                            (path/path->name path))))
         mapped-source (sut/map-source-by-file-ext
                        data
                        {"md" xform})

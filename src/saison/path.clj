@@ -11,6 +11,38 @@
   "bound to a map of environment info about the site"
   nil)
 
+(defn path->name
+  "returns the url path of the given path"
+  [path]
+  (println "path?" path)
+  (proto/path path))
+
+(defn path->metadata
+  "metadata for the given path.
+
+  if `paths` and `env` are suppplied, they will automatically be bound
+  to `*paths*` and `*env*`, respectively."
+
+  ([path]
+   (proto/metadata path))
+  ([path paths env]
+   (binding [*paths* path
+             *env* env]
+     (proto/metadata path))))
+
+(defn path->content
+  "compute content for the given path.
+
+  if `paths` and `env` are suppplied, they will automatically be bound
+  to `*paths*` and `*env*`, respectively."
+
+  ([path]
+   (proto/content path))
+  ([path paths env]
+   (binding [*paths* paths
+             *env* env]
+     (proto/content path))))
+
 (defrecord MappedPath
            [original map-path map-metadata map-content]
 
@@ -25,10 +57,10 @@
       (map-metadata original)
       (proto/metadata original)))
 
-  (content [this paths site]
+  (content [this]
     (if map-content
-      (map-content original paths site)
-      (proto/content original paths site))))
+      (map-content original)
+      (proto/content original))))
 
 (s/def ::full-path string?)
 (s/def ::short-name string?)
@@ -55,19 +87,56 @@
     :map-metadata metadata
     :map-content content}))
 
+(defmacro deftransform
+  "create a path transformer. defines a function of either:
+    [path, args..] -> path
+  or
+    path -> [args...] -> path
+
+  The first form is a binding vector of arguments.
+
+  Subsequent forms resemble record method definitions, EXCEPT:
+  - the function name must be one of `path`, `metadata`, or `content`.
+  - the bindings vector can only contain the same set of symbols
+  - the values of those symbols will be bound to the corresponding computed part of the path"
+
+  [transform-name-sym transform-arg-bindings & mapper-definitions]
+  (let [path-sym (gensym "path-")
+        transform-seq (map (fn [[method bindings & method-body]]
+                             (when-not (#{'path 'metadata 'content} method)
+                               (throw (ex-info (str "Unknown method: " method) {:form (list method bindings)})))
+                             (let [bind (mapcat (fn [dep]
+                                                  [dep `(~(case dep
+                                                            path path->name
+                                                            metadata path->metadata
+                                                            content path->content) ~path-sym)])
+                                                bindings)]
+                               [(keyword method)
+                                `(fn [~path-sym]
+                                   (let [~@bind]
+                                     ~@method-body))]))
+                           mapper-definitions)
+        transforms (into {} transform-seq)]
+    `(defn ~transform-name-sym
+       ([~@transform-arg-bindings]
+        (fn [path#]
+          (~transform-name-sym path# ~@transform-arg-bindings)))
+       ([path# ~@transform-arg-bindings]
+        (derive-path path# ~transforms)))))
+
 (defn find-by-path
   "Given a list of paths, find the first exact match"
   [paths path-name]
-  (first (filter #(= path-name (proto/path %)) paths)))
+  (first (filter #(= path-name (path->name %)) paths)))
 
 (defn short-name-expansion-map
   [paths]
   (reduce (fn [short-names path]
             (let [short-name (-> path
-                                 proto/metadata
+                                 path->metadata
                                  :short-name)]
               (if short-name
-                (assoc short-names short-name (proto/path path))
+                (assoc short-names short-name (path->name path))
                 short-names)))
           {}
           paths))
@@ -76,7 +145,7 @@
   "retrieve the mime-type from the path's metadata"
   [path-or-meta]
   (:mime-type (if (satisfies? proto/Path path-or-meta)
-                (proto/metadata path-or-meta)
+                (path->metadata path-or-meta)
                 path-or-meta)))
 
 (defn is-html?

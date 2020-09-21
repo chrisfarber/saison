@@ -3,7 +3,8 @@
             [clojure.test :as t :refer [deftest is]]
             [saison.path :as sut]
             [saison.proto :as proto]
-            [saison.source.data :as data]))
+            [saison.source.data :as data]
+            [saison.path :as path]))
 
 (deftest common-metadata
   (is (s/valid? :saison.path/metadata
@@ -16,8 +17,8 @@
                                    :data "hi."})
         hello (first paths)
         derived (sut/derive-path
-                 hello {:metadata (fn [o] (assoc (proto/metadata o)
+                 hello {:metadata (fn [o] (assoc (path/path->metadata o)
                                                  :b "new"))})]
     (is (= {:a true
             :b "new"}
-           (proto/metadata derived)))))
+           (path/path->metadata derived)))))

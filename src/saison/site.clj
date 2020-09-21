@@ -23,7 +23,3 @@
   :args (s/cat :site ::site)
   :ret (s/* :saison.path/path))
 
-(defn compile-path
-  "Compile the given path using its generator"
-  [site paths path]
-  (proto/content path paths site))

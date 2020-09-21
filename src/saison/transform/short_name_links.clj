@@ -2,14 +2,13 @@
   (:require [net.cgrand.enlive-html :as html]
             [saison.content.html :refer [alter-html-content]]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source]
             [saison.util :as util]))
 
 (defn apply-short-links
-  [path paths site]
-  (let [oc (proto/content path paths site)
-        url-expansion-map (path/short-name-expansion-map paths)]
+  [path]
+  (let [oc (path/path->content path)
+        url-expansion-map (path/short-name-expansion-map path/*paths*)]
     (alter-html-content
      [html oc]
      (html/at html [#{:link :a}]
@@ -22,7 +21,7 @@
 
 (defn map-short-links
   [source-path]
-  (if (#{"htm" "html"} (util/path-extension (proto/path source-path)))
+  (if (#{"htm" "html"} (util/path-extension (path/path->name source-path)))
     (path/derive-path source-path
                       {:content apply-short-links})
     source-path))

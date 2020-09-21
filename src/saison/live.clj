@@ -28,14 +28,14 @@ window.location.reload(true);
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
-        (let [pathname (proto/path match)
-              metadata (proto/metadata match)
+        (let [pathname (path/path->name match)
+              metadata (path/path->metadata match paths {}) ;; TODO - env
               mime (or (:mime-type metadata)
                        "text/plain")]
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
-           :body (content/content->string (sn/compile-path site paths match))
+           :body (content/content->string (path/path->content match paths {})) ;; TODO - env
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404

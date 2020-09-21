@@ -1,6 +1,7 @@
 (ns saison.source
   (:require [saison.proto :as proto]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [saison.path :as path]))
 
 (defn transform-source
   "derive a new source path invokes paths-modfier on the scanned
@@ -44,7 +45,7 @@
   [source ext]
   (filter-source source
                  #(= ext (-> %
-                             proto/path
+                             path/path->name
                              util/path-extension))))
 
 (defn map-paths-where

@@ -12,11 +12,14 @@
     "compute the URL name of the path")
   (metadata [this]
     "retrieve the metadata for this path")
-  (content [this paths site]
-    "compiles the path
-    a string, or an input stream, is returned.
+  (content [this]
+    "compiles the path, returning its content.
 
-    the `paths` argument should be a list of all other paths identified
-    for the site. this enables the path to dynamically compute content or
+    it should be compatible with `saison.content/content->string`.
+
+    `saison.path/*paths*` is expected to be bound to a list of all known paths.
+    `saison.path/*env*` is expected to be bound to any relevant site environment.
+
+    These bindings enable the path to dynamically compute content or
     references to other paths. it is probably not good practice for a path
     to generate another path, at the risk of causing an infinite loop."))

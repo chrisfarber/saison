@@ -1,9 +1,9 @@
 (ns saison.build
   "Tools for statically outputting a site."
-  (:require [saison.site :as sn]
+  (:require [clojure.java.io :as io]
+            [saison.site :as sn]
             [saison.util :as util]
-            [clojure.java.io :as io]
-            [saison.proto :as proto]))
+            [saison.path :as path]))
 
 (defn write-file
   "Write data to an ouput file.
@@ -27,7 +27,7 @@
 
   [site paths path dest-file]
 
-  (let [data (sn/compile-path site paths path)]
+  (let [data (path/path->content site paths path)]
     (write-file dest-file data)))
 
 (defn build-site
@@ -38,7 +38,7 @@
          dest-file (io/file dest-path)
          all-paths (sn/discover-paths site)]
      (doseq [p all-paths]
-       (let [output-path (str "." (proto/path p))
+       (let [output-path (str "." (path/path->name p))
              output-file (io/file dest-file output-path)]
          (if verbose? (println "Writing file:" (-> output-file
                                                    .getCanonicalFile

@@ -18,7 +18,7 @@
   [value]
   (io/input-stream value))
 
-(defmethod content->input-stream java.lang.String
+(defmethod content->input-stream String
   [string]
   (-> string
       .getBytes
@@ -29,7 +29,7 @@
   (with-open [stream (io/input-stream streamable)]
     (slurp stream)))
 
-(defmethod content->string java.lang.String
+(defmethod content->string String
   [s]
   s)
 

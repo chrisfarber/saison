@@ -2,13 +2,11 @@
   (:require [clojure.edn :as edn]
             [saison.content :as content]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source]
             [saison.util :as util]))
 
-(defn read-meta [entry]
-  ;; TODO this is an abuse of the content fn ....
-  (let [output (proto/content entry (list entry) {})
+(defn read-meta [path]
+  (let [output (path/path->content path)
         metadata-str (content/content->string output)]
     (edn/read-string metadata-str)))
 
@@ -17,7 +15,7 @@
   (source/transform-source
    source
    (fn [entries]
-     (let [path-for (memoize proto/path)
+     (let [path-for (memoize path/path->name)
            probs-meta? (fn [entry] (= "edn"
                                       (util/path-extension (path-for entry))))
            normal-entries (remove probs-meta? entries)
@@ -25,7 +23,7 @@
            meta-lookup (group-by path-for meta-entries)
            update-metadata (fn [entry]
                              (let [path (path-for entry)
-                                   path-meta (proto/metadata entry)
+                                   path-meta (path/path->metadata entry)
                                    meta-entry (get-in meta-lookup
                                                       [(str path ".edn") 0])]
                                (if meta-entry

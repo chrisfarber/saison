@@ -22,7 +22,7 @@
                            :metadata {:something true}})
         paths (proto/scan source)
         robots (path/find-by-path paths "/robots.txt")]
-    (is (= (:something (proto/metadata robots))
+    (is (= (:something (path/path->metadata robots))
            true))))
 
 (deftest content-reads-file
@@ -30,5 +30,5 @@
         site {:source source}
         paths (proto/scan source)
         robots (path/find-by-path paths "/a/robots.txt")
-        content (proto/content robots paths site)]
+        content (path/path->content robots paths site)]
     (is (some? content))))

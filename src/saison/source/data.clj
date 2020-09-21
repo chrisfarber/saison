@@ -1,18 +1,20 @@
 (ns saison.source.data
-  (:require [saison.proto :as types :refer [scan]]))
+  (:require [saison.proto :as proto :refer [scan]]))
+
+(println "uh" proto/Path)
 
 (defrecord DataPath
            [data path metadata]
-  types/Path
+  proto/Path
   (path [this] path)
   (metadata [this] metadata)
-  (content [this paths site]
+  (content [this]
     data))
 
 (defrecord DataSource
            [items]
 
-  types/Source
+  proto/Source
   (scan [this]
     (map map->DataPath items))
   (watch [this cb]

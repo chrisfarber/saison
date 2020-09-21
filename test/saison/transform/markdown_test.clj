@@ -1,11 +1,11 @@
 (ns saison.transform.markdown-test
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
+            [saison.transform.markdown :as sut]
             [saison.content :as content]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source.data :as data]
-            [saison.transform.markdown :as sut]))
+            [saison.proto :as proto]))
 
 (deftest source-test
   (let [src (sut/markdown
@@ -15,7 +15,7 @@
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         content (-> path
-                    (proto/content paths src)
+                    (path/path->content paths src)
                     content/content->string)]
     (is (str/index-of content "<h1>"))
     (is (str/index-of content "Hello"))))

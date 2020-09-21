@@ -25,7 +25,7 @@
       (merge (when known-mime
                {:mime-type known-mime})
              metadata)))
-  (content [this paths site]
+  (content [this]
     file))
 
 (defrecord FileSource
