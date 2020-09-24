@@ -100,7 +100,9 @@
         found (get-in lookup [method bind-sym])]
     (or
       found
-      (throw (ex-info (str "Unknown binding `" bind-sym "` for method `" method "`") {})))))
+      (throw (ex-info "Unknown binding" {:method method
+                                         :binding bind-sym
+                                         :allowed-bindings (keys (get lookup method))})))))
 
 (defn- transform-method-form
   "convert a transformation form to a key/fn pair suitable for passing `derive-path`"
@@ -111,7 +113,8 @@
                            [dep (value-for-binding method dep path-sym)])
                          bindings)]
     (when-not (#{'path 'metadata 'content} method)
-      (throw (ex-info (str "Unknown method: " method) {:form (list method bindings)})))
+      (throw (ex-info (str "Unknown method") {:method method
+                                              :form form})))
     [(keyword method) `(fn [~path-sym]
                          (let [~@bindings]
                            ~@method-body))]))
@@ -130,15 +133,15 @@
   - the values of those symbols will be bound to the corresponding computed part of the path"
 
   [transform-name-sym transform-arg-bindings & mapper-definitions]
-  (let [path-sym (gensym "path-")
+  (let [path 'path
         transform-seq (map transform-method-form mapper-definitions)
         transforms (into {} transform-seq)]
     `(defn ~transform-name-sym
        ([~@transform-arg-bindings]
-        (fn [path#]
-          (~transform-name-sym path# ~@transform-arg-bindings)))
-       ([path# ~@transform-arg-bindings]
-        (derive-path path# ~transforms)))))
+        (fn [~path]
+          (~transform-name-sym ~path ~@transform-arg-bindings)))
+       ([~path ~@transform-arg-bindings]
+        (derive-path ~path ~transforms)))))
 
 (defn find-by-path
   "Given a list of paths, find the first exact match"
