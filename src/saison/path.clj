@@ -86,6 +86,36 @@
     :map-metadata metadata
     :map-content content}))
 
+(defn- value-for-binding
+  [method bind-sym path-sym]
+  (let [lookup-path `(path->name ~path-sym)
+        lookup-metadata `(path->metadata ~path-sym)
+        lookup-content `(path->content ~path-sym)
+        lookup {'path {'path lookup-path}
+                'metadata {'path lookup-path
+                           'metadata lookup-metadata}
+                'content {'path lookup-path
+                          'metadata lookup-metadata
+                          'content lookup-content}}
+        found (get-in lookup [method bind-sym])]
+    (or
+      found
+      (throw (ex-info (str "Unknown binding `" bind-sym "` for method `" method "`") {})))))
+
+(defn- transform-method-form
+  "convert a transformation form to a key/fn pair suitable for passing `derive-path`"
+  [form]
+  (let [path-sym (gensym "path-")
+        [method bindings & method-body] form
+        bindings (mapcat (fn [dep]
+                           [dep (value-for-binding method dep path-sym)])
+                         bindings)]
+    (when-not (#{'path 'metadata 'content} method)
+      (throw (ex-info (str "Unknown method: " method) {:form (list method bindings)})))
+    [(keyword method) `(fn [~path-sym]
+                         (let [~@bindings]
+                           ~@method-body))]))
+
 (defmacro deftransform
   "create a path transformer. defines a function of either:
     [path, args..] -> path
@@ -101,20 +131,7 @@
 
   [transform-name-sym transform-arg-bindings & mapper-definitions]
   (let [path-sym (gensym "path-")
-        transform-seq (map (fn [[method bindings & method-body]]
-                             (when-not (#{'path 'metadata 'content} method)
-                               (throw (ex-info (str "Unknown method: " method) {:form (list method bindings)})))
-                             (let [bind (mapcat (fn [dep]
-                                                  [dep `(~(case dep
-                                                            path path->name
-                                                            metadata path->metadata
-                                                            content path->content) ~path-sym)])
-                                                bindings)]
-                               [(keyword method)
-                                `(fn [~path-sym]
-                                   (let [~@bind]
-                                     ~@method-body))]))
-                           mapper-definitions)
+        transform-seq (map transform-method-form mapper-definitions)
         transforms (into {} transform-seq)]
     `(defn ~transform-name-sym
        ([~@transform-arg-bindings]
