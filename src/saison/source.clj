@@ -24,7 +24,7 @@
     (scan [this]
       (mapcat proto/scan sources))
     (watch [this changed]
-      (let [close-fns (map #(proto/watch % changed) sources)]
+      (let [close-fns (doall (map #(proto/watch % changed) sources))]
         (fn []
           (doseq [close-fn close-fns]
             (close-fn)))))))

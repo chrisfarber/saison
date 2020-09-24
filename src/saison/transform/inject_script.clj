@@ -10,16 +10,16 @@
 
   (content [content]
            (alter-html-content [html content]
-                                     (html/at html
-                                              [:body] 
-                                              (html/append {:tag "script"
-                                                            :attrs {"type" "module"}
-                                                            :content script-text})))))
+                               (html/at html
+                                        [:body]
+                                        (html/append {:tag "script"
+                                                      :attrs {"type" "module"}
+                                                      :content script-text})))))
 
 (defn inject-script
   "for html paths, inject a script module at the end of the body"
   ([script-text]
    #(inject-script % script-text))
-  
+
   ([source script-text]
    (source/map-paths-where source path/is-html? (path-inject-script script-text))))

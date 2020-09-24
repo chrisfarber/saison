@@ -1,13 +1,13 @@
 (ns saison.transform.html-template-test
-  (:require [saison.transform.html-template :as sut]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
             [net.cgrand.enlive-html :as html]
-            [clojure.java.io :as io]
-            [clojure.string :as str]
+            [saison.content :as content]
+            [saison.path :as path]
             [saison.proto :as proto]
             [saison.source.data :as data]
-            [saison.path :as path]
-            [saison.content :as content]))
+            [saison.transform.html-template :as sut]))
 
 (html/deftemplate standard-template* (io/as-file "fixtures/template/template.html")
   [title meta-tags content]
@@ -16,7 +16,6 @@
                                                                        :content value))
   [:head :title] (html/content title)
   [:div#content] (html/substitute content))
-
 
 (defn standard-template
   [content meta]

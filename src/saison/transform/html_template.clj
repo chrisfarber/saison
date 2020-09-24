@@ -3,23 +3,15 @@
   (:require [clojure.string :as str]
             [saison.content.html :as htmlc]
             [saison.path :as path]
-            [saison.source :as source]))
+            [saison.source :as source]
+            [net.cgrand.enlive-html :as html]))
 
-(defn- wrap-template-fn
+(path/deftransform template-path-using
   [template-fn]
-  (fn [path]
-    (let [html-content (-> path
-                           path/path->content
-                           htmlc/content->html)
-          metadata (path/path->metadata path)]
-      (str/join (template-fn html-content metadata)))))
 
-(defn- map-template
-  [template-fn]
-  (let [templator (wrap-template-fn template-fn)]
-    (fn [original-path]
-      (path/derive-path original-path
-                        {:content templator}))))
+  (content [content metadata]
+           (let [html-content (htmlc/content->html content)]
+             (str/join (template-fn html-content metadata)))))
 
 (defn template-using
   "Transform a source by applying an enlive template to its paths.
@@ -39,4 +31,4 @@
    (source/map-paths-where
     source
     where?
-    (map-template template-fn))))
+    (template-path-using template-fn))))

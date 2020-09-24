@@ -44,8 +44,10 @@ window.location.reload(true);
 
 (defn- wait-for-change [changes-atom respond]
   (let [key (gensym "wait-for-change-")]
+    (println "waiting for change")
     (add-watch changes-atom key (fn [_ _ old new]
                                   (when (not= old new)
+                                    (println "change occurred")
                                     (respond {:status 204})
                                     (remove-watch changes-atom key))))))
 

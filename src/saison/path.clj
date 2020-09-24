@@ -14,7 +14,6 @@
 (defn path->name
   "returns the url path of the given path"
   [path]
-  (println "path?" path)
   (proto/path path))
 
 (defn path->metadata
