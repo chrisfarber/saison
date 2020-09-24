@@ -42,7 +42,7 @@
              *env* env]
      (proto/content path))))
 
-(defrecord MappedPath
+(defrecord DerivedPath
            [original map-path map-metadata map-content]
 
   proto/Path
@@ -80,7 +80,7 @@
 
 (defn derive-path
   [path-inst {:keys [path metadata content]}]
-  (map->MappedPath
+  (map->DerivedPath
    {:original path-inst
     :map-path path
     :map-metadata metadata
