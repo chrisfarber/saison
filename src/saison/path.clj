@@ -61,11 +61,8 @@
       (map-content original)
       (proto/content original))))
 
-(s/def ::full-path string?)
 (s/def ::short-name string?)
 (s/def ::mime-type string?)
-
-(s/def ::data map?)
 
 (s/def ::title string?)
 (s/def ::date-created inst?)

@@ -3,7 +3,8 @@
   (:require [clojure.java.io :as io]
             [saison.site :as sn]
             [saison.util :as util]
-            [saison.path :as path]))
+            [saison.path :as path]
+            [saison.content :as content]))
 
 (defn write-file
   "Write data to an ouput file.
@@ -16,7 +17,7 @@
       (.getParentFile)
       (.mkdirs))
   (with-open [out (io/output-stream dest)
-              in (util/->input-stream contents)]
+              in (content/content->input-stream contents)]
     (io/copy in out)))
 
 (defn write-path

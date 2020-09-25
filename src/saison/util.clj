@@ -49,29 +49,3 @@
   (str/replace url-path #"\.[^./\\]+$"
                (str "." new-ext)))
 
-(defmulti ->input-stream
-  "Convert the item to an input stream."
-  type)
-
-(defmethod ->input-stream java.lang.String
-  [path]
-  (->input-stream (io/file path)))
-
-(defmethod ->input-stream java.io.File
-  [f]
-  (io/input-stream f))
-
-(defmethod ->input-stream java.io.InputStream
-  [stream]
-  stream)
-
-(defn data->input-stream
-  "take some string data and make an input stream out of it"
-  [data]
-  (-> data
-      .getBytes
-      java.io.ByteArrayInputStream.))
-
-(defn input-stream->string
-  [is]
-  (slurp is))

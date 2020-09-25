@@ -50,20 +50,3 @@
   (is (= "/thing/thing1.test.html"
          (sut/set-path-extension "/thing/thing1.test.css" "html"))))
 
-(deftest ->input-stream
-  (let [data (with-open [stream (sut/->input-stream "fixtures/a/robots.txt")]
-               (slurp stream))]
-    (is (= data
-           "hi robots\n"))))
-
-(deftest data->input-stream
-  (is (= "stuff"
-         (with-open [stream (sut/data->input-stream "stuff")]
-           (slurp stream)))))
-
-(deftest input-stream->string
-  (let [v "aoentuhaoenuth"]
-    (= v
-       (-> v
-           sut/data->input-stream
-           sut/input-stream->string))))
