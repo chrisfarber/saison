@@ -90,7 +90,8 @@
         lookup-content `(path->content ~path-sym)
         lookup {'path {'path lookup-path}
                 'metadata {'path lookup-path
-                           'metadata lookup-metadata}
+                           'metadata lookup-metadata
+                           'content lookup-content}
                 'content {'path lookup-path
                           'metadata lookup-metadata
                           'content lookup-content}}
