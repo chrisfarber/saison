@@ -42,9 +42,12 @@ bye"}))
         path (path/find-by-path paths "/index.html")
         metadata (path/path->metadata path paths {})
         content (content/content->string (path/path->content path paths {}))]
+    ;; metadata comes from the original path
     (is (true?
-           (:extra metadata)))
+         (:extra metadata)))
+    ;; metadata comes from markdown metadata
     (is (= "a title"
            (:title metadata)))
+    ;; the mime type is set to html
     (is (= "text/html"
            (path/mime-type metadata)))))

@@ -42,7 +42,7 @@ waitForReload();
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
-           :body (content/content->string (path/path->content match paths {})) ;; TODO - env
+           :body (content/content->input-stream (path/path->content match paths {})) ;; TODO - env
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404
