@@ -12,7 +12,10 @@
    "ico" "image/x-icon"
    "js" "text/javascript"
    "json" "application/json"
-   "gz" "application/gzip"})
+   "gz" "application/gzip"
+   "png" "image/png"
+   "jpg" "image/jpeg"
+   "jpeg" "image/jpeg"})
 
 (defrecord FilePath
            [file base-path path metadata]
