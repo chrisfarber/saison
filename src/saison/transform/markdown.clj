@@ -27,7 +27,7 @@
                       parsed-meta)))
 
   (content [content]
-           (md-to-html-string (content/content->string content))))
+           (md-to-html-string (content/content->string content) :parse-meta? true)))
 
 (defn markdown
   [source]

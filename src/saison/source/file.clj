@@ -1,8 +1,7 @@
 (ns saison.source.file
-  (:require [saison.proto :as proto]
-            [saison.util :as util]
-            [hawk.core :as hawk]
-            [clojure.java.io :as io]))
+  (:require [hawk.core :as hawk]
+            [saison.proto :as proto]
+            [saison.util :as util]))
 
 (def mime-types
   {"htm" "text/html"
