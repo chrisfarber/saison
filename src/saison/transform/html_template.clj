@@ -2,16 +2,11 @@
   "transform paths by templating them with enlive"
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as html]
-            [saison.content.html :as htmlc :refer [alter-html-content]]
+            [saison.content.html :as htmlc :refer [alter-html-content edits edit-html]]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
             [hawk.core :as hawk]))
-
-(defmacro edits
-  [& rules]
-  `(fn [node-or-nodes#]
-     (html/at node-or-nodes# ~@rules)))
 
 (defn set-title
   [path]
@@ -30,7 +25,7 @@
                      [:meta] (html/set-attr :name prop
                                             :content value)))))
 
-(defn insert-content
+(defn- insert-content
   [content-selector]
   (fn [path]
     (let [content (path/path->content path)
@@ -38,42 +33,21 @@
       (edits
        [content-selector] (html/substitute html-content)))))
 
-(defn combine-edit-builders
-  [& ops]
-  (fn [path]
-    (let [edits (map #(% path) ops)
-          edit (apply comp edits)]
-      edit)))
-
-(comment
-  ((edits
-    [:html :title] (html/content "hi"))
-   (html/html-resource (io/file "fixtures/b/index.html"))))
-
-(comment
-  (templates
-   {:file "templates/thing.html"
-    :name "main"
-    :edits [basic-stuff
-            apply-html-metadata]
-    :content-selector :div#content}
-   {:file "another/thing.html"
-    :edits 4}))
-
 (path/deftransform apply-template
   [templates]
 
   (content [path metadata content]
            (let [template (get templates (:template metadata))
                  {:keys [file content-selector]} template
+                 apply-template ((insert-content content-selector) path)
                  edit-builders (:edits template)
-                 edit-builders (cond (sequential? edit-builders) ((apply combine-edit-builders edit-builders) path)
-                                     (fn? edit-builders) (edit-builders path)
-                                     :else identity)
-                 apply-edits (comp edit-builders
-                                   ((insert-content content-selector) path))]
-             (alter-html-content [html (slurp file)]
-                                 (apply-edits html)))))
+                 apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
+                                   (fn? edit-builders) (edit-builders path)
+                                   :else identity)]
+             (edit-html
+              (slurp file)
+              apply-template
+              apply-edits))))
 
 (defn templates
   "Transform a source by applying templates to paths.

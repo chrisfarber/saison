@@ -29,3 +29,11 @@
                       (fn [node]
                         (assoc node :content "new title")))))))))
 
+(deftest editing-html
+  (let [edited (content/content->string
+                (sut/edit-html
+                 "<title>hello</title><p></p>"
+                 (sut/edits [:title] (html/content "okay"))
+                 [(sut/edits [:p] (html/content "there"))]))]
+    (is (= "<title>okay</title><p>there</p>"
+           edited))))

@@ -35,6 +35,30 @@
   [content]
   content)
 
+(defmacro edits
+  [& rules]
+  `(fn [node-or-nodes#]
+     (html/at node-or-nodes# ~@rules)))
+
+(defn apply-edits
+  [html edit-fn]
+  (edit-fn html))
+
+(defn edit-html
+  "Applies whatever edits are supplied to `content`.
+
+  The content is coerced to html automatically, and the resulting
+  content will be marked as html as well.
+
+  `edit-fns` will be flattened and applied in the order they
+  are specified (i.e., the opposite of `comp`)"
+
+  [content & edit-fns]
+  (as-html
+   (reduce apply-edits
+           (content->html content)
+           (flatten edit-fns))))
+
 (defmacro alter-html-content
   "Parse content as html using enlive, and call `as-html` on the
   result.
