@@ -5,7 +5,8 @@
             [saison.content.html :as htmlc :refer [alter-html-content]]
             [saison.path :as path]
             [saison.proto :as proto]
-            [saison.source :as source]))
+            [saison.source :as source]
+            [hawk.core :as hawk]))
 
 (defmacro edits
   [& rules]
@@ -115,7 +116,11 @@
       (scan [this]
         (proto/scan templating-source))
       (watch [this cb]
-        (let [close-source (proto/watch templating-source cb)]
-          ;; TODO - watch `files-to-watch` as well.
-          close-source)))))
+        (let [close-source (proto/watch templating-source cb)
+              template-watcher (hawk/watch! [{:paths files-to-watch
+                                              :handler (fn [_ _]
+                                                         (cb))}])]
+          (fn []
+            (hawk/stop! template-watcher)
+            (close-source)))))))
 
