@@ -1,12 +1,11 @@
 (ns saison.transform.html-template
   "transform paths by templating them with enlive"
-  (:require [clojure.java.io :as io]
+  (:require [hawk.core :as hawk]
             [net.cgrand.enlive-html :as html]
-            [saison.content.html :as htmlc :refer [alter-html-content edits edit-html]]
+            [saison.content.html :as htmlc :refer [edit-html* edits]]
             [saison.path :as path]
             [saison.proto :as proto]
-            [saison.source :as source]
-            [hawk.core :as hawk]))
+            [saison.source :as source]))
 
 (defn set-title
   [path]
@@ -44,7 +43,7 @@
                  apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
                                    (fn? edit-builders) (edit-builders path)
                                    :else identity)]
-             (edit-html
+             (edit-html*
               (slurp file)
               apply-template
               apply-edits))))
