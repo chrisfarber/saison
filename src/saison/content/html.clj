@@ -60,20 +60,9 @@
            (flatten edit-fns))))
 
 (defmacro edit-html
+  "Parse content as html and apply the specified enlive rules to it.
+
+  Calls `as-html` on the result for you."
   [content & rules]
   `(edit-html* ~content
                (edits ~@rules)))
-
-(defmacro alter-html-content
-  "Parse content as html using enlive, and call `as-html` on the
-  result.
-
-  There must be exactly one binding. `content->html` will be called
-  on its value."
-  [binding & body]
-  (assert (vector? binding) "binding should be a vector")
-  (assert (= 2 (count binding)) "binding should have two symbols")
-  (let [[name source] binding]
-    `(as-html
-      (let [~name (content->html ~source)]
-        ~@body))))

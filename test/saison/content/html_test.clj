@@ -18,17 +18,6 @@
                sut/as-html
                content/content->string)))))
 
-(deftest alter-html
-  (let [original "<h1>title</h1>"]
-    (is (= "<h1>new title</h1>"
-           (content/content->string
-            (sut/alter-html-content
-             [nodes original]
-             (html/at nodes
-                      [#{:h1}]
-                      (fn [node]
-                        (assoc node :content "new title")))))))))
-
 (deftest editing-html
   (let [edited (content/content->string
                 (sut/edit-html*
