@@ -9,8 +9,8 @@
 (path/deftransform parse-markdown
   []
 
-  (path [path]
-        (util/set-path-extension path "html"))
+  (path [pathname]
+        (util/set-path-extension pathname "html"))
 
   ;; unfortunately we end up consuming the content twice;
   ;; once for metadata and once for content.

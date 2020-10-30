@@ -1,34 +1,121 @@
 (ns saison.transform.html-template
   "transform paths by templating them with enlive"
-  (:require [clojure.string :as str]
-            [saison.content.html :as htmlc]
+  (:require [clojure.java.io :as io]
+            [net.cgrand.enlive-html :as html]
+            [saison.content.html :as htmlc :refer [alter-html-content]]
             [saison.path :as path]
-            [saison.source :as source]
-            [net.cgrand.enlive-html :as html]))
+            [saison.proto :as proto]
+            [saison.source :as source]))
 
-(path/deftransform template-path-using
-  [template-fn]
+(defmacro edits
+  [& rules]
+  `(fn [node-or-nodes#]
+     (html/at node-or-nodes# ~@rules)))
 
-  (content [content metadata]
-           (let [html-content (htmlc/content->html content)]
-             (str/join (template-fn html-content metadata)))))
+(defn set-title
+  [path]
+  (let [metadata (path/path->metadata path)
+        title (:title metadata)]
+    (edits
+     [:head :title] (html/content title))))
 
-(defn template-using
-  "Transform a source by applying an enlive template to its paths.
+(defn apply-html-metadata
+  [path]
+  (let [metadata (path/path->metadata path)
+        html-meta (:html-meta-tags metadata)]
+    (edits
+     [:head [:meta html/first-of-type]]
+     (html/clone-for [[prop value] html-meta]
+                     [:meta] (html/set-attr :name prop
+                                            :content value)))))
 
-  By default, the template is filtered to paths for which are marked
-  as html. This can be overridden by passing in a function for
-  `where?`.
+(defn insert-content
+  [content-selector]
+  (fn [path]
+    (let [content (path/path->content path)
+          html-content (htmlc/content->html content)]
+      (edits
+       [content-selector] (html/substitute html-content)))))
 
-  The supplied `template-fn` will receive content and metadata. The
-  content will be parsed enlive nodes. The `template-fn` should return
-  the same structure as an enlive template: a seq of strings to be
-  concatenated."
-  ([source template-fn]
-   (template-using source template-fn path/is-html?))
-  
-  ([source template-fn where?]
-   (source/map-paths-where
-    source
-    where?
-    (template-path-using template-fn))))
+(defn combine-edit-builders
+  [& ops]
+  (fn [path]
+    (let [edits (map #(% path) ops)
+          edit (apply comp edits)]
+      edit)))
+
+(comment
+  ((edits
+    [:html :title] (html/content "hi"))
+   (html/html-resource (io/file "fixtures/b/index.html"))))
+
+(comment
+  (templates
+   {:file "templates/thing.html"
+    :name "main"
+    :edits [basic-stuff
+            apply-html-metadata]
+    :content-selector :div#content}
+   {:file "another/thing.html"
+    :edits 4}))
+
+(path/deftransform apply-template
+  [templates]
+
+  (content [path metadata content]
+           (let [template (get templates (:template metadata))
+                 {:keys [file content-selector]} template
+                 edit-builders (:edits template)
+                 edit-builders (cond (sequential? edit-builders) ((apply combine-edit-builders edit-builders) path)
+                                     (fn? edit-builders) (edit-builders path)
+                                     :else identity)
+                 apply-edits (comp edit-builders
+                                   ((insert-content content-selector) path))]
+             (alter-html-content [html (slurp file)]
+                                 (apply-edits html)))))
+
+(defn templates
+  "Transform a source by applying templates to paths.
+
+  A path must opt-in to having a template applied to it. This is done by
+  setting the `:template` metadata to a string that identifies the desired
+  template.
+
+  When constructing this source, any number of template definitions can be
+  supplied after the origin source. Each template definition should be a
+  map with the following keys:
+
+  `:file` - something that can be `slurp`ed to get an html string
+  `:name` - a string identifier of the template
+  `:content-selector` - an enlive selector indicating where to insert the
+                        content. optional.
+  `:edits` - a function, or list of functions, that accepts a path and returns
+             transformations defined via the `edits` macro. optional."
+  [source & template-defs]
+  (let [templates (reduce (fn [ts def]
+                            (let [{:keys [file name edits content-selector]
+                                   :or {content-selector :div#content}} def
+                                  template {:file file
+                                            :content-selector content-selector
+                                            :edits edits}]
+                              (assoc ts name
+                                     template)))
+                          {}
+                          template-defs)
+        files-to-watch (map :file template-defs)
+        find-template (fn [path]
+                        (let [m (path/path->metadata path)
+                              template (:template m)]
+                          (and template
+                               (get templates template))))
+        templating-source (source/map-paths-where source find-template (apply-template templates))]
+    (reify
+      proto/Source
+
+      (scan [this]
+        (proto/scan templating-source))
+      (watch [this cb]
+        (let [close-source (proto/watch templating-source cb)]
+          ;; TODO - watch `files-to-watch` as well.
+          close-source)))))
+

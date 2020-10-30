@@ -88,11 +88,12 @@
   (let [lookup-path `(path->name ~path-sym)
         lookup-metadata `(path->metadata ~path-sym)
         lookup-content `(path->content ~path-sym)
-        lookup {'path {'path lookup-path}
-                'metadata {'path lookup-path
+        lookup {'path {'pathname lookup-path}
+                'metadata {'pathname lookup-path
                            'metadata lookup-metadata
                            'content lookup-content}
-                'content {'path lookup-path
+                'content {'path path-sym
+                          'pathname lookup-path
                           'metadata lookup-metadata
                           'content lookup-content}}
         found (get-in lookup [method bind-sym])]

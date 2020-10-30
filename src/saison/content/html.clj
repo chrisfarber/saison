@@ -35,10 +35,6 @@
   [content]
   content)
 
-(comment
-  (alter-html [content]
-              (html/at )))
-
 (defmacro alter-html-content
   "Parse content as html using enlive, and call `as-html` on the
   result.
