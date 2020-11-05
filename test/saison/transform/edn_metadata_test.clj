@@ -20,7 +20,7 @@
         processed (sut/file-metadata src)
         paths (proto/scan processed)
         subject (path/find-by-path paths "/hello/index.html")
-        subject-meta (path/path->metadata subject)
+        subject-meta (path/metadata subject)
         meta-path (path/find-by-path paths "/hello/index.html.edn")]
     ;; the metadata file should not be output:
     (is (nil? meta-path))

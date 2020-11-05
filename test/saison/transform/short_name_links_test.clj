@@ -21,7 +21,7 @@
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         content (-> path
-                    (path/path->content paths {})
+                    (path/content paths {})
                     content/content->string)]
     (is (str/index-of content "href=\"/about.html\""))
     (is (str/index-of content "href=\"/thereee\""))))

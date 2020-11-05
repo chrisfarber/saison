@@ -28,7 +28,7 @@
 
   [site paths path dest-file]
 
-  (let [data (path/path->content site paths path)]
+  (let [data (path/content site paths path)]
     (write-file dest-file data)))
 
 (defn build-site
@@ -39,7 +39,7 @@
          dest-file (io/file dest-path)
          all-paths (sn/discover-paths site)]
      (doseq [p all-paths]
-       (let [output-path (str "." (path/path->name p))
+       (let [output-path (str "." (path/pathname p))
              output-file (io/file dest-file output-path)]
          (if verbose? (println "Writing file:" (-> output-file
                                                    .getCanonicalFile

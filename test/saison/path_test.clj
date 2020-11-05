@@ -17,8 +17,8 @@
                                    :data "hi."})
         hello (first paths)
         derived (sut/derive-path
-                 hello {:metadata (fn [o] (assoc (path/path->metadata o)
+                 hello {:metadata (fn [o] (assoc (path/metadata o)
                                                  :b "new"))})]
     (is (= {:a true
             :b "new"}
-           (path/path->metadata derived)))))
+           (path/metadata derived)))))

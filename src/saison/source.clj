@@ -118,13 +118,8 @@
   `(defn ~source-sym ~bindings
      (construct ~@source-forms)))
 
-(defn concat-sources
+(defn combine
   [& sources]
   (construct
    (inputs sources)))
 
-(comment
-  (defsource simple [source]
-    (input source)
-    (transform [paths]
-               (rest paths))))

@@ -35,14 +35,14 @@ waitForReload();
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
-        (let [pathname (path/path->name match)
-              metadata (path/path->metadata match paths {}) ;; TODO - env
+        (let [pathname (path/pathname match)
+              metadata (path/metadata match paths {}) ;; TODO - env
               mime (or (:mime-type metadata)
                        "text/plain")]
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
-           :body (content/content->input-stream (path/path->content match paths {})) ;; TODO - env
+           :body (content/content->input-stream (path/content match paths {})) ;; TODO - env
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404

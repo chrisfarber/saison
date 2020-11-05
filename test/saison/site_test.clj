@@ -8,7 +8,7 @@
             [saison.path :as path]))
 
 (def test-site-1
-  {:source (source/concat-sources
+  {:source (source/combine
             (data-source
              {:path "/index.html"
               :data "this is index"}
@@ -22,8 +22,8 @@
   (let [site test-site-1
         paths (sut/discover-paths site)
         path (first paths)
-        path-data (content/content->string (path/path->content path paths site))]
+        path-data (content/content->string (path/content path paths site))]
     (is (= 3 (count paths)))
-    (is (= "/index.html" (path/path->name path)))
+    (is (= "/index.html" (path/pathname path)))
     (is (= path-data
            "this is index"))))

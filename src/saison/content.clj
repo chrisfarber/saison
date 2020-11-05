@@ -32,5 +32,3 @@
 (defmethod content->string String
   [s]
   s)
-
-

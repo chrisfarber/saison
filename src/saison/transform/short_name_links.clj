@@ -7,7 +7,7 @@
 
 (defn apply-short-links
   [path]
-  (let [oc (path/path->content path)
+  (let [oc (path/content path)
         url-expansion-map (path/short-name-expansion-map path/*paths*)]
     (edit-html oc
       [#{:link :a}]
@@ -22,7 +22,7 @@
     [source]
   (input source)
   (map (fn [source-path]
-         (if (#{"htm" "html"} (util/path-extension (path/path->name source-path)))
+         (if (#{"htm" "html"} (util/path-extension (path/pathname source-path)))
            (path/derive-path source-path
                              {:content apply-short-links})
            source-path))))

@@ -31,7 +31,7 @@
 
 (defn is-markdown?
   [path]
-  (#{"md" "markdown"} (util/path-extension (path/path->name path))))
+  (#{"md" "markdown"} (util/path-extension (path/pathname path))))
 
 (defsource markdown
     [source]

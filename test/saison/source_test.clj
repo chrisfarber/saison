@@ -14,7 +14,7 @@
         s2 (data/data-source
             {:path "/stuff.md"
              :data "stuff"})
-        combined (sut/concat-sources s1 s2)
+        combined (sut/combine s1 s2)
         outputs (proto/scan combined)]
     (is (= 3 (count outputs)))))
 
@@ -34,7 +34,7 @@
                      (cb)
                      (fn []
                        (vswap! watchers-2 dec))))
-        merged (sut/concat-sources source-1 source-2)]
+        merged (sut/combine source-1 source-2)]
     (is (zero? @watchers-1))
     (is (zero? @watchers-2))
     (is (zero? @fires))

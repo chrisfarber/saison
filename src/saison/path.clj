@@ -11,12 +11,12 @@
   "bound to a map of environment info about the site"
   nil)
 
-(defn path->name
+(defn pathname
   "returns the url path of the given path"
   [path]
   (proto/path path))
 
-(defn path->metadata
+(defn metadata
   "metadata for the given path.
 
   if `paths` and `env` are suppplied, they will automatically be bound
@@ -29,7 +29,7 @@
              *env* env]
      (proto/metadata path))))
 
-(defn path->content
+(defn content
   "compute content for the given path.
 
   if `paths` and `env` are suppplied, they will automatically be bound
@@ -85,9 +85,9 @@
 
 (defn- value-for-binding
   [method bind-sym path-sym]
-  (let [lookup-path `(path->name ~path-sym)
-        lookup-metadata `(path->metadata ~path-sym)
-        lookup-content `(path->content ~path-sym)
+  (let [lookup-path `(pathname ~path-sym)
+        lookup-metadata `(metadata ~path-sym)
+        lookup-content `(content ~path-sym)
         lookup {'path {'pathname lookup-path}
                 'metadata {'pathname lookup-path
                            'metadata lookup-metadata
@@ -145,16 +145,16 @@
 (defn find-by-path
   "Given a list of paths, find the first exact match"
   [paths path-name]
-  (first (filter #(= path-name (path->name %)) paths)))
+  (first (filter #(= path-name (pathname %)) paths)))
 
 (defn short-name-expansion-map
   [paths]
   (reduce (fn [short-names path]
             (let [short-name (-> path
-                                 path->metadata
+                                 metadata
                                  :short-name)]
               (if short-name
-                (assoc short-names short-name (path->name path))
+                (assoc short-names short-name (pathname path))
                 short-names)))
           {}
           paths))
@@ -163,7 +163,7 @@
   "retrieve the mime-type from the path's metadata"
   [path-or-meta]
   (:mime-type (if (satisfies? proto/Path path-or-meta)
-                (path->metadata path-or-meta)
+                (metadata path-or-meta)
                 path-or-meta)))
 
 (defn is-html?

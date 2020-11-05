@@ -9,14 +9,14 @@
 
 (defn set-title
   [path]
-  (let [metadata (path/path->metadata path)
+  (let [metadata (path/metadata path)
         title (:title metadata)]
     (edits
      [:head :title] (html/content title))))
 
 (defn apply-html-metadata
   [path]
-  (let [metadata (path/path->metadata path)
+  (let [metadata (path/metadata path)
         html-meta (:html-meta-tags metadata)]
     (edits
      [:head [:meta html/first-of-type]]
@@ -27,7 +27,7 @@
 (defn- insert-content
   [content-selector]
   (fn [path]
-    (let [content (path/path->content path)
+    (let [content (path/content path)
           html-content (htmlc/content->html content)]
       (edits
        [content-selector] (html/substitute html-content)))))
@@ -78,7 +78,7 @@
                           template-defs)
         files-to-watch (map :file template-defs)
         find-template (fn [path]
-                        (let [m (path/path->metadata path)
+                        (let [m (path/metadata path)
                               template (:template m)]
                           (and template
                                (get templates template))))]

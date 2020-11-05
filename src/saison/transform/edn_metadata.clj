@@ -6,7 +6,7 @@
             [saison.util :as util]))
 
 (defn read-meta [path]
-  (let [output (path/path->content path)
+  (let [output (path/content path)
         metadata-str (content/content->string output)]
     (edn/read-string metadata-str)))
 
@@ -14,7 +14,7 @@
     [source]
   (input source)
   (transform [entries]
-    (let [path-for (memoize path/path->name)
+    (let [path-for (memoize path/pathname)
           probs-meta? (fn [entry] (= "edn"
                                      (util/path-extension (path-for entry))))
           normal-entries (remove probs-meta? entries)
@@ -22,7 +22,7 @@
           meta-lookup (group-by path-for meta-entries)
           update-metadata (fn [entry]
                             (let [path (path-for entry)
-                                  path-meta (path/path->metadata entry)
+                                  path-meta (path/metadata entry)
                                   meta-entry (get-in meta-lookup
                                                      [(str path ".edn") 0])]
                               (if meta-entry
