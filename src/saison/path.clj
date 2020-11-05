@@ -43,7 +43,7 @@
      (proto/content path))))
 
 (defrecord DerivedPath
-           [original map-path map-metadata map-content]
+    [original map-path map-metadata map-content]
 
   proto/Path
   (path [this]
@@ -98,10 +98,10 @@
                           'content lookup-content}}
         found (get-in lookup [method bind-sym])]
     (or
-      found
-      (throw (ex-info "Unknown binding" {:method method
-                                         :binding bind-sym
-                                         :allowed-bindings (keys (get lookup method))})))))
+     found
+     (throw (ex-info "Unknown binding" {:method method
+                                        :binding bind-sym
+                                        :allowed-bindings (keys (get lookup method))})))))
 
 (defn- transform-method-form
   "convert a transformation form to a key/fn pair suitable for passing `derive-path`"
@@ -130,7 +130,7 @@
   - the function name must be one of `path`, `metadata`, or `content`.
   - the bindings vector can only contain the same set of symbols
   - the values of those symbols will be bound to the corresponding computed part of the path"
-
+  {:style/indent [2 :defn]}
   [transform-name-sym transform-arg-bindings & mapper-definitions]
   (let [path 'path
         transform-seq (map transform-method-form mapper-definitions)

@@ -18,21 +18,31 @@
         outputs (proto/scan combined)]
     (is (= 3 (count outputs)))))
 
-(deftest map-by-file-extension
-  (let [data (data/data-source
-              {:path "/hello.html"
-               :data "stuff"}
-              {:path "/bye.md"
-               :data "bye"}
-              {:path "/other.css"
-               :data "eh"}
-              {:path "/stuff.md"
-               :data "..."})
-        xform #(sut/filter-source % (fn [path]
-                                      (not= "/bye.md"
-                                            (path/path->name path))))
-        mapped-source (sut/map-source-by-file-ext
-                       data
-                       {"md" xform})
-        outputs (proto/scan mapped-source)]
-    (is (= 1 (count outputs)))))
+(deftest concat-sources-handles-watching
+  (let [watchers-1 (volatile! 0)
+        watchers-2 (volatile! 0)
+        fires (volatile! 0)
+        source-1 (sut/construct
+                   (watch [cb]
+                     (vswap! watchers-1 inc)
+                     (cb)
+                     (fn []
+                       (vswap! watchers-1 dec))))
+        source-2 (sut/construct
+                   (watch [cb]
+                     (vswap! watchers-2 inc)
+                     (cb)
+                     (fn []
+                       (vswap! watchers-2 dec))))
+        merged (sut/concat-sources source-1 source-2)]
+    (is (zero? @watchers-1))
+    (is (zero? @watchers-2))
+    (is (zero? @fires))
+    (let [close-fn (proto/watch merged (fn [] (vswap! fires inc)))]
+      (is (= 1 @watchers-1))
+      (is (= 1 @watchers-2))
+      (is (= 2 @fires))
+      (close-fn))
+    (is (zero? @watchers-1))
+    (is (zero? @watchers-2))
+    (is (= 2 @fires))))

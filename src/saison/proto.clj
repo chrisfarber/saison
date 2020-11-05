@@ -5,7 +5,14 @@
     "return a list of Paths")
   (watch [this changed]
     "ask the source to invoke `changed` whenever its `scan` function
-    might return different paths"))
+    might return different paths")
+
+  (before-build-hook [this env]
+    "Called before a build is created. Also called when live preview detects new
+changes.")
+
+  (before-publish-hook [this env]
+    "Called before a publish is triggered."))
 
 (defprotocol Path
   (path [this]

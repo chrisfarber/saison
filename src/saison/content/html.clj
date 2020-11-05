@@ -63,6 +63,7 @@
   "Parse content as html and apply the specified enlive rules to it.
 
   Calls `as-html` on the result for you."
+  {:style/indent [1 :form]}
   [content & rules]
   `(edit-html* ~content
                (edits ~@rules)))

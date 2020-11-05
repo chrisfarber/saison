@@ -5,14 +5,14 @@
             [saison.source :as source]))
 
 (path/deftransform path-inject-script
-  [script-text]
+    [script-text]
 
   (content [content]
-           (edit-html content
-                      [:body]
-                      (html/append {:tag "script"
-                                    :attrs {"type" "module"}
-                                    :content script-text}))))
+    (edit-html content
+      [:body]
+      (html/append {:tag "script"
+                    :attrs {"type" "module"}
+                    :content script-text}))))
 
 (defn inject-script
   "for html paths, inject a script module at the end of the body"
@@ -20,4 +20,6 @@
    #(inject-script % script-text))
 
   ([source script-text]
-   (source/map-paths-where source path/is-html? (path-inject-script script-text))))
+   (source/construct
+     (input source)
+     (map-where path/is-html? (path-inject-script script-text)))))

@@ -2,7 +2,7 @@
   (:require [saison.proto :as proto :refer [scan Path Source]]))
 
 (defrecord DataPath
-           [data path metadata]
+    [data path metadata]
   Path
   (path [this] path)
   (metadata [this] metadata)
@@ -10,7 +10,7 @@
     data))
 
 (defrecord DataSource
-           [items]
+    [items]
 
   Source
   (scan [this]

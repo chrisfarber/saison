@@ -33,20 +33,20 @@
        [content-selector] (html/substitute html-content)))))
 
 (path/deftransform apply-template
-  [templates]
+    [templates]
 
   (content [path metadata content]
-           (let [template (get templates (:template metadata))
-                 {:keys [file content-selector]} template
-                 apply-template ((insert-content content-selector) path)
-                 edit-builders (:edits template)
-                 apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
-                                   (fn? edit-builders) (edit-builders path)
-                                   :else identity)]
-             (edit-html*
-              (slurp file)
-              apply-template
-              apply-edits))))
+    (let [template (get templates (:template metadata))
+          {:keys [file content-selector]} template
+          apply-template ((insert-content content-selector) path)
+          edit-builders (:edits template)
+          apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
+                            (fn? edit-builders) (edit-builders path)
+                            :else identity)]
+      (edit-html*
+       (slurp file)
+       apply-template
+       apply-edits))))
 
 (defn templates
   "Transform a source by applying templates to paths.
@@ -81,19 +81,12 @@
                         (let [m (path/path->metadata path)
                               template (:template m)]
                           (and template
-                               (get templates template))))
-        templating-source (source/map-paths-where source find-template (apply-template templates))]
-    (reify
-      proto/Source
-
-      (scan [this]
-        (proto/scan templating-source))
-      (watch [this cb]
-        (let [close-source (proto/watch templating-source cb)
-              template-watcher (hawk/watch! [{:paths files-to-watch
-                                              :handler (fn [_ _]
-                                                         (cb))}])]
-          (fn []
-            (hawk/stop! template-watcher)
-            (close-source)))))))
+                               (get templates template))))]
+    (source/construct
+      (input source)
+      (map-where find-template (apply-template templates))
+      (watch [cb]
+        (let [template-watcher (hawk/watch! [{:paths files-to-watch
+                                              :handler (fn [_ _] (cb))}])]
+          #(hawk/stop! template-watcher))))))
 

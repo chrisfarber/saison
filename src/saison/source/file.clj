@@ -17,7 +17,7 @@
    "jpeg" "image/jpeg"})
 
 (defrecord FilePath
-           [file base-path path metadata]
+    [file base-path path metadata]
   proto/Path
   (path [this] (util/add-path-component base-path path))
   (metadata [this]
@@ -31,7 +31,7 @@
     file))
 
 (defrecord FileSource
-           [file-root base-path metadata]
+    [file-root base-path metadata]
 
   proto/Source
   (scan [this]
