@@ -22,6 +22,6 @@
         path (path/find-by-path paths "/index.html")
         content (-> path
                     (path/content paths {})
-                    content/content->string)]
+                    content/string)]
     (is (str/index-of content "href=\"/about.html\""))
     (is (str/index-of content "href=\"/thereee\""))))

@@ -22,7 +22,7 @@ changes.")
   (content [this]
     "compiles the path, returning its content.
 
-    it should be compatible with `saison.content/content->string`.
+    it should be compatible with `saison.content/input-stream`.
 
     `saison.path/*paths*` is expected to be bound to a list of all known paths.
     `saison.path/*env*` is expected to be bound to any relevant site environment.

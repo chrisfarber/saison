@@ -24,7 +24,7 @@
         paths (proto/scan source)
         path (first paths)
         raw-content (path/content path paths {})
-        content (content/content->string raw-content)]
+        content (content/string raw-content)]
     (is (str/index-of content "<meta name=\"abcd\" content=\"efg\""))
     (is (str/index-of content "<title>fancy title"))
     (is (str/index-of content "<p>content</p"))

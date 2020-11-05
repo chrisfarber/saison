@@ -3,35 +3,35 @@
             [net.cgrand.enlive-html :as html]
             [saison.content :as content]))
 
-(defmethod content/content->string ::html
+(defmethod content/string ::html
   [html-seq]
   (str/join (html/emit* html-seq)))
 
-(defmethod content/content->input-stream ::html
+(defmethod content/input-stream ::html
   [html-seq]
   (-> html-seq
-      content/content->string
-      content/content->input-stream))
+      content/string
+      content/input-stream))
 
 (defn as-html [html-seq]
   (vary-meta html-seq assoc :type ::html))
 
-(defmulti content->html
+(defmulti html
   "Get the content as a parsed enlive nodes"
   type)
 
-(defmethod content->html ::content/streamable
+(defmethod html ::content/streamable
   [content]
   (as-html
-   (with-open [stream (content/content->input-stream content)]
+   (with-open [stream (content/input-stream content)]
      (html/html-resource stream))))
 
-(defmethod content->html java.lang.String
+(defmethod html java.lang.String
   [content]
   (as-html
    (html/html-snippet content)))
 
-(defmethod content->html ::html
+(defmethod html ::html
   [content]
   content)
 
@@ -56,7 +56,7 @@
   [content & edit-fns]
   (as-html
    (reduce apply-edits
-           (content->html content)
+           (html content)
            (flatten edit-fns))))
 
 (defmacro edit-html

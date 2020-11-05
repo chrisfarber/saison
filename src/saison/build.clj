@@ -17,7 +17,7 @@
       (.getParentFile)
       (.mkdirs))
   (with-open [out (io/output-stream dest)
-              in (content/content->input-stream contents)]
+              in (content/input-stream contents)]
     (io/copy in out)))
 
 (defn write-path

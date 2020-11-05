@@ -22,7 +22,7 @@
   (let [site test-site-1
         paths (sut/discover-paths site)
         path (first paths)
-        path-data (content/content->string (path/content path paths site))]
+        path-data (content/string (path/content path paths site))]
     (is (= 3 (count paths)))
     (is (= "/index.html" (path/pathname path)))
     (is (= path-data

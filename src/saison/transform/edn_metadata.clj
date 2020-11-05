@@ -7,7 +7,7 @@
 
 (defn read-meta [path]
   (let [output (path/content path)
-        metadata-str (content/content->string output)]
+        metadata-str (content/string output)]
     (edn/read-string metadata-str)))
 
 (defsource file-metadata

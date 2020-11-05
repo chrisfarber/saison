@@ -28,7 +28,7 @@
   [content-selector]
   (fn [path]
     (let [content (path/content path)
-          html-content (htmlc/content->html content)]
+          html-content (htmlc/html content)]
       (edits
        [content-selector] (html/substitute html-content)))))
 

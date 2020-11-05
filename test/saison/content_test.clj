@@ -5,10 +5,10 @@
 (deftest strings-in-and-out
   (is (= "hello"
          (-> "hello"
-             sut/content->input-stream
-             sut/content->string))))
+             sut/input-stream
+             sut/string))))
 
 (deftest idempotent-strings
   (is (= "abcd"
-         (sut/content->string "abcd"))))
+         (sut/string "abcd"))))
 

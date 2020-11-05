@@ -16,7 +16,7 @@
   ;; once for metadata and once for content.
   ;; i have ideas for how to optimize that eventually, if need be
   (metadata [metadata content]
-    (let [content-str (content/content->string content)
+    (let [content-str (content/string content)
           parsed-meta (md-to-meta content-str)]
       ;; md-to-meta gives us a map of keywords to arrays of strings.
       ;; (because you could supply the same header twice)
@@ -27,7 +27,7 @@
               parsed-meta)))
 
   (content [content]
-    (md-to-html-string (content/content->string content) :parse-meta? true)))
+    (md-to-html-string (content/string content) :parse-meta? true)))
 
 (defn is-markdown?
   [path]

@@ -16,7 +16,7 @@
         path (path/find-by-path paths "/index.html")
         content (-> path
                     (path/content paths src)
-                    content/content->string)]
+                    content/string)]
     (is (str/index-of content "<h1>"))
     (is (str/index-of content "Hello"))))
 
@@ -41,7 +41,7 @@ bye"}))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         metadata (path/metadata path paths {})
-        content (content/content->string (path/content path paths {}))]
+        content (content/string (path/content path paths {}))]
     ;; metadata comes from the original path
     (is (true?
          (:extra metadata)))
