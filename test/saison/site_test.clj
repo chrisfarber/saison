@@ -4,17 +4,17 @@
             [saison.proto :as proto]
             [saison.site :as sut]
             [saison.source :as source]
-            [saison.source.data :refer [data-source]]
+            [saison.source.data :refer [source]]
             [saison.path :as path]))
 
 (def test-site-1
   {:source (source/combine
-            (data-source
+            (source
              {:path "/index.html"
               :data "this is index"}
              {:path "/robots.txt"
               :data "hi robots"})
-            (data-source
+            (source
              {:path "/alpha"
               :data "alpha"}))})
 

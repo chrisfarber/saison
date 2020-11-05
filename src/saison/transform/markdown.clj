@@ -2,11 +2,11 @@
   "Source and generator for basic markdown-templated files"
   (:require [markdown.core :refer [md-to-html-string md-to-meta]]
             [saison.content :as content]
-            [saison.path :as path]
+            [saison.path :as path :refer [deftransform]]
             [saison.source :as source :refer [defsource]]
             [saison.util :as util]))
 
-(path/deftransform parse-markdown
+(deftransform parse-markdown
     []
 
   (path [pathname]

@@ -1,10 +1,10 @@
 (ns saison.transform.inject-script
   (:require [net.cgrand.enlive-html :as html]
             [saison.content.html :refer [edit-html]]
-            [saison.path :as path]
+            [saison.path :as path :refer [deftransform]]
             [saison.source :as source]))
 
-(path/deftransform path-inject-script
+(deftransform path-inject-script
     [script-text]
 
   (content [content]

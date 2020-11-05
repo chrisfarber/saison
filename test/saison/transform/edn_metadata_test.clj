@@ -6,7 +6,7 @@
             [saison.transform.edn-metadata :as sut]))
 
 (deftest parse-metadata-test
-  (let [src (data/data-source
+  (let [src (data/source
              {:path "/hello/index.html"
               :data ""
               :metadata {:cool true}}

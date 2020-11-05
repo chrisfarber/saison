@@ -12,7 +12,7 @@
                  :title "feast"})))
 
 (deftest derive-path-metadata
-  (let [paths (data/literal-paths {:path "/hello"
+  (let [paths (data/paths {:path "/hello"
                                    :metadata {:a true}
                                    :data "hi."})
         hello (first paths)

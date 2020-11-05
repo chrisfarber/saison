@@ -9,7 +9,7 @@
 
 (deftest new-templating-test
   (let [source (sut/templates
-                (data/data-source
+                (data/source
                  {:path "/hello.html"
                   :metadata {:mime-type "text/html"
                              :title "fancy title"

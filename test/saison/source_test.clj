@@ -6,12 +6,12 @@
             [saison.path :as path]))
 
 (deftest concat-sources
-  (let [s1 (data/data-source
+  (let [s1 (data/source
             {:path "/index.html"
              :data "index"}
             {:path "/robots.txt"
              :data "hi robots"})
-        s2 (data/data-source
+        s2 (data/source
             {:path "/stuff.md"
              :data "stuff"})
         combined (sut/combine s1 s2)

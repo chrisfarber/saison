@@ -18,7 +18,7 @@
   (watch [this cb]
     (fn [])))
 
-(defn data-source
+(defn source
   "A source of paths from literal data.
 
   Accepts any number of maps. Each map is expected to have the keys:
@@ -28,12 +28,12 @@
   [& paths]
   (map->DataSource {:items paths}))
 
-(defn literal-paths
+(defn paths
   "create a list of paths.
 
   generates a data source from the supplied data using `data-source`, and
   then invokes `scan` on it."
   [& path-defs]
   (-> path-defs
-      data-source
+      source
       scan))

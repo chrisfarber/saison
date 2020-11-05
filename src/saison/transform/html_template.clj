@@ -3,7 +3,7 @@
   (:require [hawk.core :as hawk]
             [net.cgrand.enlive-html :as html]
             [saison.content.html :as htmlc :refer [edit-html* edits]]
-            [saison.path :as path]
+            [saison.path :as path :refer [deftransform]]
             [saison.proto :as proto]
             [saison.source :as source]))
 
@@ -32,7 +32,7 @@
       (edits
        [content-selector] (html/substitute html-content)))))
 
-(path/deftransform apply-template
+(deftransform apply-template
     [templates]
 
   (content [path metadata content]

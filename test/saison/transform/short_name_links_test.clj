@@ -9,7 +9,7 @@
 
 (deftest short-name-links-test
   (let [src (sut/short-name-links
-             (data/data-source
+             (data/source
               {:path "/index.html"
                :data "<a href=\"abt\">about</a> <a href=\"thr\">there</a>"}
               {:path "/about.html"

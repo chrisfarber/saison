@@ -9,7 +9,7 @@
 
 (deftest markdown-test
   (let [src (sut/markdown
-             (data/data-source
+             (data/source
               {:path "/index.md"
                :data "# Hello"}))
         paths (proto/scan src)
@@ -21,7 +21,7 @@
     (is (str/index-of content "Hello"))))
 
 (deftest markdown-metadata-test
-  (let [src (sut/markdown (data/data-source
+  (let [src (sut/markdown (data/source
                            {:path "/index.md"
                             :metadata {:extra true}
                             :data "Title: a title
