@@ -31,6 +31,12 @@
                            (doseq [watcher# watchers#]
                              (watcher#)))))])))
 
+(defmethod parse-source-form
+  'emit
+  [[_ & paths]]
+  (list [:scan `(fn [paths#]
+                  (concat paths# ~(flatten paths)))]))
+
 (defmethod parse-source-form 'filter
   [source-form]
   (let [[vec-or-sym & forms] (rest source-form)]

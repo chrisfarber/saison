@@ -1,5 +1,6 @@
 (ns saison.source.data
-  (:require [saison.proto :as proto :refer [scan Path Source]]))
+  (:require [saison.proto :as proto :refer [scan Path Source]]
+            [saison.source :as source]))
 
 (defrecord DataPath
     [pathname metadata content]
@@ -11,14 +12,19 @@
   (content [this]
     content))
 
-(defrecord DataSource
-    [items]
+(defn path
+  "create a literal path. should receive a map containing the keys
+  :pathname
+  :metadata (optional)
+  :content"
+  [path-def]
+  (map->DataPath path-def))
 
-  Source
-  (scan [this]
-    (map map->DataPath items))
-  (watch [this cb]
-    (fn [])))
+(defn paths
+  "create a list of paths by applying `path` it its inputs.
+  the provided path-defs are flattened."
+  [& path-defs]
+  (map path (flatten path-defs)))
 
 (defn source
   "A source of paths from literal data.
@@ -27,15 +33,6 @@
   :pathname
   :metadata (optional)
   :content"
-  [& paths]
-  (map->DataSource {:items paths}))
-
-(defn paths
-  "create a list of paths.
-
-  generates a data source from the supplied data using `data-source`, and
-  then invokes `scan` on it."
   [& path-defs]
-  (-> path-defs
-      source
-      scan))
+  (source/construct
+    (emit (paths path-defs))))
