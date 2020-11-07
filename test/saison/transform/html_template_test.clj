@@ -10,12 +10,12 @@
 (deftest new-templating-test
   (let [source (sut/templates
                 (data/source
-                 {:path "/hello.html"
+                 {:pathname "/hello.html"
                   :metadata {:mime-type "text/html"
                              :title "fancy title"
                              :template "test1"
                              :html-meta-tags {"abcd" "efg"}}
-                  :data "<h1>heading</h1><p>content</p>"})
+                  :content "<h1>heading</h1><p>content</p>"})
                 {:file "fixtures/template/template.html"
                  :name "test1"
                  :content-selector :div#content

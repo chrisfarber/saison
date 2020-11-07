@@ -15,7 +15,7 @@ changes.")
     "Called before a publish is triggered."))
 
 (defprotocol Path
-  (path [this]
+  (pathname [this]
     "compute the URL name of the path")
   (metadata [this]
     "retrieve the metadata for this path")

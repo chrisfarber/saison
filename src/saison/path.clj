@@ -14,7 +14,7 @@
 (defn pathname
   "returns the url path of the given path"
   [path]
-  (proto/path path))
+  (proto/pathname path))
 
 (defn metadata
   "metadata for the given path.
@@ -46,10 +46,10 @@
     [original map-path map-metadata map-content]
 
   proto/Path
-  (path [this]
+  (pathname [this]
     (if map-path
       (map-path original)
-      (proto/path original)))
+      (proto/pathname original)))
 
   (metadata [this]
     (if map-metadata

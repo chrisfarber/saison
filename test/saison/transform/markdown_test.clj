@@ -10,8 +10,8 @@
 (deftest markdown-test
   (let [src (sut/markdown
              (data/source
-              {:path "/index.md"
-               :data "# Hello"}))
+              {:pathname "/index.md"
+               :content "# Hello"}))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         content (-> path
@@ -22,9 +22,9 @@
 
 (deftest markdown-metadata-test
   (let [src (sut/markdown (data/source
-                           {:path "/index.md"
+                           {:pathname "/index.md"
                             :metadata {:extra true}
-                            :data "Title: a title
+                            :content "Title: a title
 Title: a second title
 Date: 2020-09-25
 

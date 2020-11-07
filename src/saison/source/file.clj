@@ -19,9 +19,9 @@
 (defrecord FilePath
     [file base-path path metadata]
   proto/Path
-  (path [this] (util/add-path-component base-path path))
+  (pathname [this] (util/add-path-component base-path path))
   (metadata [this]
-    (let [path (proto/path this)
+    (let [path (proto/pathname this)
           extension (util/path-extension path)
           known-mime (get mime-types extension)]
       (merge (when known-mime

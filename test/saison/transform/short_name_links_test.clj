@@ -10,13 +10,13 @@
 (deftest short-name-links-test
   (let [src (sut/short-name-links
              (data/source
-              {:path "/index.html"
-               :data "<a href=\"abt\">about</a> <a href=\"thr\">there</a>"}
-              {:path "/about.html"
-               :data ""
+              {:pathname "/index.html"
+               :content "<a href=\"abt\">about</a> <a href=\"thr\">there</a>"}
+              {:pathname "/about.html"
+               :content ""
                :metadata {:short-name "abt"}}
-              {:path "/thereee"
-               :data ""
+              {:pathname "/thereee"
+               :content ""
                :metadata {:short-name "thr"}}))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")

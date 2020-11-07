@@ -7,16 +7,16 @@
 
 (deftest parse-metadata-test
   (let [src (data/source
-             {:path "/hello/index.html"
-              :data ""
+             {:pathname "/hello/index.html"
+              :content ""
               :metadata {:cool true}}
-             {:path "/hello/index.html.edn"
-              :data (pr-str {:title "Hello"
+             {:pathname "/hello/index.html.edn"
+              :content (pr-str {:title "Hello"
                              :mime-type "bogus"})}
-             {:path "/hello/index"
-              :data ""}
-             {:path "/index.html"
-              :data ""})
+             {:pathname "/hello/index"
+              :content ""}
+             {:pathname "/index.html"
+              :content ""})
         processed (sut/file-metadata src)
         paths (proto/scan processed)
         subject (path/find-by-path paths "/hello/index.html")

@@ -10,13 +10,13 @@
 (def test-site-1
   {:source (source/combine
             (source
-             {:path "/index.html"
-              :data "this is index"}
-             {:path "/robots.txt"
-              :data "hi robots"})
+             {:pathname "/index.html"
+              :content "this is index"}
+             {:pathname "/robots.txt"
+              :content "hi robots"})
             (source
-             {:path "/alpha"
-              :data "alpha"}))})
+             {:pathname "/alpha"
+              :content "alpha"}))})
 
 (deftest discover-paths-simple
   (let [site test-site-1

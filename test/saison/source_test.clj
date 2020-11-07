@@ -7,13 +7,13 @@
 
 (deftest concat-sources
   (let [s1 (data/source
-            {:path "/index.html"
-             :data "index"}
-            {:path "/robots.txt"
-             :data "hi robots"})
+            {:pathname "/index.html"
+             :content "index"}
+            {:pathname "/robots.txt"
+             :content "hi robots"})
         s2 (data/source
-            {:path "/stuff.md"
-             :data "stuff"})
+            {:pathname "/stuff.md"
+             :content "stuff"})
         combined (sut/combine s1 s2)
         outputs (proto/scan combined)]
     (is (= 3 (count outputs)))))

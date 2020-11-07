@@ -2,12 +2,14 @@
   (:require [saison.proto :as proto :refer [scan Path Source]]))
 
 (defrecord DataPath
-    [data path metadata]
+    [pathname metadata content]
   Path
-  (path [this] path)
-  (metadata [this] metadata)
+  (pathname [this]
+    pathname)
+  (metadata [this]
+    metadata)
   (content [this]
-    data))
+    content))
 
 (defrecord DataSource
     [items]
@@ -22,9 +24,9 @@
   "A source of paths from literal data.
 
   Accepts any number of maps. Each map is expected to have the keys:
-  :data
-  :path
-  :metadata (optional)"
+  :pathname
+  :metadata (optional)
+  :content"
   [& paths]
   (map->DataSource {:items paths}))
 
