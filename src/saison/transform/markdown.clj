@@ -9,7 +9,7 @@
 (deftransform parse-markdown
     []
 
-  (path [pathname]
+  (pathname [pathname]
     (util/set-path-extension pathname "html"))
 
   ;; unfortunately we end up consuming the content twice;

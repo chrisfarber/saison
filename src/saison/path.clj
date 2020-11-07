@@ -76,10 +76,10 @@
                    ::date-updated]))
 
 (defn derive-path
-  [path-inst {:keys [path metadata content]}]
+  [path-inst {:keys [pathname metadata content]}]
   (map->DerivedPath
    {:original path-inst
-    :map-path path
+    :map-path pathname
     :map-metadata metadata
     :map-content content}))
 
@@ -88,7 +88,7 @@
   (let [lookup-path `(pathname ~path-sym)
         lookup-metadata `(metadata ~path-sym)
         lookup-content `(content ~path-sym)
-        lookup {'path {'pathname lookup-path}
+        lookup {'pathname {'pathname lookup-path}
                 'metadata {'pathname lookup-path
                            'metadata lookup-metadata
                            'content lookup-content}
@@ -111,7 +111,7 @@
         bindings (mapcat (fn [dep]
                            [dep (value-for-binding method dep path-sym)])
                          bindings)]
-    (when-not (#{'path 'metadata 'content} method)
+    (when-not (#{'pathname 'metadata 'content} method)
       (throw (ex-info (str "Unknown method") {:method method
                                               :form form})))
     [(keyword method) `(fn [~path-sym]
@@ -127,7 +127,7 @@
   The first form is a binding vector of arguments.
 
   Subsequent forms resemble record method definitions, EXCEPT:
-  - the function name must be one of `path`, `metadata`, or `content`.
+  - the function name must be one of `pathname`, `metadata`, or `content`.
   - the bindings vector can only contain the same set of symbols
   - the values of those symbols will be bound to the corresponding computed part of the path"
   {:style/indent [2 :defn]}
