@@ -4,17 +4,18 @@
  {org.clojure/clojure {:mvn/version "1.10.1"}
   org.clojure/clojurescript {:mvn/version "1.10.773"}
 
-  ring {:mvn/version "1.8.1"}
+  ring {:mvn/version "1.8.2"}
 
   ;; integrant {:mvn/version "0.8.0"}
   ;; integrant/repl {:mvn/version "0.3.1"}
 
-  markdown-clj {:mvn/version "1.10.4"}
+  markdown-clj {:mvn/version "1.10.5"}
 
   enlive {:mvn/version "1.1.6"}
   ;; org.clojure/tools.cli {:mvn/version "1.0.194"}
   cli-matic {:mvn/version "0.4.3"}
-  hawk {:mvn/version "0.2.11"}}
+  hawk {:mvn/version "0.2.11"}
+  tick {:mvn/version "0.4.27-alpha"}}
 
  :aliases
  {:outdated {:extra-deps {olical/depot {:mvn/version "2.0.1"}}

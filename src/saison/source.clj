@@ -74,6 +74,18 @@
          (= 1 (count bindings))]}
   (list [:scan `(fn ~bindings ~@forms)]))
 
+(defmethod parse-source-form 'before-build
+  [[_ bindings & fn-forms]]
+  {:pre [(vector? bindings)
+         (= 1 (count bindings))]}
+  (list [:before-build `(fn ~bindings ~@fn-forms)]))
+
+(defmethod parse-source-form 'before-publish
+  [[_ bindings & fn-forms]]
+  {:pre [(vector? bindings)
+         (= 1 (count bindings))]}
+  (list [:before-publish `(fn ~bindings ~@fn-forms)]))
+
 (defn- apply-step [hooks source-form]
   (reduce (fn [m [hook-name hook-fn]]
             (update-in m [hook-name] (fn [fns]
