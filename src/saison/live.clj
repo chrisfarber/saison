@@ -70,7 +70,10 @@ waitForReload();
         site-source (:source reloadable-site)
         changes (atom 0)
         handler (site-handler reloadable-site)]
-    (proto/watch site-source (fn [] (swap! changes inc)))
+    (proto/before-build-hook site-source {})
+    (proto/watch site-source (fn []
+                               (proto/before-build-hook site-source {})
+                               (swap! changes inc)))
     (fn [req respond raise]
       (let [path (:uri req)]
         (if (= path "/__reload")

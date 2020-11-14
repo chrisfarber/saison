@@ -46,3 +46,22 @@
     (is (zero? @watchers-1))
     (is (zero? @watchers-2))
     (is (= 2 @fires))))
+
+(deftest source-inputs-hooks
+  (let [build-count (volatile! 0)
+        publish-count (volatile! 0)
+        s1 (sut/construct
+             (before-build [env]
+               (vswap! build-count inc)))
+        s2 (sut/construct
+             (before-publish [env]
+               (vswap! publish-count inc)))
+        s1-and-s2 (list s1 s2)
+        merged (sut/construct
+                 (inputs s1-and-s2))]
+    (proto/before-build-hook merged {})
+    (is (= 1 @build-count))
+    (is (zero? @publish-count))
+    (proto/before-publish-hook merged {})
+    (is (= 1 @build-count))
+    (is (= 1 @publish-count))))

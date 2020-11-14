@@ -9,27 +9,38 @@
   [source-form]
   (let [[_ source] source-form]
     (list [:scan `(fn [paths#] (concat paths# (proto/scan ~source)))]
-          [:watch `(fn [cb#] (proto/watch ~source cb#))])))
+          [:watch `(fn [cb#] (proto/watch ~source cb#))]
+          [:before-build `(fn [env#] (proto/before-build-hook ~source env#))]
+          [:before-publish `(fn [env#] (proto/before-publish-hook ~source env#))])))
 
 (defmethod parse-source-form 'inputs
   [[_ & sources]]
   (let [source-syms (flatten sources)
         cb (gensym "watch-cb")
+        env (gensym "env")
         scan-forms (map (fn [sym]
                           `(map proto/scan ~sym))
                         source-syms)
         watch-forms (map (fn [sym]
                            `(map #(proto/watch % ~cb) ~sym))
-                         source-syms)]
+                         source-syms)
+        build-notifier (fn [notifier]
+                         `(fn [~env]
+                            ~@(map (fn [source-or-list-sym]
+                                     `(doseq [s# (flatten (list ~source-or-list-sym))]
+                                        (~notifier s# ~env)))
+                                   source-syms)))]
     (list [:scan `(fn [paths#]
                     (flatten (concat paths#
                                      ~@scan-forms)))]
           [:watch `(fn [~cb]
                      (let [watchers# (flatten (list ~@watch-forms))]
-                         (doall watchers#)
-                         (fn []
-                           (doseq [watcher# watchers#]
-                             (watcher#)))))])))
+                       (doall watchers#)
+                       (fn []
+                         (doseq [watcher# watchers#]
+                           (watcher#)))))]
+          [:before-build (build-notifier #'proto/before-build-hook)]
+          [:before-publish (build-notifier #'proto/before-publish-hook)])))
 
 (defmethod parse-source-form
   'emit
