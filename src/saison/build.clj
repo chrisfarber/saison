@@ -4,7 +4,8 @@
             [saison.site :as sn]
             [saison.util :as util]
             [saison.path :as path]
-            [saison.content :as content]))
+            [saison.content :as content]
+            [saison.proto :as proto]))
 
 (defn write-file
   "Write data to an ouput file.
@@ -23,26 +24,30 @@
 (defn write-path
   "Compile and write the path to the specified output.
 
-  The path is compiled with `compile-path`. Any intermediate directories
-  will be automatically created."
+  Any intermediate directories will be automatically created."
 
-  [site paths path dest-file]
+  [path paths env dest-file]
 
-  (let [data (path/content site paths path)]
+  (let [data (path/content path paths env)]
     (write-file dest-file data)))
 
 (defn build-site
-  ([site] (build-site site false))
+  ([site] (build-site site nil))
   
-  ([site verbose?]
+  ([site {:keys [verbose? publish?]
+          :or {verbose? false
+               publish? false}}]
    (let [dest-path (:output-to site)
-         dest-file (io/file dest-path)
-         all-paths (sn/discover-paths site)]
-     (doseq [p all-paths]
-       (let [output-path (str "." (path/pathname p))
-             output-file (io/file dest-file output-path)]
-         (if verbose? (println "Writing file:" (-> output-file
-                                                   .getCanonicalFile
-                                                   .getPath)))
-         (write-path site all-paths p output-file))))))
-
+         {:keys [env source]} site]
+     (proto/before-build-hook source env)
+     (when publish?
+       (proto/before-publish-hook source env))
+     (let [dest-file (io/file dest-path)
+           all-paths (sn/discover-paths site)]
+       (doseq [p (proto/scan source)]
+         (let [output-path (str "." (path/pathname p))
+               output-file (io/file dest-file output-path)]
+           (if verbose? (println "Writing file:" (-> output-file
+                                                     .getCanonicalFile
+                                                     .getPath)))
+           (write-path p all-paths env output-file)))))))

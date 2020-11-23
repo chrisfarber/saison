@@ -50,7 +50,11 @@
           watcher (hawk/watch! [{:paths [file-root]
                                  :handler notifier}])]
       (fn []
-        (hawk/stop! watcher)))))
+        (hawk/stop! watcher))))
+
+  (before-build-hook [_ _])
+
+  (before-publish-hook [_ _]))
 
 (defn files
   "create a source from files on the filesystem"

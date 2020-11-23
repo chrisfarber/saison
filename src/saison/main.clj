@@ -18,7 +18,7 @@
         site (if output-to
                (assoc site :output-to output-to)
                site)]
-    (build/build-site site true)))
+    (build/build-site site {:verbose? true})))
 
 (defn preview [{:keys [site port]}]
   (let [site (resolve-site site)]

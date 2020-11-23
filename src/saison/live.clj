@@ -30,19 +30,20 @@ waitForReload();
 
   [site]
   (fn [req]
-    (let [path (:uri req)
+    (let [env (:env site)
+          path (:uri req)
           paths (sn/discover-paths site)
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
         (let [pathname (path/pathname match)
-              metadata (path/metadata match paths {}) ;; TODO - env
+              metadata (path/metadata match paths env)
               mime (or (:mime-type metadata)
                        "text/plain")]
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
-           :body (content/input-stream (path/content match paths {})) ;; TODO - env
+           :body (content/input-stream (path/content match paths env))
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404
@@ -69,10 +70,11 @@ waitForReload();
   (let [reloadable-site (update site :source (inject-script reload-script))
         site-source (:source reloadable-site)
         changes (atom 0)
+        env (:env site)
         handler (site-handler reloadable-site)]
-    (proto/before-build-hook site-source {})
+    (proto/before-build-hook site-source env)
     (proto/watch site-source (fn []
-                               (proto/before-build-hook site-source {})
+                               (proto/before-build-hook site-source env)
                                (swap! changes inc)))
     (fn [req respond raise]
       (let [path (:uri req)]
@@ -86,7 +88,7 @@ waitForReload();
   A map of jetty parameters may optionally be supplied. By default, the server
   will run on port 1931, the year Orval was founded.
 
-  Returns the jetty instance."
+  Returns the jetty instance, which you can later (.stop on)"
 
   ([site] (live-preview site {}))
   ([site jetty-opts]
@@ -96,11 +98,3 @@ waitForReload();
                            jetty-opts)
          handler (reloading-site-handler site)]
      (run-jetty handler jetty-opts))))
-
-(comment
-  ;; to start
-  (def testing-site
-    (live-preview ...site-config...))
-
-  ;; to stop
-  (.stop testing-site))
