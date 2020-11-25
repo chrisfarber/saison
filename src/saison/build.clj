@@ -43,8 +43,8 @@
      (when publish?
        (proto/before-publish-hook source env))
      (let [dest-file (io/file dest-path)
-           all-paths (sn/discover-paths site)]
-       (doseq [p (proto/scan source)]
+           all-paths (proto/scan (:source site))]
+       (doseq [p all-paths]
          (let [output-path (str "." (path/pathname p))
                output-file (io/file dest-file output-path)]
            (if verbose? (println "Writing file:" (-> output-file

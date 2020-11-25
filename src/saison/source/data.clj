@@ -2,15 +2,20 @@
   (:require [saison.proto :as proto :refer [scan Path Source]]
             [saison.source :as source]))
 
+(defn- resolve [thing]
+  (if (fn? thing)
+    (thing)
+    thing))
+
 (defrecord DataPath
     [pathname metadata content]
   Path
   (pathname [this]
-    pathname)
+    (resolve pathname))
   (metadata [this]
-    metadata)
+    (resolve metadata))
   (content [this]
-    content))
+    (resolve content)))
 
 (defn path
   "create a literal path. should receive a map containing the keys

@@ -1,6 +1,8 @@
 (ns saison.util
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [tick.alpha.api :as t])
+  (:import java.net.URL))
 
 (defn list-files
   "Return a seq of files in a directory.
@@ -49,3 +51,13 @@
   (str/replace url-path #"\.[^./\\]+$"
                (str "." new-ext)))
 
+(defn append-url-component
+  [base addition]
+  (let [base (if (instance? URL base)
+               base
+               (URL. base))
+        base-path (.getPath base)]
+    (str (URL. base (add-path-component base-path addition)))))
+
+(defn rfc3339 [time]
+  (t/format "u-MM-dd'T'HH:mm:ss.SSXXX" time))

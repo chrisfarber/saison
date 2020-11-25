@@ -50,3 +50,8 @@
   (is (= "/thing/thing1.test.html"
          (sut/set-path-extension "/thing/thing1.test.css" "html"))))
 
+(deftest append-url-component
+  (is (= "https://chrisfarber.net/a/b/c.txt"
+         (sut/append-url-component "https://chrisfarber.net/a" "/b/c.txt")))
+  (is (= "https://chrisfarber.net/index.html"
+         (sut/append-url-component (java.net.URL. "https://chrisfarber.net") "index.html"))))

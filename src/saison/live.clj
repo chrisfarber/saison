@@ -32,7 +32,7 @@ waitForReload();
   (fn [req]
     (let [env (:env site)
           path (:uri req)
-          paths (sn/discover-paths site)
+          paths (proto/scan (:source site))
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)

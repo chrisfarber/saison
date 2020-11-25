@@ -10,16 +10,3 @@
 (s/def ::site (s/keys :req-un [::source
                                ::name
                                ::output]))
-
-;; 
-;; ==================================================
-
-(defn discover-paths
-  "Given the definition of a site, discover all paths."
-  [site]
-  (proto/scan (:source site)))
-
-(s/fdef discover-paths
-  :args (s/cat :site ::site)
-  :ret (s/* :saison.path/path))
-
