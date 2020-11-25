@@ -35,6 +35,10 @@
   [content]
   content)
 
+(defn select [content selector]
+  (as-html
+   (html/select (html content) selector)))
+
 (defmacro edits
   [& rules]
   `(fn [node-or-nodes#]

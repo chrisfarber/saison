@@ -1,9 +1,10 @@
 (ns saison.blog
   (:require [clojure.data.xml :as xml]
-            [saison.path :as path :refer [deftransform]]
+            [saison.content :as content]
+            [saison.content.html :as htmlc]
+            [saison.path :as path]
             [saison.source :as source]
             [saison.source.data :as data]
-            [saison.content :as content]
             [saison.util :as util]
             [tick.alpha.api :as t]))
 
@@ -24,7 +25,13 @@
                                   (:published-at meta)]))
                              paths))))
 
-(defn element-for-item [path public-url]
+(defn get-content [path selector?]
+  (let [content (path/content path)]
+    (if selector?
+      (htmlc/select content selector?)
+      content)))
+
+(defn element-for-item [path public-url content-selector]
   (let [metadata (path/metadata path)
         {:keys [title
                 created-at
@@ -39,20 +46,21 @@
      [:updated nil (util/rfc3339 updated-at)]
      (when published-at
        [:published nil (util/rfc3339 published-at)])
-     [:content {:type "html"} (content/string (path/content path))]]))
+     [:content {:type "html"} (content/string (get-content path content-selector))]]))
 
 (defn compile-atom-feed [opts env entries]
   (let [{:keys [feed-id
                 feed-path
                 feed-title
                 feed-icon
-                feed-items]
+                feed-items
+                content-selector]
          :or {feed-items 10}} opts
         {:keys [public-url
                 author]} env
         feed-url (util/append-url-component public-url feed-path)
         entries-to-include (take feed-items entries)
-        items (map #(element-for-item % public-url) entries-to-include)
+        items (map #(element-for-item % public-url content-selector) entries-to-include)
         update-date (most-recent-date entries-to-include)]
     (xml/sexp-as-element
      [:feed {:xmlns "http://www.w3.org/2005/Atom"}
@@ -97,6 +105,7 @@
   - :feed-title, the <title> of the atom feed
   - :feed-icon, a path to the icon to use for the feed
   - :feed-items, the number of items to include. default 10.
+  - :content-selector, an enlive selector that will be used to extract the content
 
   additionally, the site's env has some important keys that will affect the feed:
   - :public-url, all urls in the feed will be subpaths of this
