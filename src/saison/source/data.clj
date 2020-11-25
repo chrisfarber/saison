@@ -2,7 +2,7 @@
   (:require [saison.proto :as proto :refer [scan Path Source]]
             [saison.source :as source]))
 
-(defn- resolve [thing]
+(defn- unwrap [thing]
   (if (fn? thing)
     (thing)
     thing))
@@ -11,11 +11,11 @@
     [pathname metadata content]
   Path
   (pathname [this]
-    (resolve pathname))
+    (unwrap pathname))
   (metadata [this]
-    (resolve metadata))
+    (unwrap metadata))
   (content [this]
-    (resolve content)))
+    (unwrap content)))
 
 (defn path
   "create a literal path. should receive a map containing the keys
