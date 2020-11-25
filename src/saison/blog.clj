@@ -2,13 +2,14 @@
   (:require [clojure.data.xml :as xml]
             [saison.content :as content]
             [saison.content.html :as htmlc]
+            [saison.content.xml]
             [saison.path :as path]
             [saison.source :as source]
             [saison.source.data :as data]
             [saison.util :as util]
             [tick.alpha.api :as t]))
 
-(defn blog? [{:keys [feed-id]}]
+(defn feed? [{:keys [feed-id]}]
   (fn [path]
     (= feed-id (:feed-id (path/metadata path)))))
 
@@ -89,7 +90,7 @@
                 :metadata {:mime-type "application/xml"
                            :short-name (str "feed-" feed-id)}
                 :content (fn []
-                           (let [entries (sorted-blog-entries path/*paths* (blog? opts))]
+                           (let [entries (sorted-blog-entries path/*paths* (feed? opts))]
                              (compile-atom-feed opts path/*env* entries)))})))
 
 (defn add-feed [paths opts]
