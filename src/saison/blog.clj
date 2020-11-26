@@ -9,11 +9,11 @@
             [saison.util :as util]
             [tick.alpha.api :as t]))
 
-(defn feed? [{:keys [feed-id]}]
+(defn- feed? [{:keys [feed-id]}]
   (fn [path]
     (= feed-id (:feed-id (path/metadata path)))))
 
-(defn sorted-blog-entries [paths pred]
+(defn- sorted-blog-entries [paths pred]
   (let [matching (filter pred paths)]
     (sort-by #(:created-at (path/metadata %))
              (comp - compare)
@@ -32,7 +32,15 @@
       (htmlc/select content selector?)
       content)))
 
-(defn element-for-item [path public-url content-selector]
+(defn paths-in-feed
+  "Find current paths that belong in the feed, and sort them
+  by creation date (descending).
+
+  Relies on `path/*paths*` being bound."
+  [feed-id]
+  (sorted-blog-entries path/*paths* (feed? {:feed-id feed-id})))
+
+(defn- element-for-item [path public-url content-selector]
   (let [metadata (path/metadata path)
         {:keys [title
                 created-at
@@ -49,7 +57,7 @@
        [:published nil (util/rfc3339 published-at)])
      [:content {:type "html"} (content/string (get-content path content-selector))]]))
 
-(defn compile-atom-feed [opts env entries]
+(defn- compile-atom-feed [opts env entries]
   (let [{:keys [feed-id
                 feed-path
                 feed-title
@@ -83,7 +91,7 @@
       [:link {:rel "alternate" :href public-url}]
       items])))
 
-(defn build-feed [opts]
+(defn- build-feed [opts]
   (let [{:keys [feed-path
                 feed-id]} opts]
     (data/path {:pathname feed-path
@@ -93,10 +101,10 @@
                            (let [entries (sorted-blog-entries path/*paths* (feed? opts))]
                              (compile-atom-feed opts path/*env* entries)))})))
 
-(defn add-feed [paths opts]
+(defn- add-feed [paths opts]
   (conj paths (build-feed opts)))
 
-(defn blog
+(defn feed
   "create a blog using the supplied options.
 
   opts can contain:
