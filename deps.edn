@@ -6,15 +6,12 @@
 
   ring/ring {:mvn/version "1.8.2"}
 
-  ;; integrant {:mvn/version "0.8.0"}
-  ;; integrant/repl {:mvn/version "0.3.1"}
-
   markdown-clj/markdown-clj {:mvn/version "1.10.5"}
 
   org.clojure/data.xml {:mvn/version "0.0.8"}
 
   enlive/enlive {:mvn/version "1.1.6"}
-  ;; org.clojure/tools.cli {:mvn/version "1.0.194"}
+
   cli-matic/cli-matic {:mvn/version "0.4.3"}
   hawk/hawk {:mvn/version "0.2.11"}
   tick/tick {:mvn/version "0.4.27-alpha"}}
