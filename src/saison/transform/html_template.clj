@@ -12,7 +12,8 @@
   (let [metadata (path/metadata path)
         title (:title metadata)]
     (edits
-     [:head :title] (html/content title))))
+     [:head :title] (html/content title)
+     [:h1#title] (html/content title))))
 
 (defn apply-html-metadata
   [path]
