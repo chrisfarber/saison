@@ -27,7 +27,10 @@
               parsed-meta)))
 
   (content [content]
-    (md-to-html-string (content/string content) :parse-meta? true)))
+    (md-to-html-string (content/string content)
+                       :parse-meta? true
+                       :footnotes? true
+                       :reference-links? true)))
 
 (defn is-markdown?
   [path]
