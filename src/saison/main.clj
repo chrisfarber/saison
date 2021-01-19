@@ -13,12 +13,13 @@
       (throw (ex-info "Could not find site definition" {:site ns-str
                                                         :underlying-error e})))))
 
-(defn build [{:keys [site output-to]}]
+(defn build [{:keys [site output-to publish]}]
   (let [site (resolve-site site)
         site (if output-to
                (assoc site :output-to output-to)
                site)]
-    (build/build-site site {:verbose? true})))
+    (build/build-site site {:verbose? true
+                            :publish? publish})))
 
 (defn preview [{:keys [site port]}]
   (let [site (resolve-site site)]
@@ -38,7 +39,11 @@
                   :description "Generate the site and write it out"
                   :opts [{:option "output-to"
                           :short "o"
-                          :type :string}]
+                          :type :string}
+                         {:option "publish"
+                          :short "p"
+                          :type :with-flag
+                          :default false}]
                   :runs build}
                  {:command "preview"
                   :description "Start live-previewing the site"
