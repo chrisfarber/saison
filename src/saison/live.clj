@@ -5,7 +5,6 @@
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [saison.path :as path]
             [saison.proto :as proto]
-            [saison.site :as sn]
             [saison.util :as util]
             [saison.content :as content]
             [saison.transform.inject-script :refer [inject-script]]))

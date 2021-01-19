@@ -1,7 +1,6 @@
 (ns saison.build
   "Tools for statically outputting a site."
   (:require [clojure.java.io :as io]
-            [saison.site :as sn]
             [saison.util :as util]
             [saison.path :as path]
             [saison.content :as content]
