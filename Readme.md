@@ -4,6 +4,8 @@ saison is a toolkit for building static web sites with clojure.
 
 It's alpha-quality, and there may be breaking API changes.
 
+![Clojure CI](https://github.com/chrisfarber/saison/workflows/Clojure%20CI/badge.svg)
+
 ## Why?
 
 I thought it would be interesting to have a static site generator
