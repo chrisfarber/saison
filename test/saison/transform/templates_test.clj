@@ -1,11 +1,11 @@
-(ns saison.transform.html-template-test
+(ns saison.transform.templates-test
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
             [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source.data :as data]
-            [saison.transform.html-template :as sut]))
+            [saison.transform.templates :as sut]))
 
 (deftest new-templating-test
   (let [source (sut/templates

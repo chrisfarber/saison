@@ -1,4 +1,4 @@
-(ns saison.transform.html-template
+(ns saison.transform.templates
   "transform paths by templating them with enlive"
   (:require [hawk.core :as hawk]
             [net.cgrand.enlive-html :as html]
