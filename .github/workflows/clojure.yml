@@ -1,0 +1,28 @@
+name: Clojure CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - name: tools.deps-builder
+    # You may pin to the exact commit or the version.
+    # uses: vouch-opensource/tools.deps-build@aa0b444776fc18fa431567e93c46045dece05fd2
+      uses: vouch-opensource/tools.deps-build@1.0.1
+      with:
+        # The alias or concatenated aliases (eg test, mem:test, ...)
+        alias: test:ci
+        # Any java opts (eg -Xmx512m)
+        # java-opts: # optional
+        # GitHub secret with the SSH private key to access your private repositories
+        # ssh-key: # optional
+        # Working directoy in which to execute the clojure command
+        # working-directory: # optional
