@@ -24,4 +24,5 @@
                       cljfmt/cljfmt {:mvn/version "0.6.4"}
                       com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
                                                  :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
-         :main-opts ["-m" "cognitect.test-runner"]}}}
+         ;; temporarily work around https://github.com/clojure-emacs/cider/issues/2941
+         #_(:main-opts ["-m" "cognitect.test-runner"])}}}
