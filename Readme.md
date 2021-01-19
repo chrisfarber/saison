@@ -120,7 +120,7 @@ Consider the following example:
 (ns example
   (:require [net.cgrand.enlive-html :as html]
             [saison.content.html :as htmlc]
-			[saison.content :as content]))
+            [saison.content :as content]))
 
 (content/string
   (htmlc/edit-html "<p>this is a <span>normal</span> paragraph</p>"
