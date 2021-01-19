@@ -18,7 +18,7 @@ jobs:
       uses: vouch-opensource/tools.deps-build@1.0.1
       with:
         # The alias or concatenated aliases (eg test, mem:test, ...)
-        alias: test
+        alias: test:ci
         # Any java opts (eg -Xmx512m)
         # java-opts: # optional
         # GitHub secret with the SSH private key to access your private repositories
