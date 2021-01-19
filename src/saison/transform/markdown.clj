@@ -12,9 +12,6 @@
   (pathname [pathname]
     (util/set-path-extension pathname "html"))
 
-  ;; unfortunately we end up consuming the content twice;
-  ;; once for metadata and once for content.
-  ;; i have ideas for how to optimize that eventually, if need be
   (metadata [metadata content]
     (let [content-str (content/string content)
           parsed-meta (md-to-meta content-str)]
