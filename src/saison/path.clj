@@ -147,18 +147,6 @@
   [paths path-name]
   (first (filter #(= path-name (pathname %)) paths)))
 
-(defn short-name-expansion-map
-  [paths]
-  (reduce (fn [short-names path]
-            (let [short-name (-> path
-                                 metadata
-                                 :short-name)]
-              (if short-name
-                (assoc short-names short-name (pathname path))
-                short-names)))
-          {}
-          paths))
-
 (defn mime-type
   "retrieve the mime-type from the path's metadata"
   [path-or-meta]

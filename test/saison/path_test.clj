@@ -8,7 +8,7 @@
 
 (deftest common-metadata
   (is (s/valid? :saison.path/metadata
-                {:short-name "fancy"
+                {:alias "fancy"
                  :title "feast"})))
 
 (deftest derive-path-metadata

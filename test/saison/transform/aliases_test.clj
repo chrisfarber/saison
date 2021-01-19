@@ -1,24 +1,24 @@
-(ns saison.transform.short-name-links-test
+(ns saison.transform.aliases-test
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
             [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source.data :as data]
-            [saison.transform.short-name-links :as sut]))
+            [saison.transform.aliases :as sut]))
 
-(deftest short-name-links-test
-  (let [src (sut/short-name-links
+(deftest aliases-test
+  (let [src (sut/resolve
              (data/source
               {:pathname "/index.html"
                :metadata {:mime-type "text/html"}
                :content "<a href=\"abt\">about</a> <a href=\"thr\">there</a>"}
               {:pathname "/about.html"
                :content ""
-               :metadata {:short-name "abt"}}
+               :metadata {:alias "abt"}}
               {:pathname "/thereee"
                :content ""
-               :metadata {:short-name "thr"}}))
+               :metadata {:alias "thr"}}))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         content (-> path

@@ -96,7 +96,7 @@
                 feed-id]} opts]
     (data/path {:pathname feed-path
                 :metadata {:mime-type "application/xml"
-                           :short-name (str "feed-" feed-id)}
+                           :alias (str "feed-" feed-id)}
                 :content (fn []
                            (let [entries (sorted-blog-entries path/*paths* (feed? opts))]
                              (compile-atom-feed opts path/*env* entries)))})))
