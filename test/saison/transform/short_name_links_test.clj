@@ -11,6 +11,7 @@
   (let [src (sut/short-name-links
              (data/source
               {:pathname "/index.html"
+               :metadata {:mime-type "text/html"}
                :content "<a href=\"abt\">about</a> <a href=\"thr\">there</a>"}
               {:pathname "/about.html"
                :content ""
