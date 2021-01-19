@@ -16,8 +16,8 @@ For example, this allows you to do some interesting things:
   contains at least one `<pre><code>...` block
 * Programatically rewrite all your HTML headings on all your pages so
   that they have
-  [screen-reader-friendly](https://amberwilson.co.uk/blog/are-your-anchor-links-accessible/)
-  anchor tags.
+  [screen reader friendly](https://amberwilson.co.uk/blog/are-your-anchor-links-accessible/)
+  anchor tags
 * Statically render pseudo-components inside of pages
 
 Having a simple hobby project to distract me from the pandemic and
@@ -65,18 +65,18 @@ programatically represent the data during transformation may vary. It
 could be a parsed AST, a simple string, a pointer to a file on disk,
 or even a remote URL whose data should be fetched.
 
-For this reason, Saison has a polymorphic system for handling
+For this reason, saison has a polymorphic system for handling
 content.
 
 This system is defined in the `saison.content` namespace, but is
 pretty simple. Essentially, any content that can be represented in
-Saison must have, at minimum, implementations for the two following
+saison must have, at minimum, implementations for the two following
 multimethods that are dispatched on `type`:
 
 * `content/string`
 * `content/input-stream`
 
-Beyond this, Saison also has a `saison.content.html` namespace for
+Beyond this, saison also has a `saison.content.html` namespace for
 manipulating HTML data using enlive's AST.
 
 Before using any content from a path, or during a transformation, you
@@ -96,8 +96,8 @@ then this call will behave as the `identity` function.
 
 #### HTML Manipulation
 
-Saison adopts [enlive](https://github.com/cgrand/enlive)'s structure
-for representing HTML, with one critical detail:
+Although saison uses enlive's data structures for representing HTML,
+there's one critical detail:
 
 Given that enlive represents HTML with regular Clojure data, we must
 tag the content with metadata so that it can be dispatched on
@@ -112,20 +112,19 @@ Otherwise, you're encouraged to use enlive directly.
 Finally, this namespace has some tools for applying transformations:
 the `edit-html` macro and its related functions.
 
-Here's an example, in which `html` is an alias for enlive, `htmlc` is
-an alias for `saison.content.html`, and `content` is an alias for
-`saison.content`:
+Consider the following example:
 
 ```clj
+(ns example
+  (:require [net.cgrand.enlive-html :as html]
+            [saison.content.html :as htmlc]
+			[saison.content :as content]))
+
 (content/string
   (htmlc/edit-html "<p>this is a <span>normal</span> paragraph</p>"
     [:span] (html/content "special")))
-```
-
-This will return:
-
-```clj
-"<p>this is a <span>special</span> paragraph</p>"
+	
+;; => "<p>this is a <span>special</span> paragraph</p>"
 ```
 
 ### Paths
@@ -293,7 +292,7 @@ generate absolute URLs.
 #### Example site
 
 ```clj
-(ns docs
+(ns example.site
   (:require [saison.source.file :refer [files]]
             [saison.transform.markdown :refer [markdown]]
             [saison.transform.edn-metadata :refer [file-metadata]]
@@ -304,32 +303,18 @@ generate absolute URLs.
 
 (def site
   {:output-to "dist"
-   :env {:public-url "https://my-project.github.com"}
-   :source (-> (files {:root "docs"
-                       :metadata {:template "doc"}})
+   :env {:public-url "https://my-project.github.io"}
+   :source (-> (files {:root "pages"
+                       :metadata {:template "page"}})
                file-metadata
                markdown
                (templates
-                {:file "templates/doc.html"
-                 :name "doc"
+                {:file "templates/page.html"
+                 :name "page"
                  :edits [templ/set-title
                          templ/apply-html-metadata]})
                short-name-links)})
-```
 
-#### Reloading the site
-
-During preview, saison will live-reload your site in the browser
-whenever underlying filesystem content changes. This isn't true out of
-the box for code reloading.
-
-To reload the site while I'm working on the site definition or other
-code that powers it, I use Cider's code evaluation and
-[refreshing](https://docs.cider.mx/cider/0.26/usage/misc_features.html#reloading-code).
-
-To facilitate this, I'll add this to the clojure ns that has the site definition:
-
-```clj
 (defonce live-preview-server (atom nil))
 
 (defn stop! []
@@ -346,6 +331,21 @@ To facilitate this, I'll add this to the clojure ns that has the site definition
 (comment
   (start!)
   )
+```
+
+#### Reloading the site
+
+During preview, saison will live-reload your site in the browser
+whenever underlying filesystem content changes. This isn't true out of
+the box for code reloading.
+
+To reload the site while I'm working on the site definition or other
+code that powers it, I use Cider's code evaluation and
+[refreshing](https://docs.cider.mx/cider/0.26/usage/misc_features.html#reloading-code).
+
+To facilitate this, I'll add this to the clojure ns that has the site definition:
+
+```clj
 ```
 
 and to .dir-locals.el:
