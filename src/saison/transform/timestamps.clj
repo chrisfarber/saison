@@ -1,11 +1,11 @@
 (ns saison.transform.timestamps
-  (:require [saison.source :as source]
-            [clojure.edn :as edn]
+  (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [time-literals.read-write]
-            [saison.proto :as proto]
             [saison.path :as path :refer [deftransform]]
-            [tick.alpha.api :as t]))
+            [saison.proto :as proto]
+            [saison.source :as source]
+            [tick.alpha.api :as t]
+            time-literals.read-write))
 
 (defn read-edn [f not-found]
   (try
@@ -29,7 +29,7 @@
   [db-path data]
   (write-edn (io/file db-path) data))
 
-(defn add-missing-timestamp [db timestamp pathname key]
+(defn save-missing-timestamp [db timestamp pathname key]
   (let [existing-ts (get-in @db [pathname key])]
     (if (some? existing-ts)
       existing-ts
@@ -37,17 +37,18 @@
         (swap! db update-in [pathname] assoc key timestamp)
         timestamp))))
 
-(deftransform add-timestamps
+(deftransform add-timestamps-to-metadata
   [ts-db]
   (metadata [pathname metadata]
     (assoc metadata
-           :created-at (get-in @ts-db [pathname :created-at]))))
+           :created-at (get-in @ts-db [pathname :created-at])
+           :published-at (get-in @ts-db [pathname :published-at]))))
 
-(defn add-missing-timestamps
+(defn save-missing-timestamps
   [ts-db paths key]
   (let [ts (t/zoned-date-time)]
     (doseq [path paths]
-      (add-missing-timestamp ts-db ts (path/pathname path) :created-at))))
+      (save-missing-timestamp ts-db ts (path/pathname path) key))))
 
 (defn timestamp-database
   [source timestamp-db-path]
@@ -55,10 +56,10 @@
   (let [db (atom (read-db timestamp-db-path))]
     (source/construct
       (input source)
-      (map (add-timestamps db))
+      (map (add-timestamps-to-metadata db))
       (before-build [env]
-        (add-missing-timestamps db (proto/scan source) :created-at)
+        (save-missing-timestamps db (proto/scan source) :created-at)
         (write-db timestamp-db-path @db))
       (before-publish [env]
-        (add-missing-timestamps db (proto/scan source) :published-at)
+        (save-missing-timestamps db (proto/scan source) :published-at)
         (write-db timestamp-db-path @db)))))
