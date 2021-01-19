@@ -1,13 +1,13 @@
-(ns saison.transform.edit-page-test
-  (:require [saison.transform.edit-page :as sut]
+(ns saison.transform.edit-test
+  (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
-            [saison.source.data :as data]
+            [net.cgrand.enlive-html :as html]
+            [saison.content :as content]
             [saison.content.html :as htmlc]
             [saison.path :as path]
             [saison.proto :as proto]
-            [net.cgrand.enlive-html :as html]
-            [clojure.string :as str]
-            [saison.content :as content]))
+            [saison.source.data :as data]
+            [saison.transform.edit :as sut]))
 
 (deftest editing-pages
   (let [source (data/source
@@ -17,7 +17,7 @@
                 {:pathname "/thing/2.html"
                  :metadata {:title "thing 2"}
                  :content "<div><h1></h1><p>this is a page</p></div>"})
-        edited (sut/edit-page source "/thing/2.html"
+        edited (sut/edit-path source "/thing/2.html"
                  [path]
                  (let [titles (map #(-> % path/metadata :title) path/*paths*)]
                    (htmlc/edits

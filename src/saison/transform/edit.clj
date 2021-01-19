@@ -1,10 +1,10 @@
-(ns saison.transform.edit-page
+(ns saison.transform.edit
   (:require [saison.source :as source]
             [saison.path :as path]
             [saison.content.html :as htmlc]
             [net.cgrand.enlive-html :as html]))
 
-(path/deftransform edit-path
+(path/deftransform apply-edits
     [build-edit-ops]
   (content [path content]
     (htmlc/edit-html* content (build-edit-ops path))))
@@ -14,19 +14,19 @@
                                                  (path/pathname path)))
         (fn? pathname-or-pred) pathname-or-pred))
 
-(defn edit-page*
+(defn edit-path*
   {:style/indent [2 :form]}
   [source pred build-edit-ops]
   (source/construct
     (input source)
-    (map-where pred (edit-path build-edit-ops))))
+    (map-where pred (apply-edits build-edit-ops))))
 
-(defmacro edit-page
+(defmacro edit-path
   {:style/indent [2 :defn]}
   [source path-name-or-pred path-binding & forms]
   {:pre [(vector? path-binding)
          (= 1 (count path-binding))]}
-  `(edit-page*
+  `(edit-path*
        ~source
        (pred-for ~path-name-or-pred)
      (fn ~path-binding
