@@ -1,7 +1,6 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
-  (:require [clojure.spec.alpha :as s]
-            [saison.proto :as proto]))
+  (:require [saison.proto :as proto]))
 
 (def ^:dynamic *paths*
   "bound to a seq of other paths that have been discovered within the site"
@@ -60,20 +59,6 @@
     (if map-content
       (map-content original)
       (proto/content original))))
-
-(s/def ::short-name string?)
-(s/def ::mime-type string?)
-
-(s/def ::title string?)
-(s/def ::date-created inst?)
-(s/def ::date-updated inst?)
-
-(s/def ::metadata
-  (s/keys :opt-un [::short-name
-                   ::title
-                   ::mime-type
-                   ::date-created
-                   ::date-updated]))
 
 (defn derive-path
   [path-inst {:keys [pathname metadata content]}]
