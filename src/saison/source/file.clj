@@ -1,20 +1,8 @@
 (ns saison.source.file
   (:require [hawk.core :as hawk]
             [saison.proto :as proto]
-            [saison.util :as util]))
-
-(def mime-types
-  {"htm" "text/html"
-   "html" "text/html"
-   "css" "text/css"
-   "edn" "application/edn"
-   "ico" "image/x-icon"
-   "js" "text/javascript"
-   "json" "application/json"
-   "gz" "application/gzip"
-   "png" "image/png"
-   "jpg" "image/jpeg"
-   "jpeg" "image/jpeg"})
+            [saison.util :as util]
+            [pantomime.mime :refer [mime-type-of]]))
 
 (defrecord FilePath
     [file base-path path metadata]
@@ -23,7 +11,7 @@
   (metadata [this]
     (let [path (proto/pathname this)
           extension (util/path-extension path)
-          known-mime (get mime-types extension)]
+          known-mime (mime-type-of file)]
       (merge (when known-mime
                {:mime-type known-mime})
              metadata)))

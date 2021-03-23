@@ -14,7 +14,9 @@
 
   cli-matic/cli-matic {:mvn/version "0.4.3"}
   hawk/hawk {:mvn/version "0.2.11"}
-  tick/tick {:mvn/version "0.4.27-alpha"}}
+  tick/tick {:mvn/version "0.4.27-alpha"}
+
+  com.novemberain/pantomime {:mvn/version "2.11.0"}}
 
  :aliases
  {:outdated {:extra-deps {olical/depot {:mvn/version "2.0.1"}}
