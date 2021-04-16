@@ -3,6 +3,7 @@
 
   Primarily, this provides some ring middleware and server."
   (:require [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.util :as util]
@@ -70,7 +71,7 @@ waitForReload();
         site-source (:source reloadable-site)
         changes (atom 0)
         env (:env site)
-        handler (site-handler reloadable-site)]
+        handler (wrap-stacktrace (site-handler reloadable-site))]
     (proto/before-build-hook site-source env)
     (proto/watch site-source (fn []
                                (proto/before-build-hook site-source env)
