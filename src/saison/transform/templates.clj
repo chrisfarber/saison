@@ -82,6 +82,7 @@
                         (let [m (path/metadata path)
                               template (:template m)]
                           (and template
+                               (path/is-html? path)
                                (get templates template))))]
     (source/construct
       (input source)
@@ -90,4 +91,3 @@
         (let [template-watcher (hawk/watch! [{:paths files-to-watch
                                               :handler (fn [_ _] (cb))}])]
           #(hawk/stop! template-watcher))))))
-

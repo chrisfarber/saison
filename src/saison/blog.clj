@@ -11,7 +11,9 @@
 
 (defn- feed? [{:keys [feed-id]}]
   (fn [path]
-    (= feed-id (:feed-id (path/metadata path)))))
+    (and
+     (= feed-id (:feed-id (path/metadata path)))
+     (path/is-html? path))))
 
 (defn- sorted-blog-entries [paths pred]
   (let [matching (filter pred paths)]
