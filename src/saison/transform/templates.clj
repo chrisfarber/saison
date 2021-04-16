@@ -82,7 +82,7 @@
                         (let [m (path/metadata path)
                               template (:template m)]
                           (and template
-                               (path/is-html? path)
+                               (path/html? path)
                                (get templates template))))]
     (source/construct
       (input source)

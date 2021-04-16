@@ -125,7 +125,7 @@ Consider the following example:
 (content/string
   (htmlc/edit-html "<p>this is a <span>normal</span> paragraph</p>"
     [:span] (html/content "special")))
-	
+
 ;; => "<p>this is a <span>special</span> paragraph</p>"
 ```
 
@@ -165,7 +165,7 @@ Let's consider an example:
 ```clj
 (deftransform change-title
     [new-title]
-	
+
   (metadata [metadata]
     (assoc metadata :title new-title)))
 ```
@@ -264,7 +264,7 @@ or, to filter out all paths that aren't html:
 ```clojure
 (source/construct
   (input other-source)
-  (filter [path] (path/is-html? path)))
+  (filter [path] (path/html? path)))
 ```
 
 Most often, you'll want to apply a transformation:
@@ -272,7 +272,7 @@ Most often, you'll want to apply a transformation:
 ```clj
 (source/construct
   (input other-source)
-  (map-where path/is-html? (my-transformation 42)))
+  (map-where path/html? (my-transformation 42)))
 ```
 
 ### Site Definition

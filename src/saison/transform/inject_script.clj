@@ -22,4 +22,4 @@
   ([source script-text]
    (source/construct
      (input source)
-     (map-where path/is-html? (path-inject-script script-text)))))
+     (map-where path/html? (path-inject-script script-text)))))

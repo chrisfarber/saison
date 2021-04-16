@@ -32,4 +32,4 @@
 (defsource resolve
     [source]
   (input source)
-  (map-where path/is-html? aliases))
+  (map-where path/html? aliases))

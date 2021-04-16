@@ -139,7 +139,7 @@
                 (metadata path-or-meta)
                 path-or-meta)))
 
-(defn is-html?
+(defn html?
   "Return true if the path's metadata indicates it's HTML"
   [path-or-meta]
   (= "text/html"

@@ -29,11 +29,11 @@
                        :footnotes? true
                        :reference-links? true)))
 
-(defn is-markdown?
+(defn markdown?
   [path]
   (#{"md" "markdown"} (util/path-extension (path/pathname path))))
 
 (defsource markdown
     [source]
   (input source)
-  (map-where is-markdown? parse-markdown))
+  (map-where markdown? parse-markdown))
