@@ -1,7 +1,8 @@
 /.calva/output-window
-.cljs_node_repl
-.cpcache
-.nrepl-port
+/.cljs_node_repl
+/.cpcache
+/.lsp
+/.nrepl-port
 .DS_Store
 /dist
 /dist1
