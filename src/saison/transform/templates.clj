@@ -3,9 +3,8 @@
   (:require [hawk.core :as hawk]
             [net.cgrand.enlive-html :as html]
             [saison.content.html :as htmlc :refer [edit-html* edits]]
-            [saison.path :as path :refer [deftransform]]
-            [saison.proto :as proto]
-            [saison.source :as source]))
+            [saison.source :as source]
+            [saison.path :as path]))
 
 (defn set-title
   [path]
@@ -33,31 +32,30 @@
       (edits
        [content-selector] (html/substitute html-content)))))
 
-(deftransform apply-template
-    [templates]
-
-  (content [path metadata content]
-    (let [template (get templates (:template metadata))
-          {:keys [file content-selector]} template
-          apply-template ((insert-content content-selector) path)
-          edit-builders (:edits template)
-          apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
-                            (fn? edit-builders) (edit-builders path)
-                            :else identity)]
-      (edit-html*
-       (slurp file)
-       apply-template
-       apply-edits))))
+(defn apply-template [templates]
+  (path/transformer
+   {:content (fn [path]
+               (let [metadata (path/metadata path)
+                     template (get templates (:template metadata))
+                     {:keys [file content-selector]} template
+                     apply-template ((insert-content content-selector) path)
+                     edit-builders (:edits template)
+                     apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
+                                       (fn? edit-builders) (edit-builders path)
+                                       :else identity)]
+                 (edit-html*
+                  (slurp file)
+                  apply-template
+                  apply-edits)))}))
 
 (defn templates
-  "Transform a source by applying templates to paths.
+  "A source step that applies templates to paths.
 
   A path must opt-in to having a template applied to it. This is done by
   setting the `:template` metadata to a string that identifies the desired
   template.
 
-  When constructing this source, any number of template definitions can be
-  supplied after the origin source. Each template definition should be a
+  Each template definition should be a
   map with the following keys:
 
   `:file` - something that can be `slurp`ed to get an html string
@@ -66,7 +64,7 @@
                         content. optional.
   `:edits` - a function, or list of functions, that accepts a path and returns
              transformations defined via the `edits` macro. optional."
-  [source & template-defs]
+  [& template-defs]
   (let [templates (reduce (fn [ts def]
                             (let [{:keys [file name edits content-selector]
                                    :or {content-selector :div#content}} def
@@ -84,10 +82,10 @@
                           (and template
                                (path/html? path)
                                (get templates template))))]
-    (source/construct
-      (input source)
-      (map-where find-template (apply-template templates))
-      (watch [cb]
+    (source/steps
+     (source/map-paths-where find-template (apply-template templates))
+     (source/add-watcher
+      (fn [cb]
         (let [template-watcher (hawk/watch! [{:paths files-to-watch
                                               :handler (fn [_ _] (cb))}])]
-          #(hawk/stop! template-watcher))))))
+          #(hawk/stop! template-watcher)))))))

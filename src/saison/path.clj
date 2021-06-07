@@ -24,7 +24,7 @@
   ([path]
    (proto/metadata path))
   ([path paths env]
-   (binding [*paths* path
+   (binding [*paths* paths
              *env* env]
      (proto/metadata path))))
 
@@ -42,20 +42,20 @@
      (proto/content path))))
 
 (defrecord DerivedPath
-    [original map-path map-metadata map-content]
+           [original map-path map-metadata map-content]
 
   proto/Path
-  (pathname [this]
+  (pathname [_]
     (if map-path
       (map-path original)
       (proto/pathname original)))
 
-  (metadata [this]
+  (metadata [_]
     (if map-metadata
       (map-metadata original)
       (proto/metadata original)))
 
-  (content [this]
+  (content [_]
     (if map-content
       (map-content original)
       (proto/content original))))
@@ -68,64 +68,21 @@
     :map-metadata metadata
     :map-content content}))
 
-(defn- value-for-binding
-  [method bind-sym path-sym]
-  (let [lookup-path `(pathname ~path-sym)
-        lookup-metadata `(metadata ~path-sym)
-        lookup-content `(content ~path-sym)
-        lookup {'pathname {'pathname lookup-path}
-                'metadata {'pathname lookup-path
-                           'metadata lookup-metadata
-                           'content lookup-content}
-                'content {'path path-sym
-                          'pathname lookup-path
-                          'metadata lookup-metadata
-                          'content lookup-content}}
-        found (get-in lookup [method bind-sym])]
-    (or
-     found
-     (throw (ex-info "Unknown binding" {:method method
-                                        :binding bind-sym
-                                        :allowed-bindings (keys (get lookup method))})))))
+(defn transformer
+  "Build a path transformer, which is a function that accepts
+   a path and returns a new, modified path.
+   
+   Accepts a map with the keys:
+   :pathname - a function from a path -> string
+   :metadata - a function from a path -> new metadata map
+   :content - a function from a path -> new content
+   
+   All of the keys are optional. Unspecified aspects of a path
+   will be unmodified."
+  [modifiers]
+  (fn [path]
+    (derive-path path modifiers)))
 
-(defn- transform-method-form
-  "convert a transformation form to a key/fn pair suitable for passing `derive-path`"
-  [form]
-  (let [path-sym (gensym "path-")
-        [method bindings & method-body] form
-        bindings (mapcat (fn [dep]
-                           [dep (value-for-binding method dep path-sym)])
-                         bindings)]
-    (when-not (#{'pathname 'metadata 'content} method)
-      (throw (ex-info (str "Unknown method") {:method method
-                                              :form form})))
-    [(keyword method) `(fn [~path-sym]
-                         (let [~@bindings]
-                           ~@method-body))]))
-
-(defmacro deftransform
-  "create a path transformer. defines a function of either:
-    [path, args..] -> path
-  or
-    path -> [args...] -> path
-
-  The first form is a binding vector of arguments.
-
-  Subsequent forms resemble record method definitions, EXCEPT:
-  - the function name must be one of `pathname`, `metadata`, or `content`.
-  - the bindings vector can only contain the same set of symbols
-  - the values of those symbols will be bound to the corresponding computed part of the path"
-  {:style/indent [2 :defn]}
-  [transform-name-sym transform-arg-bindings & mapper-definitions]
-  (let [path 'path
-        transform-seq (map transform-method-form mapper-definitions)
-        transforms (into {} transform-seq)]
-    `(defn ~transform-name-sym
-       ([~@transform-arg-bindings]
-        (fn [~path]
-          (~transform-name-sym ~path ~@transform-arg-bindings)))
-       ([~path ~@transform-arg-bindings]
-        (derive-path ~path ~transforms)))))
 
 (defn find-by-path
   "Given a list of paths, find the first exact match"

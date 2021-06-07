@@ -1,25 +1,27 @@
 (ns saison.transform.inject-script
   (:require [net.cgrand.enlive-html :as html]
             [saison.content.html :refer [edit-html]]
-            [saison.path :as path :refer [deftransform]]
+            [saison.path :as path]
             [saison.source :as source]))
 
-(deftransform path-inject-script
-    [script-text]
+(defn content-script-injector [script-text]
+  (fn [path]
+    (edit-html (path/content path)
+               [:body]
+               (html/append {:tag "script"
+                             :attrs {"type" "module"}
+                             :content script-text}))))
 
-  (content [content]
-    (edit-html content
-      [:body]
-      (html/append {:tag "script"
-                    :attrs {"type" "module"}
-                    :content script-text}))))
+(defn script-injector
+  "A path transformer that will add the supplied script text
+   to the end of the body tag for any path given to it."
+  [script-text]
+  (path/transformer
+   {:content (content-script-injector script-text)}))
 
 (defn inject-script
-  "for html paths, inject a script module at the end of the body"
-  ([script-text]
-   #(inject-script % script-text))
-
-  ([source script-text]
-   (source/construct
-     (input source)
-     (map-where path/html? (path-inject-script script-text)))))
+  "A source step that will inject the supplied script text
+   into any html path."
+  [script-text]
+  (source/map-paths-where path/html?
+                          (script-injector script-text)))

@@ -5,24 +5,22 @@
             [pantomime.mime :refer [mime-type-of]]))
 
 (defrecord FilePath
-    [file base-path path metadata]
+           [file base-path path metadata]
   proto/Path
-  (pathname [this] (util/add-path-component base-path path))
-  (metadata [this]
-    (let [path (proto/pathname this)
-          extension (util/path-extension path)
-          known-mime (mime-type-of file)]
+  (pathname [_] (util/add-path-component base-path path))
+  (metadata [_]
+    (let [known-mime (mime-type-of file)]
       (merge (when known-mime
                {:mime-type known-mime})
              metadata)))
-  (content [this]
+  (content [_]
     file))
 
 (defrecord FileSource
-    [file-root base-path metadata]
+           [file-root base-path metadata]
 
   proto/Source
-  (scan [this]
+  (scan [_]
     (let [files (util/list-files file-root)]
       (map (fn [[name f]]
              (map->FilePath {:file f
@@ -32,7 +30,7 @@
            files)))
 
   (watch
-    [this changed]
+    [_ changed]
     (let [notifier (fn [_ _]
                      (changed))
           watcher (hawk/watch! [{:paths [file-root]

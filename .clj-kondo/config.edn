@@ -1,0 +1,1 @@
+{:hooks {:analyze-call {}} :lint-as {saison.transform.timestamps-test/with-tempfile clojure.core/let}}

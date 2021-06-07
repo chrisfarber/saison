@@ -1,9 +1,8 @@
 (ns saison.build
   "Tools for statically outputting a site."
   (:require [clojure.java.io :as io]
-            [saison.util :as util]
-            [saison.path :as path]
             [saison.content :as content]
+            [saison.path :as path]
             [saison.proto :as proto]))
 
 (defn write-file
@@ -32,7 +31,7 @@
 
 (defn build-site
   ([site] (build-site site nil))
-  
+
   ([site {:keys [verbose? publish?]
           :or {verbose? false
                publish? false}}]
@@ -46,7 +45,7 @@
        (doseq [p all-paths]
          (let [output-path (str "." (path/pathname p))
                output-file (io/file dest-file output-path)]
-           (if verbose? (println "Writing file:" (-> output-file
-                                                     .getCanonicalFile
-                                                     .getPath)))
+           (when verbose? (println "Writing file:" (-> output-file
+                                                       .getCanonicalFile
+                                                       .getPath)))
            (write-path p all-paths env output-file)))))))

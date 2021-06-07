@@ -20,7 +20,9 @@
     (let [input (data/source
                  {:pathname "/hello.txt"
                   :content "hi"})
-          ts (sut/timestamp-database input t)]
+          ts (source/construct
+              input
+              (sut/timestamp-database t))]
       (proto/before-build-hook ts {})
       (let [paths (proto/scan ts)
             path (first paths)
@@ -39,7 +41,9 @@
       (let [input (data/source
                    {:pathname "/hello.txt"
                     :content "hi"})
-            ts (sut/timestamp-database input t)]
+            ts (source/construct
+                input
+                (sut/timestamp-database t))]
         (proto/before-build-hook ts {})
         (let [paths (proto/scan ts)
               path (first paths)

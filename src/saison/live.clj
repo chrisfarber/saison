@@ -4,11 +4,12 @@
   Primarily, this provides some ring middleware and server."
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
+            [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
-            [saison.util :as util]
-            [saison.content :as content]
-            [saison.transform.inject-script :refer [inject-script]]))
+            [saison.source :as source]
+            [saison.transform.inject-script :refer [inject-script]]
+            [saison.util :as util]))
 
 (def ^{:private true}
   reload-script
@@ -67,7 +68,9 @@ waitForReload();
 
 (defn- reloading-site-handler
   [site]
-  (let [reloadable-site (update site :source (inject-script reload-script))
+  (let [reloadable-source (source/construct (:source site)
+                                            (inject-script reload-script))
+        reloadable-site (assoc site :source reloadable-source)
         site-source (:source reloadable-site)
         changes (atom 0)
         env (:env site)

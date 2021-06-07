@@ -2,6 +2,7 @@
   (:require [clojure.test :as t :refer [deftest is]]
             [saison.path :as path]
             [saison.proto :as proto]
+            [saison.source :as source]
             [saison.source.data :as data]
             [saison.transform.edn-metadata :as sut]))
 
@@ -12,12 +13,12 @@
               :metadata {:cool true}}
              {:pathname "/hello/index.html.edn"
               :content (pr-str {:title "Hello"
-                             :mime-type "bogus"})}
+                                :mime-type "bogus"})}
              {:pathname "/hello/index"
               :content ""}
              {:pathname "/index.html"
               :content ""})
-        processed (sut/file-metadata src)
+        processed (source/construct src (sut/file-metadata))
         paths (proto/scan processed)
         subject (path/find-by-path paths "/hello/index.html")
         subject-meta (path/metadata subject)

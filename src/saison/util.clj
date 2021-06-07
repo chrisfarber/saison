@@ -39,12 +39,12 @@
 (defn path-extension
   [url-path]
   ;; stolen from ring:
-  (if-let [ext (second (re-find #"\.([^./\\]+)$" url-path))]
+  (when-let [ext (second (re-find #"\.([^./\\]+)$" url-path))]
     (str/lower-case ext)))
 
 (defn compound-path-extension
   [url-path]
-  (if-let [ext (second (re-find #"\.([^/\\]+)$" url-path))]
+  (when-let [ext (second (re-find #"\.([^/\\]+)$" url-path))]
     (str/lower-case ext)))
 
 (defn set-path-extension [url-path new-ext]

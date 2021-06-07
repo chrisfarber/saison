@@ -1,8 +1,7 @@
 (ns saison.transform.aliases
-  (:refer-clojure :exclude [resolve alias])
   (:require [saison.content.html :refer [edit-html]]
-            [saison.path :as path :refer [deftransform]]
-            [saison.source :as source :refer [defsource]]))
+            [saison.path :as path]
+            [saison.source :as source]))
 
 (defn alias-expansions
   [paths]
@@ -16,20 +15,23 @@
           {}
           paths))
 
-(deftransform aliases
-    []
-  (content [content]
-    (let [url-expansion-map (alias-expansions path/*paths*)]
-      (edit-html content
-        [#{:link :a}]
-        (fn [node]
-          (let [href (get-in node [:attrs :href])
-                resolved-href (get url-expansion-map href)]
-            (if resolved-href
-              (assoc-in node [:attrs :href] resolved-href)
-              node)))))))
+(defn resolve-aliases-in-content [path]
+  (let [content (path/content path)
+        url-expansion-map (alias-expansions path/*paths*)]
+    (edit-html content
+               [#{:link :a}]
+               (fn [node]
+                 (let [href (get-in node [:attrs :href])
+                       resolved-href (get url-expansion-map href)]
+                   (if resolved-href
+                     (assoc-in node [:attrs :href] resolved-href)
+                     node))))))
 
-(defsource resolve
-    [source]
-  (input source)
-  (map-where path/html? aliases))
+(def resolve-aliases-in-path
+  (path/transformer
+   {:content resolve-aliases-in-content}))
+
+(defn resolve-path-aliases
+  "A source step for resolving path aliases in HTML files."
+  []
+  (source/map-paths-where path/html? resolve-aliases-in-path))
