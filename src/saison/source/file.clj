@@ -38,8 +38,9 @@
       (fn []
         (hawk/stop! watcher))))
 
+  (start [_ _])
+  (stop [_ _])
   (before-build-hook [_ _])
-
   (before-publish-hook [_ _]))
 
 (defn files

@@ -1,6 +1,14 @@
 (ns saison.source
   (:require [saison.proto :as proto]))
 
+(def ^:dynamic *previewing*
+  "true when the the site needs to be live-reloadable"
+  false)
+
+(def ^:dynamic *publishing*
+  "true when the site is being published (and should be minified, have timestamps updated, etc)"
+  false)
+
 (defn from
   "A step that consumes the provided `sources`."
   [& sources]
@@ -9,6 +17,8 @@
               (into hooks
                     [[:scan (fn [paths] (into paths (proto/scan src)))]
                      [:watch (fn [cb] (proto/watch src cb))]
+                     [:start (fn [env] (proto/start src env))]
+                     [:stop (fn [env] (proto/stop src env))]
                      [:before-build (fn [env] (proto/before-build-hook src env))]
                      [:before-publish (fn [env] (proto/before-publish-hook src env))]]))
             []
@@ -23,11 +33,29 @@
   [watcher]
   [[:watch watcher]])
 
-(defn before-build [fn]
-  [[:before-build fn]])
+(defn start
+  "A function to be invoked when the source is started. Will receive a single map,
+   containing the keys `:source` and `:env`"
+  [f]
+  [[:start f]])
 
-(defn before-publish [fn]
-  [[:before-publish fn]])
+(defn stop
+  "A function to be invoked when the source is stopped. Will receive a single map,
+   containing the keys `:source` and `:env`"
+  [f]
+  [[:stop f]])
+
+(defn before-build
+  "A function to be invoked before building the source. Will receive a single map,
+   containing the keys `:source` and `:env`"
+  [f]
+  [[:before-build f]])
+
+(defn before-publish
+  "A function to be invoked before publishing the source. Will receive a single map,
+   containing the keys `:source` and `:env`"
+  [f]
+  [[:before-publish f]])
 
 (defn map-paths
   "Invoke `map-fn` on each path that flows through it."
@@ -68,12 +96,28 @@
              []
              step-vecs))
 
-(defn construct [& hook-lists]
-  (let [hooks (apply steps hook-lists)
+(defn when-previewing
+  "Run the provided steps only when the site is constructed for live-reloading."
+  [& step-vecs]
+  (if *previewing*
+    (apply steps step-vecs)
+    []))
+
+(defn when-publishing
+  "Run the provided steps only when the site is constructed for publishing."
+  [& step-vecs]
+  (if *publishing*
+    (apply steps step-vecs)
+    []))
+
+(defn construct [& step-vecs]
+  (let [hooks (apply steps step-vecs)
         grouped-hooks (group-by first hooks)
         get-hooks (fn [n] (map second (-> grouped-hooks n (or []))))
         scanners (get-hooks :scan)
         watchers (get-hooks :watch)
+        start-fns (get-hooks :start)
+        stop-fns (get-hooks :stop)
         before-build-fns (get-hooks :before-build)
         before-publish-fns (get-hooks :before-publish)]
     (reify proto/Source
@@ -88,6 +132,14 @@
           (fn stop-watching []
             (doseq [close-fn close-fns]
               (close-fn)))))
+
+      (start [this env]
+        (notify-hooks start-fns {:source this
+                                 :env env}))
+
+      (stop [this env]
+        (notify-hooks stop-fns {:source this
+                                :env env}))
 
       (before-build-hook [this env]
         (notify-hooks before-build-fns {:source this

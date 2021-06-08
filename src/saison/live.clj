@@ -9,31 +9,20 @@
             [saison.proto :as proto]
             [saison.source :as source]
             [saison.transform.inject-script :refer [inject-script]]
-            [saison.util :as util]))
+            [saison.util :as util]
+            [clojure.java.io :as io]))
 
 (def ^{:private true}
-  reload-script
-  "
-
-function waitForReload() {
-fetch(\"/__reload\").then(r => {
-window.location.reload(true);
-}, err => {
-console.log(\"err?\", err);
-setTimeout(waitForReload, 200);
-})
-}
-waitForReload();
-")
+  reload-script (slurp (io/resource "saison/reloader.js")))
 
 (defn- site-handler
   "Creates a ring handler that renders any discoverable path."
 
-  [site]
+  [site source]
   (fn [req]
     (let [env (:env site)
           path (:uri req)
-          paths (proto/scan (:source site))
+          paths (proto/scan source)
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
@@ -66,19 +55,27 @@ waitForReload();
     (catch Exception e
       (raise e))))
 
+
+(defn- build-reloadable-source
+  "Given a site definition, construct the site with previewing
+   enabled (`source/*previewing*) and automatically inject the
+   reload script into all javascript files."
+  [{:keys [env constructor]}]
+  (binding [source/*previewing* true]
+    (source/construct (constructor env)
+                      (inject-script reload-script))))
+
 (defn- reloading-site-handler
   [site]
-  (let [reloadable-source (source/construct (:source site)
-                                            (inject-script reload-script))
-        reloadable-site (assoc site :source reloadable-source)
-        site-source (:source reloadable-site)
+  (let [source (build-reloadable-source site)
         changes (atom 0)
         env (:env site)
-        handler (wrap-stacktrace (site-handler reloadable-site))]
-    (proto/before-build-hook site-source env)
-    (proto/watch site-source (fn []
-                               (proto/before-build-hook site-source env)
-                               (swap! changes inc)))
+        handler (wrap-stacktrace (site-handler site source))]
+    (proto/start source env)
+    (proto/before-build-hook source env)
+    (proto/watch source (fn []
+                          (proto/before-build-hook source env)
+                          (swap! changes inc)))
     (fn [req respond raise]
       (let [path (:uri req)]
         (if (= path "/__reload")

@@ -7,6 +7,11 @@
     "ask the source to invoke `changed` whenever its `scan` function
     might return different paths")
 
+  (start [this env]
+    "Called after the source is constructed.")
+  (stop [this env]
+    "Called to shut down the source after the site has been bult.")
+
   (before-build-hook [this env]
     "Called before a build is created. Also called when live preview detects new
 changes.")
@@ -30,4 +35,3 @@ changes.")
     These bindings enable the path to dynamically compute content or
     references to other paths. it is probably not good practice for a path
     to generate another path, at the risk of causing an infinite loop."))
-
