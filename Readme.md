@@ -14,13 +14,13 @@ AST, rather than smashing strings together.
 
 For example, this allows you to do some interesting things:
 
-* Automatically include a link tag for `highlight.js` in any path that
+- Automatically include a link tag for `highlight.js` in any path that
   contains at least one `<pre><code>...` block
-* Programatically rewrite all your HTML headings on all your pages so
+- Programatically rewrite all your HTML headings on all your pages so
   that they have
   [screen reader friendly](https://amberwilson.co.uk/blog/are-your-anchor-links-accessible/)
   anchor tags
-* Statically render pseudo-components inside of pages
+- Statically render pseudo-components inside of pages
 
 Having a simple hobby project to distract me from the pandemic and
 politics of 2020 was also a driving motivator.
@@ -55,7 +55,6 @@ for manipulating it are provided by Christophe Grand's excellent
 Before we can get into any of that, however, there are a few primary
 concepts that we must cover.
 
-
 ### Content
 
 The content of a path is simply the data that will be written to file
@@ -75,8 +74,8 @@ pretty simple. Essentially, any content that can be represented in
 saison must have, at minimum, implementations for the two following
 multimethods that are dispatched on `type`:
 
-* `content/string`
-* `content/input-stream`
+- `content/string`
+- `content/input-stream`
 
 Beyond this, saison also has a `saison.content.html` namespace for
 manipulating HTML data using enlive's AST.
@@ -152,91 +151,44 @@ namespace.
 
 The `saison.path` namespace includes some tools for creating
 transformations to paths. These transformations can change anything
-about the path, and are created using the `deftransform` macro.
-
+about the path, and are created using the `transformer` function.
 
 #### Defining Transforms
 
-Saison provides a macro, `deftransform`, for defining path
-transformations. This macro builds a function and `def`s it.
+Saison provides a function, `transformer`, for defining path
+transformations.
 
 Let's consider an example:
 
 ```clj
-(deftransform change-title
-    [new-title]
-
-  (metadata [metadata]
-    (assoc metadata :title new-title)))
+(defn change-title [new-title]
+  (path/transformer
+   {:metadata (fn [original-path]
+                (assoc (path/metadata original-path) :title new-title))}))
 ```
 
-This snippet will define a function, `change-title`, with
-two arities:
-
-* `(change-title a-path)` will return a function that accepts the
-  defined arguments (in this case, `new-title`) and returns a new Path
-  that has its title modified.
-* `(change-title a-path "some new title")` will return a new Path
-  derived from `a-path` with its title set to `"some new title"`.
-
-##### Property forms
-
-It's important to note that the body forms passed into `deftransform`
-are _not_ regular Clojure forms. Instead, they are special forms that
-declare how to compute a new property of a path.
-
-The general shape of a property transformation is:
-
-```clj
-(property-symbol [dependency-symbols...]
-   body)
-```
-
-Where `property-symbol` indicates which property you'd like to
-transform, and is one of:
-
-* `pathname`
-* `metadata`
-* `content`
-
-And the `dependency-symbols` are other properties of the original path
-that you'd like to use to compute your transformation. They will be
-bound for you using `let` to the values of the original path. In
-general, only specify what you need, as computing them can involve
-side effects or reading data from storage.
-
-Finally, the `dependency-symbols` can include `path`. In this case,
-`path` will be bound to the path being transformed.
-
-##### Transforming pathnames
-
-Here's an example transform that changes a path's extension:
-
-```clj
-(deftransform rename-extension
-    [new-extension]
-  (pathname [pathname]
-    (util/set-path-extension pathname new-extension)))
-```
-
-When transforming the pathname, it's not possible to depend on the
-source path's metadata or content; only the original pathname can be
-requested.
+This snippet will define a function, `change-title`. The function returned
+by `change-title` will operate on individual paths, and will change the
+input paths' metadata to have the `:title` of `new-title`.
 
 ##### Transforming metadata and content
 
 For examples of transforming the content or metadata, check out the
-[inject script](https://github.com/chrisfarber/saison/blob/main/src/saison/transform/inject_script.clj#L7)
+[inject script](https://github.com/chrisfarber/saison/blob/main/src/saison/transform/inject_script.clj)
 and
-[markdown](https://github.com/chrisfarber/saison/blob/main/src/saison/transform/markdown.clj#L9)
+[markdown](https://github.com/chrisfarber/saison/blob/main/src/saison/transform/markdown.clj)
 builtins.
 
 ### Sources
 
 A Source is a provider of Paths. It is also responsible for watching
 content for changes, in order to facilitate live previewing. Finally,
-a Source can optionally respond to some lifecycle hooks: currently
-only `before-build` and `before-publish`.
+a Source can optionally respond to some lifecycle hooks: currently:
+
+- `start`
+- `stop`
+- `before-build`
+- `before-publish`
 
 Saison includes two types of root sources out of the box:
 
@@ -254,7 +206,7 @@ other sources.
 To facilitate this, the `saison.source` namespace provides some tools:
 
 ```clojure
-(source/combine
+(source/construct
   (files {:root "blog"})
   (files {:root "css"}))
 ```
@@ -263,16 +215,16 @@ or, to filter out all paths that aren't html:
 
 ```clojure
 (source/construct
-  (input other-source)
-  (filter [path] (path/html? path)))
+  other-source
+  (source/filter-paths path/html?))
 ```
 
 Most often, you'll want to apply a transformation:
 
 ```clj
 (source/construct
-  (input other-source)
-  (map-where path/html? (my-transformation 42)))
+  other-source
+  (map-paths-where path/html? (my-transformation 42)))
 ```
 
 ### Site Definition
@@ -280,7 +232,7 @@ Most often, you'll want to apply a transformation:
 Finally, the site definition is just a clojure map that wraps up a few
 things:
 
-- `:source`, the root source for the site
+- `:constructor`, a function that creates the site's source
 - `:env`, common configuration or data available to sources and paths
 - `:output-to`, the folder where files will be written during build
 
@@ -303,19 +255,23 @@ generate absolute URLs.
             [saison.source :as source]
             [saison.live :as live]))
 
+(defn constructor [env]
+  (source/construct
+   (files {:root "pages"
+           :metadata {:template "page"}})
+   (file-metadata)
+   (markdown)
+   (templates
+    {:file "templates/page.html"
+     :name "page"
+     :edits [templ/set-title
+             templ/apply-html-metadata]})
+   (aliases/resolve-path-aliases))
+
 (def site
   {:output-to "dist"
    :env {:public-url "https://my-project.github.io"}
-   :source (-> (files {:root "pages"
-                       :metadata {:template "page"}})
-               file-metadata
-               markdown
-               (templates
-                {:file "templates/page.html"
-                 :name "page"
-                 :edits [templ/set-title
-                         templ/apply-html-metadata]})
-               short-name-links)})
+   :constructor  constructor)})
 
 (defonce live-preview-server (atom nil))
 
@@ -339,18 +295,12 @@ generate absolute URLs.
 
 During preview, saison will live-reload your site in the browser
 whenever underlying filesystem content changes. This isn't true out of
-the box for code reloading.
+the box for the site's source construction.
 
-To reload the site while I'm working on the site definition or other
-code that powers it, I use Cider's code evaluation and
-[refreshing](https://docs.cider.mx/cider/0.26/usage/misc_features.html#reloading-code).
+The above example has `start!` and `stop!` functions to facilitate code
+reloading in a repl workflow.
 
-To facilitate this, I'll add this to the clojure ns that has the site definition:
-
-```clj
-```
-
-and to .dir-locals.el:
+If using cider, you may want to add these to .dir-locals.el:
 
 ```elisp
 ((nil . ((cider-ns-refresh-before-fn . "docs/stop!")

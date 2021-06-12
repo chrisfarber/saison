@@ -4,23 +4,18 @@
             [saison.proto :as proto]
             [saison.source :as source]
             [saison.source.data :as data]
+            [saison.tempfile :refer [with-tempfile]]
             [saison.transform.timestamps :as sut]
             [tick.alpha.api :as tick]))
-
-(defmacro with-tempfile
-  [[binding name] & forms]
-  `(let [temp# (java.io.File/createTempFile ~name ".temp")
-         ~binding (.getPath temp#)
-         r# (do ~@forms)]
-     (.delete temp#)
-     r#))
 
 (deftest timestamps-created-from-scratch
   (with-tempfile [t "temp"]
     (let [input (data/source
                  {:pathname "/hello.txt"
                   :content "hi"})
-          ts (sut/timestamp-database input t)]
+          ts (source/construct
+              input
+              (sut/timestamp-database t))]
       (proto/before-build-hook ts {})
       (let [paths (proto/scan ts)
             path (first paths)
@@ -39,12 +34,14 @@
       (let [input (data/source
                    {:pathname "/hello.txt"
                     :content "hi"})
-            ts (sut/timestamp-database input t)]
+            ts (source/construct
+                input
+                (sut/timestamp-database t))]
         (proto/before-build-hook ts {})
         (let [paths (proto/scan ts)
               path (first paths)
               pathname (path/pathname path)
-              meta (path/metadata path paths {})
               db (sut/read-db t)]
+          (is (= "/hello.txt" pathname))
           (is (= previous-date
                  (get-in db ["/hello.txt" :created-at]))))))))

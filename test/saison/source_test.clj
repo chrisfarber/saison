@@ -2,20 +2,17 @@
   (:require [clojure.test :as t :refer [deftest is]]
             [saison.proto :as proto]
             [saison.source :as sut]
-            [saison.source.data :as data]
-            [saison.path :as path]))
+            [saison.source.data :as data]))
 
 (deftest concat-sources
-  (let [s1 (data/source
-            {:pathname "/index.html"
-             :content "index"}
-            {:pathname "/robots.txt"
-             :content "hi robots"})
-        s2 (data/source
-            {:pathname "/stuff.md"
-             :content "stuff"})
-        combined (sut/combine s1 s2)
-        outputs (proto/scan combined)]
+  (let [src (sut/construct
+             (data/source {:pathname "/index.html"
+                           :content "index"}
+                          {:pathname "/robots.txt"
+                           :content "hi robots"})
+             (data/source {:pathname "/stuff.md"
+                           :content "stuff"}))
+        outputs (proto/scan src)]
     (is (= 3 (count outputs)))))
 
 (deftest concat-sources-handles-watching
@@ -23,18 +20,18 @@
         watchers-2 (volatile! 0)
         fires (volatile! 0)
         source-1 (sut/construct
-                   (watch [cb]
-                     (vswap! watchers-1 inc)
-                     (cb)
-                     (fn []
-                       (vswap! watchers-1 dec))))
+                  (sut/add-watcher (fn [cb]
+                                     (vswap! watchers-1 inc)
+                                     (cb)
+                                     (fn []
+                                       (vswap! watchers-1 dec)))))
         source-2 (sut/construct
-                   (watch [cb]
-                     (vswap! watchers-2 inc)
-                     (cb)
-                     (fn []
-                       (vswap! watchers-2 dec))))
-        merged (sut/combine source-1 source-2)]
+                  (sut/add-watcher (fn [cb]
+                                     (vswap! watchers-2 inc)
+                                     (cb)
+                                     (fn []
+                                       (vswap! watchers-2 dec)))))
+        merged (sut/construct source-1 source-2)]
     (is (zero? @watchers-1))
     (is (zero? @watchers-2))
     (is (zero? @fires))
@@ -51,14 +48,14 @@
   (let [build-count (volatile! 0)
         publish-count (volatile! 0)
         s1 (sut/construct
-             (before-build [env]
-               (vswap! build-count inc)))
+            (sut/before-build (fn [env]
+                                (vswap! build-count inc))))
         s2 (sut/construct
-             (before-publish [env]
-               (vswap! publish-count inc)))
+            (sut/before-publish (fn [env]
+                                  (vswap! publish-count inc))))
         s1-and-s2 (list s1 s2)
         merged (sut/construct
-                 (inputs s1-and-s2))]
+                (sut/from s1-and-s2))]
     (proto/before-build-hook merged {})
     (is (= 1 @build-count))
     (is (zero? @publish-count))

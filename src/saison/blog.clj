@@ -60,8 +60,7 @@
      [:content {:type "html"} (content/string (get-content path content-selector))]]))
 
 (defn- compile-atom-feed [opts env entries]
-  (let [{:keys [feed-id
-                feed-path
+  (let [{:keys [feed-path
                 feed-title
                 feed-icon
                 feed-items
@@ -121,10 +120,9 @@
   additionally, the site's env has some important keys that will affect the feed:
   - :public-url, all urls in the feed will be subpaths of this
   - :author, a map containing :name and :email"
-  [source opts]
+  [opts]
   (let [{:keys [feed-path]} opts]
-    (source/construct
-      (input source)
-      (transform [paths]
-        (cond-> paths
-          (some? feed-path) (add-feed opts))))))
+    (source/modify-paths
+     (fn [paths]
+       (cond-> paths
+         (some? feed-path) (add-feed opts))))))

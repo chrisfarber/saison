@@ -4,11 +4,12 @@
             [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
+            [saison.source :as source]
             [saison.source.data :as data]
             [saison.transform.aliases :as sut]))
 
 (deftest aliases-test
-  (let [src (sut/resolve
+  (let [src (source/construct
              (data/source
               {:pathname "/index.html"
                :metadata {:mime-type "text/html"}
@@ -18,7 +19,8 @@
                :metadata {:alias "abt"}}
               {:pathname "/thereee"
                :content ""
-               :metadata {:alias "thr"}}))
+               :metadata {:alias "thr"}})
+             (sut/resolve-path-aliases))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         content (-> path

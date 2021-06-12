@@ -1,5 +1,5 @@
 (ns saison.source.data
-  (:require [saison.proto :as proto :refer [scan Path Source]]
+  (:require [saison.proto :as proto]
             [saison.source :as source]))
 
 (defn- unwrap [thing]
@@ -8,13 +8,13 @@
     thing))
 
 (defrecord DataPath
-    [pathname metadata content]
-  Path
-  (pathname [this]
+           [pathname metadata content]
+  proto/Path
+  (pathname [_]
     (unwrap pathname))
-  (metadata [this]
+  (metadata [_]
     (unwrap metadata))
-  (content [this]
+  (content [_]
     (unwrap content)))
 
 (defn path
@@ -40,4 +40,4 @@
   :content"
   [& path-defs]
   (source/construct
-    (emit (paths path-defs))))
+   (source/emit (paths path-defs))))

@@ -5,13 +5,15 @@
             [saison.content :as content]
             [saison.path :as path]
             [saison.source.data :as data]
-            [saison.proto :as proto]))
+            [saison.proto :as proto]
+            [saison.source :as source]))
 
 (deftest markdown-test
-  (let [src (sut/markdown
+  (let [src (source/construct
              (data/source
               {:pathname "/index.md"
-               :content "# Hello"}))
+               :content "# Hello"})
+             (sut/markdown))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         content (-> path
@@ -21,10 +23,11 @@
     (is (str/index-of content "Hello"))))
 
 (deftest markdown-metadata-test
-  (let [src (sut/markdown (data/source
-                           {:pathname "/index.md"
-                            :metadata {:extra true}
-                            :content "Title: a title
+  (let [src (source/construct
+             (data/source
+              {:pathname "/index.md"
+               :metadata {:extra true}
+               :content "Title: a title
 Title: a second title
 Date: 2020-09-25
 
@@ -37,7 +40,8 @@ This is some content
 
 ## subheading
 
-bye"}))
+bye"})
+             (sut/markdown))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
         metadata (path/metadata path paths {})
