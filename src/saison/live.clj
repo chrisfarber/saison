@@ -66,13 +66,10 @@
                       (inject-script reload-script))))
 
 (defn- reloading-site-handler
-  [site]
-  (let [source (build-reloadable-source site)
-        changes (atom 0)
+  [site source]
+  (let [changes (atom 0)
         env (:env site)
         handler (wrap-stacktrace (site-handler site source))]
-    (proto/start source env)
-    (proto/before-build-hook source env)
     (proto/watch source (fn []
                           (proto/before-build-hook source env)
                           (swap! changes inc)))
@@ -92,9 +89,16 @@
 
   ([site] (live-preview site {}))
   ([site jetty-opts]
-   (let [jetty-opts (merge {:port 1931
+   (let [source (build-reloadable-source site)
+         env (:env site)
+         jetty-opts (merge {:port 1931
                             :join? false
                             :async? true}
                            jetty-opts)
-         handler (reloading-site-handler site)]
-     (run-jetty handler jetty-opts))))
+         handler (reloading-site-handler site source)]
+     (proto/start source env)
+     (proto/before-build-hook source env)
+     (let [jetty (run-jetty handler jetty-opts)]
+       (fn stop []
+         (proto/stop source env)
+         (.stop jetty))))))
