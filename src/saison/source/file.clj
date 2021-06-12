@@ -17,29 +17,42 @@
     file))
 
 (defrecord FileSource
-           [file-root base-path metadata]
+           [file-root base-path metadata
+            cache]
 
   proto/Source
   (scan [_]
-    (let [files (util/list-files file-root)]
-      (map (fn [[name f]]
-             (map->FilePath {:file f
-                             :base-path base-path
-                             :path name
-                             :metadata metadata}))
-           files)))
+    (doseq [item (util/list-files file-root)]
+      (let [[name f] item
+            absolute-path (.getAbsolutePath f)]
+        (when-not (get @cache absolute-path)
+          (println "caching file:" absolute-path)
+          (swap! cache assoc absolute-path
+                 (map->FilePath {:file f
+                                 :base-path base-path
+                                 :path name
+                                 :metadata metadata})))))
+    (vals @cache))
 
   (watch
     [_ changed]
-    (let [notifier (fn [_ _]
-                     (changed))
+    (let [notifier (fn [_ e]
+                     (let [f (:file e)
+                           absolute-path (.getAbsolutePath f)]
+                       (when-not (.isDirectory f)
+                         (println "file changed:" absolute-path)
+                         (swap! cache dissoc absolute-path)
+                         (changed))))
           watcher (hawk/watch! [{:paths [file-root]
                                  :handler notifier}])]
       (fn []
         (hawk/stop! watcher))))
 
-  (start [_ _])
-  (stop [_ _])
+  (start [_ _]
+    (reset! cache nil))
+  (stop [_ _]
+    (reset! cache nil))
+
   (before-build-hook [_ _])
   (before-publish-hook [_ _]))
 
@@ -51,4 +64,5 @@
   (map->FileSource
    {:file-root root
     :base-path base-path
-    :metadata metadata}))
+    :metadata metadata
+    :cache (atom nil)}))
