@@ -57,7 +57,7 @@
   [timestamp-db-path]
   (let [db (atom (read-db timestamp-db-path))]
     (source/steps
-     (source/transform-paths (add-timestamps-to-metadata db))
+     (source/transform-paths (add-timestamps-to-metadata db) :cache false)
      (source/before-build (fn [{:keys [source]}]
                             (save-missing-timestamps db (proto/scan source) :created-at)
                             (write-db timestamp-db-path @db)))

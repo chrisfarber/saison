@@ -14,6 +14,7 @@
   "A source step that reads EDN metadata from paths."
   []
   ;; TODO - make this use contextualized transform
+  ;; TODO - caching strategy. right now, it clobbers any hope at caching.
   (source/modify-paths
    (fn [entries]
      (let [path-for (memoize path/pathname)

@@ -1,5 +1,6 @@
 (ns saison.source
-  (:require [saison.proto :as proto]))
+  (:require [saison.proto :as proto]
+            [saison.util :as util]))
 
 (def ^:dynamic *previewing*
   "true when the the site needs to be live-reloadable"
@@ -60,9 +61,15 @@
 (defn transform-paths
   "Apply a transformation to each path that flows through the source.
    Optionally, a predicate can be supplied, and the transformation will only
-   be applied to paths the predicate is true for."
-  [transformer]
-  [[:scan (fn [paths] (mapv transformer paths))]])
+   be applied to paths the predicate is true for.
+   
+   By default, the transformed paths are cached. This can be disabled via the
+   :cache option."
+  [transformer & {:keys [cache] :or {cache true}}]
+  (let [transformer (if cache
+                      (util/weak-memoize transformer)
+                      transformer)]
+    [[:scan (fn [paths] (mapv transformer paths))]]))
 
 (defn transform-paths-contextually
   "Similar to `transform-paths`, but where the transform is dependent upon

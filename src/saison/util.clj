@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [tick.alpha.api :as t])
-  (:import java.net.URL))
+  (:import java.net.URL
+           java.util.WeakHashMap))
 
 (defn list-files
   "Return a seq of files in a directory.
@@ -61,3 +62,18 @@
 
 (defn rfc3339 [time]
   (t/format "u-MM-dd'T'HH:mm:ss.SSXXX" time))
+
+(defn weak-memoize
+  "Like `memoize`, but uses a java.util.WeakHashMap instead of an atom
+   to store its cached values. f must have arity of exactly 1"
+  [f]
+  (let [cache (WeakHashMap.)]
+    (fn [in]
+      (if-let [hit (.get cache in)]
+        (do
+          (println "cache hit for" in)
+          hit)
+        (let [out (f in)]
+          (println "cache miss for" in)
+          (.put cache in out)
+          out)))))
