@@ -255,20 +255,23 @@ generate absolute URLs.
             [saison.source :as source]
             [saison.live :as live]))
 
+(defn constructor [env]
+  (source/construct
+   (files {:root "pages"
+           :metadata {:template "page"}})
+   (file-metadata)
+   (markdown)
+   (templates
+    {:file "templates/page.html"
+     :name "page"
+     :edits [templ/set-title
+             templ/apply-html-metadata]})
+   (aliases/resolve-path-aliases))
+
 (def site
   {:output-to "dist"
    :env {:public-url "https://my-project.github.io"}
-   :source (source/construct
-            (files {:root "pages"
-                    :metadata {:template "page"}})
-            (file-metadata)
-            (markdown)
-            (templates
-             {:file "templates/page.html"
-              :name "page"
-              :edits [templ/set-title
-                      templ/apply-html-metadata]})
-            (aliases/resolve-path-aliases))})
+   :constructor  constructor)})
 
 (defonce live-preview-server (atom nil))
 
@@ -292,19 +295,12 @@ generate absolute URLs.
 
 During preview, saison will live-reload your site in the browser
 whenever underlying filesystem content changes. This isn't true out of
-the box for code reloading.
+the box for the site's source construction.
 
-To reload the site while I'm working on the site definition or other
-code that powers it, I use Cider's code evaluation and
-[refreshing](https://docs.cider.mx/cider/0.26/usage/misc_features.html#reloading-code).
+The above example has `start!` and `stop!` functions to facilitate code
+reloading in a repl workflow.
 
-To facilitate this, I'll add this to the clojure ns that has the site definition:
-
-```clj
-
-```
-
-and to .dir-locals.el:
+If using cider, you may want to add these to .dir-locals.el:
 
 ```elisp
 ((nil . ((cider-ns-refresh-before-fn . "docs/stop!")
