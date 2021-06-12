@@ -48,10 +48,10 @@
   (let [build-count (volatile! 0)
         publish-count (volatile! 0)
         s1 (sut/construct
-            (sut/before-build (fn [env]
+            (sut/before-build (fn [_]
                                 (vswap! build-count inc))))
         s2 (sut/construct
-            (sut/before-publish (fn [env]
+            (sut/before-publish (fn [_]
                                   (vswap! publish-count inc))))
         s1-and-s2 (list s1 s2)
         merged (sut/construct

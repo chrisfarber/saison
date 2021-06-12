@@ -25,9 +25,9 @@
 
   Any intermediate directories will be automatically created."
 
-  [path paths env dest-file]
+  [path dest-file]
 
-  (let [data (path/content path paths env)]
+  (let [data (path/content path)]
     (write-file dest-file data)))
 
 (defn build-site
@@ -52,5 +52,5 @@
              (when verbose? (println "Writing file:" (-> output-file
                                                          .getCanonicalFile
                                                          .getPath)))
-             (write-path p all-paths env output-file))))
+             (write-path p output-file))))
        (proto/stop source env)))))

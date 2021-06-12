@@ -224,7 +224,7 @@ Most often, you'll want to apply a transformation:
 ```clj
 (source/construct
   other-source
-  (map-paths-where path/html? (my-transformation 42)))
+  (source/transform-paths (my-transformation 42)))
 ```
 
 ### Site Definition

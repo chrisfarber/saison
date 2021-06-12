@@ -13,6 +13,7 @@
 (defn file-metadata
   "A source step that reads EDN metadata from paths."
   []
+  ;; TODO - make this use contextualized transform
   (source/modify-paths
    (fn [entries]
      (let [path-for (memoize path/pathname)

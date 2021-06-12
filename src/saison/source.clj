@@ -57,17 +57,23 @@
   [f]
   [[:before-publish f]])
 
-(defn map-paths
-  "Invoke `map-fn` on each path that flows through it."
-  [map-fn]
-  [[:scan (fn [paths] (mapv map-fn paths))]])
+(defn transform-paths
+  "Apply a transformation to each path that flows through the source.
+   Optionally, a predicate can be supplied, and the transformation will only
+   be applied to paths the predicate is true for."
+  [transformer]
+  [[:scan (fn [paths] (mapv transformer paths))]])
 
-(defn map-paths-where
-  "Invoke `map-fn` on each path that `predicate` returns a truthy value for."
-  [predicate map-fn]
-  (map-paths #(if (predicate %)
-                (map-fn %)
-                %)))
+(defn transform-paths-contextually
+  "Similar to `transform-paths`, but where the transform is dependent upon
+   the entire set of paths, rather than a specific individual path.
+   
+   Use sparingly, as this defeats various optimizations and caching strategies.
+   
+   `transform-builder` is expected to return a transformer and will be called
+   with the vector of paths that have been emitted so far."
+  [transform-builder]
+  [[:scan (fn [paths] (mapv (transform-builder paths) paths))]])
 
 (defn filter-paths
   [predicate]

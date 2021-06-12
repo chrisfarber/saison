@@ -25,7 +25,7 @@
                           sut/set-title]}))
         paths (proto/scan source)
         path (first paths)
-        raw-content (path/content path paths {})
+        raw-content (path/content path)
         content (content/string raw-content)]
     (is (str/index-of content "<meta name=\"abcd\" content=\"efg\""))
     (is (str/index-of content "<title>fancy title"))

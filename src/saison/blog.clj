@@ -36,11 +36,9 @@
 
 (defn paths-in-feed
   "Find current paths that belong in the feed, and sort them
-  by creation date (descending).
-
-  Relies on `path/*paths*` being bound."
-  [feed-id]
-  (sorted-blog-entries path/*paths* (feed? {:feed-id feed-id})))
+  by creation date (descending)."
+  [paths feed-id]
+  (sorted-blog-entries paths (feed? {:feed-id feed-id})))
 
 (defn- element-for-item [path public-url content-selector]
   (let [metadata (path/metadata path)
@@ -59,15 +57,16 @@
        [:published nil (util/rfc3339 published-at)])
      [:content {:type "html"} (content/string (get-content path content-selector))]]))
 
-(defn- compile-atom-feed [opts env entries]
+(defn- compile-atom-feed [opts entries]
   (let [{:keys [feed-path
                 feed-title
                 feed-icon
                 feed-items
-                content-selector]
+                content-selector
+                public-url
+                author-name
+                author-email]
          :or {feed-items 10}} opts
-        {:keys [public-url
-                author]} env
         feed-url (util/append-url-component public-url feed-path)
         entries-to-include (take feed-items entries)
         items (map #(element-for-item % public-url content-selector) entries-to-include)
@@ -76,12 +75,12 @@
      [:feed {:xmlns "http://www.w3.org/2005/Atom"}
       (when feed-title
         [:title nil feed-title])
-      (when author
+      (when (or author-name author-email)
         [:author nil
-         (when-let [name (:name author)]
-           [:name nil name])
-         (when-let [email (:email author)]
-           [:email nil email])])
+         (when author-name
+           [:name nil author-name])
+         (when author-email
+           [:email nil author-email])])
       (when feed-icon
         [:icon nil (util/append-url-component public-url feed-icon)])
       [:id nil feed-url]
@@ -92,18 +91,18 @@
       [:link {:rel "alternate" :href public-url}]
       items])))
 
-(defn- build-feed [opts]
+(defn- build-feed [paths opts]
   (let [{:keys [feed-path
                 feed-id]} opts]
     (data/path {:pathname feed-path
                 :metadata {:mime-type "application/xml"
                            :alias (str "feed-" feed-id)}
                 :content (fn []
-                           (let [entries (sorted-blog-entries path/*paths* (feed? opts))]
-                             (compile-atom-feed opts path/*env* entries)))})))
+                           (let [entries (sorted-blog-entries paths (feed? opts))]
+                             (compile-atom-feed opts entries)))})))
 
 (defn- add-feed [paths opts]
-  (conj paths (build-feed opts)))
+  (conj paths (build-feed paths opts)))
 
 (defn feed
   "create a blog using the supplied options.
@@ -116,10 +115,9 @@
   - :feed-icon, a path to the icon to use for the feed
   - :feed-items, the number of items to include. default 10.
   - :content-selector, an enlive selector that will be used to extract the content
-
-  additionally, the site's env has some important keys that will affect the feed:
   - :public-url, all urls in the feed will be subpaths of this
-  - :author, a map containing :name and :email"
+  - :author-name
+  - :author-email"
   [opts]
   (let [{:keys [feed-path]} opts]
     (source/modify-paths

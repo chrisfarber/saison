@@ -28,18 +28,19 @@
                          :footnotes? true
                          :reference-links? true)))
 
-(defn markdown-transformer []
-  (path/transformer
-   {:pathname ext-to-html
-    :metadata parse-metadata
-    :content parse-content}))
-
 (defn markdown?
   [path]
   ;; TODO use the mime type rather than path extension
   (#{"md" "markdown"} (util/path-extension (path/pathname path))))
 
+(defn markdown-transformer []
+  (path/transformer
+   markdown?
+   {:pathname ext-to-html
+    :metadata parse-metadata
+    :content parse-content}))
+
 (defn markdown
   "A source step that will parse any markdown path into HTML."
   []
-  (source/map-paths-where markdown? (markdown-transformer)))
+  (source/transform-paths (markdown-transformer)))

@@ -33,7 +33,15 @@
        [content-selector] (html/substitute html-content)))))
 
 (defn apply-template [templates]
+  ;; TODO when transformer caching is implemented, make sure we invalidate it
+  ;;      when templates change.
   (path/transformer
+   (fn [path]
+     (let [m (path/metadata path)
+           template (:template m)]
+       (and template
+            (path/html? path)
+            (get templates template))))
    {:content (fn [path]
                (let [metadata (path/metadata path)
                      template (get templates (:template metadata))
@@ -75,15 +83,9 @@
                                      template)))
                           {}
                           template-defs)
-        files-to-watch (map :file template-defs)
-        find-template (fn [path]
-                        (let [m (path/metadata path)
-                              template (:template m)]
-                          (and template
-                               (path/html? path)
-                               (get templates template))))]
+        files-to-watch (map :file template-defs)]
     (source/steps
-     (source/map-paths-where find-template (apply-template templates))
+     (source/transform-paths (apply-template templates))
      (source/add-watcher
       (fn [cb]
         (let [template-watcher (hawk/watch! [{:paths files-to-watch

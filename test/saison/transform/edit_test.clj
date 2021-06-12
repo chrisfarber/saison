@@ -3,7 +3,6 @@
             [clojure.test :as t :refer [deftest is]]
             [net.cgrand.enlive-html :as html]
             [saison.content :as content]
-            [saison.content.html :as htmlc]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
@@ -21,14 +20,12 @@
                   :content "<div><h1></h1><p>this is a page</p></div>"}))
         edited (source/construct
                 source
-                (sut/edit-path "/thing/2.html"
-                               [path]
-                               (let [titles (map #(-> % path/metadata :title) path/*paths*)]
-                                 (htmlc/edits
-                                  [:h1] (html/clone-for [title titles]
-                                                        [:h1] (html/content title))))))
+                (sut/edit-path
+                 "/thing/2.html"
+                 [:h1] (html/clone-for [title ["thing 1" "thing 2"]]
+                                       [:h1] (html/content title))))
         paths (proto/scan edited)
         path (path/find-by-path paths "/thing/2.html")
-        content (content/string (path/content path paths {}))]
+        content (content/string (path/content path))]
     (is (str/index-of content "<h1>thing 1</h1>"))
     (is (str/index-of content "<h1>thing 2</h1>"))))

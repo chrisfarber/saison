@@ -18,22 +18,21 @@
 (defn- site-handler
   "Creates a ring handler that renders any discoverable path."
 
-  [site source]
+  [source]
   (fn [req]
-    (let [env (:env site)
-          path (:uri req)
+    (let [path (:uri req)
           paths (proto/scan source)
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
         (let [pathname (path/pathname match)
-              metadata (path/metadata match paths env)
+              metadata (path/metadata match)
               mime (or (:mime-type metadata)
                        "text/plain")]
           (println "serving:" pathname)
           (println "metadata:" metadata)
           {:status 200
-           :body (content/input-stream (path/content match paths env))
+           :body (content/input-stream (path/content match))
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404
@@ -69,7 +68,7 @@
   [site source]
   (let [changes (atom 0)
         env (:env site)
-        handler (wrap-stacktrace (site-handler site source))]
+        handler (wrap-stacktrace (site-handler source))]
     (proto/watch source (fn []
                           (proto/before-build-hook source env)
                           (swap! changes inc)))

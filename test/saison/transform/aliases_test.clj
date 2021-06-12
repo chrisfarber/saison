@@ -1,12 +1,12 @@
 (ns saison.transform.aliases-test
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
-            [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
             [saison.source.data :as data]
-            [saison.transform.aliases :as sut]))
+            [saison.transform.aliases :as sut]
+            [saison.content :as content]))
 
 (deftest aliases-test
   (let [src (source/construct
@@ -23,8 +23,6 @@
              (sut/resolve-path-aliases))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
-        content (-> path
-                    (path/content paths {})
-                    content/string)]
+        content (content/string (path/content path))]
     (is (str/index-of content "href=\"/about.html\""))
     (is (str/index-of content "href=\"/thereee\""))))

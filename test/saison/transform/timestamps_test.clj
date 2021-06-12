@@ -20,7 +20,7 @@
       (let [paths (proto/scan ts)
             path (first paths)
             pathname (path/pathname path)
-            meta (path/metadata path paths {})
+            meta (path/metadata path)
             db (sut/read-db t)]
         (is (some? (get-in db ["/hello.txt" :created-at])))
         (is (= "/hello.txt"

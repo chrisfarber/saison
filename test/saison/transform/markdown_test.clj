@@ -1,12 +1,11 @@
 (ns saison.transform.markdown-test
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
-            [saison.transform.markdown :as sut]
-            [saison.content :as content]
             [saison.path :as path]
-            [saison.source.data :as data]
             [saison.proto :as proto]
-            [saison.source :as source]))
+            [saison.source :as source]
+            [saison.source.data :as data]
+            [saison.transform.markdown :as sut]))
 
 (deftest markdown-test
   (let [src (source/construct
@@ -16,9 +15,7 @@
              (sut/markdown))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
-        content (-> path
-                    (path/content paths src)
-                    content/string)]
+        content (path/content path)]
     (is (str/index-of content "<h1>"))
     (is (str/index-of content "Hello"))))
 
@@ -44,8 +41,7 @@ bye"})
              (sut/markdown))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
-        metadata (path/metadata path paths {})
-        content (content/string (path/content path paths {}))]
+        metadata (path/metadata path)]
     ;; metadata comes from the original path
     (is (true?
          (:extra metadata)))

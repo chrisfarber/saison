@@ -17,11 +17,11 @@
    to the end of the body tag for any path given to it."
   [script-text]
   (path/transformer
+   path/html?
    {:content (content-script-injector script-text)}))
 
 (defn inject-script
   "A source step that will inject the supplied script text
    into any html path."
   [script-text]
-  (source/map-paths-where path/html?
-                          (script-injector script-text)))
+  (source/transform-paths (script-injector script-text)))

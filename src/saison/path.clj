@@ -2,44 +2,22 @@
   "Functions for manipulating paths and collections of paths."
   (:require [saison.proto :as proto]))
 
-(def ^:dynamic *paths*
-  "bound to a seq of other paths that have been discovered within the site"
-  nil)
-
-(def ^:dynamic *env*
-  "bound to a map of environment info about the site"
-  nil)
-
 (defn pathname
   "returns the url path of the given path"
   [path]
   (proto/pathname path))
 
 (defn metadata
-  "metadata for the given path.
-
-  if `paths` and `env` are suppplied, they will automatically be bound
-  to `*paths*` and `*env*`, respectively."
+  "metadata for the given path."
 
   ([path]
-   (proto/metadata path))
-  ([path paths env]
-   (binding [*paths* paths
-             *env* env]
-     (proto/metadata path))))
+   (proto/metadata path)))
 
 (defn content
-  "compute content for the given path.
-
-  if `paths` and `env` are suppplied, they will automatically be bound
-  to `*paths*` and `*env*`, respectively."
+  "compute content for the given path."
 
   ([path]
-   (proto/content path))
-  ([path paths env]
-   (binding [*paths* paths
-             *env* env]
-     (proto/content path))))
+   (proto/content path)))
 
 (defrecord DerivedPath
            [original map-path map-metadata map-content]
@@ -72,17 +50,25 @@
   "Build a path transformer, which is a function that accepts
    a path and returns a new, modified path.
    
-   Accepts a map with the keys:
+   Accepts a map, `modifiers` with the keys:
    :pathname - a function from a path -> string
    :metadata - a function from a path -> new metadata map
    :content - a function from a path -> new content
    
    All of the keys are optional. Unspecified aspects of a path
-   will be unmodified."
-  [modifiers]
-  (fn [path]
-    (derive-path path modifiers)))
-
+   will be unmodified.
+   
+   Optionally, a `predicate` may be supplied. The transform will
+   then only be applied if the predicate is true for an input
+   path."
+  ([modifiers]
+   (fn [path]
+     (derive-path path modifiers)))
+  ([predicate modifiers]
+   (fn [path]
+     (if (predicate path)
+       (derive-path path modifiers)
+       path))))
 
 (defn find-by-path
   "Given a list of paths, find the first exact match"
