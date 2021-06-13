@@ -36,25 +36,25 @@
   ;; TODO when transformer caching is implemented, make sure we invalidate it
   ;;      when templates change.
   (path/transformer
-   (fn [path]
-     (let [m (path/metadata path)
-           template (:template m)]
-       (and template
-            (path/html? path)
-            (get templates template))))
-   {:content (fn [path]
-               (let [metadata (path/metadata path)
-                     template (get templates (:template metadata))
-                     {:keys [file content-selector]} template
-                     apply-template ((insert-content content-selector) path)
-                     edit-builders (:edits template)
-                     apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
-                                       (fn? edit-builders) (edit-builders path)
-                                       :else identity)]
-                 (edit-html*
-                  (slurp file)
-                  apply-template
-                  apply-edits)))}))
+   :where (fn [path]
+            (let [m (path/metadata path)
+                  template (:template m)]
+              (and template
+                   (path/html? path)
+                   (get templates template))))
+   :content (fn [path]
+              (let [metadata (path/metadata path)
+                    template (get templates (:template metadata))
+                    {:keys [file content-selector]} template
+                    apply-template ((insert-content content-selector) path)
+                    edit-builders (:edits template)
+                    apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
+                                      (fn? edit-builders) (edit-builders path)
+                                      :else identity)]
+                (edit-html*
+                 (slurp file)
+                 apply-template
+                 apply-edits)))))
 
 (defn templates
   "A source step that applies templates to paths.

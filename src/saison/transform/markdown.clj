@@ -35,10 +35,10 @@
 
 (defn markdown-transformer []
   (path/transformer
-   markdown?
-   {:pathname ext-to-html
-    :metadata parse-metadata
-    :content parse-content}))
+   :where markdown?
+   :pathname ext-to-html
+   :metadata parse-metadata
+   :content parse-content))
 
 (defn markdown
   "A source step that will parse any markdown path into HTML."

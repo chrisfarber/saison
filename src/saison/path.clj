@@ -1,6 +1,7 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
-  (:require [saison.proto :as proto]))
+  (:require [saison.proto :as proto]
+            [saison.caching-path :refer [cached]]))
 
 (defn pathname
   "returns the url path of the given path"
@@ -50,25 +51,28 @@
   "Build a path transformer, which is a function that accepts
    a path and returns a new, modified path.
    
-   Accepts a map, `modifiers` with the keys:
+   The following options are accepted:
+   :where - a predicate from path -> boolean
    :pathname - a function from a path -> string
    :metadata - a function from a path -> new metadata map
    :content - a function from a path -> new content
+   :cache - a boolean indicating whether the path should cache itself
+            default true.
    
    All of the keys are optional. Unspecified aspects of a path
-   will be unmodified.
-   
-   Optionally, a `predicate` may be supplied. The transform will
-   then only be applied if the predicate is true for an input
-   path."
-  ([modifiers]
-   (fn [path]
-     (derive-path path modifiers)))
-  ([predicate modifiers]
-   (fn [path]
-     (if (predicate path)
-       (derive-path path modifiers)
-       path))))
+   will be unmodified."
+  [& {:keys [pathname metadata content where cache]
+      :or {cache true
+           where (constantly true)}}]
+  (let [derive (if cache
+                 (fn [path opts] (cached (derive-path path opts)))
+                 derive-path)]
+    (fn [path]
+      (if (where path)
+        (derive path {:pathname pathname
+                      :metadata metadata
+                      :content content})
+        path))))
 
 (defn find-by-path
   "Given a list of paths, find the first exact match"

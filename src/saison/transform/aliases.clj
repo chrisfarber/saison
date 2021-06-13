@@ -27,8 +27,8 @@
 (defn resolve-aliases-in-path [paths]
   (let [expansion-map (alias-expansions paths)]
     (path/transformer
-     path/html?
-     {:content (resolve-aliases-in-content expansion-map)})))
+     :where path/html?
+     :content (resolve-aliases-in-content expansion-map))))
 
 (defn resolve-path-aliases
   "A source step for resolving path aliases in HTML files."

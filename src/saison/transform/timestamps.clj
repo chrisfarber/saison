@@ -40,12 +40,13 @@
 (defn add-timestamps-to-metadata
   [ts-db]
   (path/transformer
-   {:metadata (fn [path]
-                (let [pathname (path/pathname path)
-                      metadata (path/metadata path)]
-                  (assoc metadata
-                         :created-at (get-in @ts-db [pathname :created-at])
-                         :published-at (get-in @ts-db [pathname :published-at]))))}))
+   :cache false
+   :metadata (fn [path]
+               (let [pathname (path/pathname path)
+                     metadata (path/metadata path)]
+                 (assoc metadata
+                        :created-at (get-in @ts-db [pathname :created-at])
+                        :published-at (get-in @ts-db [pathname :published-at]))))))
 
 (defn save-missing-timestamps
   [ts-db paths key]
