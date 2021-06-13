@@ -20,14 +20,17 @@
   proto/Path
   (pathname [_] (util/add-path-component base-path path))
   (metadata [_]
-    (let [known-mime (mime-type-of file)]
+    (let [known-mime (mime-type-of file)
+          meta-file (and read-metadata-file
+                         (metadata-file-for file))
+          meta-exists (and meta-file (.exists meta-file))]
       (merge (when known-mime
                {:mime-type known-mime})
-             (when read-metadata-file
-               (with-open [rdr (io/reader (metadata-file-for file))
+             metadata
+             (when meta-exists
+               (with-open [rdr (io/reader meta-file)
                            pb (java.io.PushbackReader. rdr)]
-                 (edn/read pb)))
-             metadata)))
+                 (edn/read pb))))))
   (content [_]
     file))
 

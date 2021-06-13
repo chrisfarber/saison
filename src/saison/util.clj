@@ -71,7 +71,7 @@
     (fn [in]
       (if-let [hit (.get cache in)]
         (do
-          (println "cache hit for" in)
+          ;; (println "cache hit for" in)
           hit)
         (let [out (f in)]
           (println "cache miss for" in)
