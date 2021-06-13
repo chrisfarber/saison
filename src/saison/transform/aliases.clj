@@ -6,12 +6,9 @@
 (defn alias-expansions
   [paths]
   (reduce (fn [expansions path]
-            (let [alias (-> path
-                            path/metadata
-                            :alias)]
-              (if alias
-                (assoc expansions alias (path/pathname path))
-                expansions)))
+            (if-let [alias (-> path path/metadata :alias)]
+              (assoc expansions alias (path/pathname path))
+              expansions))
           {}
           paths))
 

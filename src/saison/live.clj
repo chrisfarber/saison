@@ -84,7 +84,7 @@
   A map of jetty parameters may optionally be supplied. By default, the server
   will run on port 1931, the year Orval was founded.
 
-  Returns the jetty instance, which you can later (.stop on)"
+  Returns a function that can be called to stop the server."
 
   ([site] (live-preview site {}))
   ([site jetty-opts]

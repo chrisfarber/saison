@@ -65,6 +65,7 @@
                      (let [f (:file e)
                            absolute-path (.getAbsolutePath f)]
                        (when-not (.isDirectory f)
+                         ;; TODO invalidate pairs of [file, metadata-file]
                          (println "file changed:" absolute-path)
                          (swap! cache dissoc absolute-path)
                          (changed))))
