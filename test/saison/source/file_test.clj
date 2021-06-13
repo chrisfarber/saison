@@ -25,6 +25,23 @@
     (is (= (:something (path/metadata robots))
            true))))
 
+(deftest metadata-is-read-from-associated-files
+  (let [source (sut/files {:root "fixtures/a"
+                           :read-metadata-files true})
+        paths (proto/scan source)
+        robots (path/find-by-path paths "/robots.txt")]
+    (is (= "robots?"
+           ;; this title should come from the .meta.edn file
+           (:title (path/metadata robots))))))
+
+(deftest metadata-from-associated-files-can-be-disabled
+  (let [source (sut/files {:root "fixtures/a"
+                           :parse-metadata false})
+        paths (proto/scan source)
+        robots (path/find-by-path paths "/robots.txt")]
+    (is (nil?
+         (:title (path/metadata robots))))))
+
 (deftest content-reads-file
   (let [source (sut/files {:root "fixtures/"})
         paths (proto/scan source)

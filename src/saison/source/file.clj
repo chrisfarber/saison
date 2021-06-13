@@ -2,27 +2,48 @@
   (:require [hawk.core :as hawk]
             [saison.proto :as proto]
             [saison.util :as util]
-            [pantomime.mime :refer [mime-type-of]]))
+            [pantomime.mime :refer [mime-type-of]]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]))
+
+(def metadata-file-suffix ".meta.edn")
+
+(defn file-is-metadata [^java.io.File file]
+  (-> file .getAbsolutePath (.endsWith metadata-file-suffix)))
+
+(defn metadata-file-for [^java.io.File file]
+  (java.io.File. (.getParent file)
+                 (str (.getName file) metadata-file-suffix)))
 
 (defrecord FilePath
-           [file base-path path metadata]
+           [file base-path path metadata read-metadata-file]
   proto/Path
   (pathname [_] (util/add-path-component base-path path))
   (metadata [_]
     (let [known-mime (mime-type-of file)]
       (merge (when known-mime
                {:mime-type known-mime})
+             (when read-metadata-file
+               (with-open [rdr (io/reader (metadata-file-for file))
+                           pb (java.io.PushbackReader. rdr)]
+                 (edn/read pb)))
              metadata)))
   (content [_]
     file))
 
+(defn eligible-files [file-root remove-metadata]
+  (let [items (util/list-files file-root)]
+    (if remove-metadata
+      (filter (fn [[_ f]] ((complement file-is-metadata) f)) items)
+      items)))
+
 (defrecord FileSource
            [file-root base-path metadata
-            cache]
+            cache read-metadata-files]
 
   proto/Source
   (scan [_]
-    (doseq [item (util/list-files file-root)]
+    (doseq [item (eligible-files file-root read-metadata-files)]
       (let [[name f] item
             absolute-path (.getAbsolutePath f)]
         (when-not (get @cache absolute-path)
@@ -31,7 +52,8 @@
                  (map->FilePath {:file f
                                  :base-path base-path
                                  :path name
-                                 :metadata metadata})))))
+                                 :metadata metadata
+                                 :read-metadata-file read-metadata-files})))))
     (vals @cache))
 
   (watch
@@ -57,12 +79,23 @@
   (before-publish-hook [_ _]))
 
 (defn files
-  "create a source from files on the filesystem"
+  "create a source from files on the filesystem.
+   
+   the following options can be supplied:
+   :root - required. the relative path of a folder to read files from.
+   :base-path - if specified, prefix all pathnames with the base path
+   :metadata - an optional map of data that will serve as default metadata
+               for all paths discovered
+   :parse-metadata - defaults to true. will read .meta.edn files as EDN
+                     and attach their content as metadata"
   [{:keys [root
            base-path
-           metadata]}]
+           metadata
+           parse-metadata]
+    :or {parse-metadata true}}]
   (map->FileSource
    {:file-root root
     :base-path base-path
     :metadata metadata
-    :cache (atom nil)}))
+    :cache (atom nil)
+    :read-metadata-files parse-metadata}))
