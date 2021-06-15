@@ -1,4 +1,4 @@
-(ns saison.caching-path
+(ns saison.path.caching
   (:require [saison.proto :as proto]
             [saison.content :as content]))
 

@@ -1,7 +1,7 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
   (:require [saison.proto :as proto]
-            [saison.caching-path :refer [cached]]))
+            [saison.path.caching :refer [cached]]))
 
 (defn pathname
   "returns the url path of the given path"
@@ -65,7 +65,7 @@
       :or {cache true
            where (constantly true)}}]
   (let [derive (if cache
-                 (fn [path opts] (cached (derive-path path opts)))
+                 (comp cached derive-path)
                  derive-path)]
     (fn [path]
       (if (where path)

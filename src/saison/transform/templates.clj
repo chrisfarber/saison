@@ -36,6 +36,7 @@
   ;; TODO when transformer caching is implemented, make sure we invalidate it
   ;;      when templates change.
   (path/transformer
+   :cache false
    :where (fn [path]
             (let [m (path/metadata path)
                   template (:template m)]

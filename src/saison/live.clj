@@ -2,7 +2,8 @@
   "Tools for running a live preview of a saison site.
 
   Primarily, this provides some ring middleware and server."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.core.async :as a :refer [<! <!! >! go-loop put!]]
+            [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
@@ -19,10 +20,10 @@
 (defn- site-handler
   "Creates a ring handler that renders any discoverable path."
 
-  [source]
+  [paths-atom]
   (fn [req]
     (let [path (:uri req)
-          paths (proto/scan source)
+          paths @paths-atom
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
@@ -30,8 +31,7 @@
               metadata (path/metadata match)
               mime (or (:mime-type metadata)
                        "text/plain")]
-          (log/debug "serving" {:pathname pathname
-                                :metadata metadata})
+          (log/debug "serving" pathname)
           {:status 200
            :body (content/input-stream (path/content match))
            ;; specify the mime type based on the matching path; this allows index.html to work.
@@ -42,10 +42,10 @@
 
 (defn- wait-for-change [changes-atom respond]
   (let [key (gensym "wait-for-change-")]
-    (log/debug "waiting for change")
+    (log/debug "browser waiting for change" key)
     (add-watch changes-atom key (fn [_ _ old new]
                                   (when (not= old new)
-                                    (log/debug "change occurred")
+                                    (log/debug "notifying browser of change" key)
                                     (respond {:status 204})
                                     (remove-watch changes-atom key))))))
 
@@ -54,7 +54,6 @@
     (respond (handler req))
     (catch Exception e
       (raise e))))
-
 
 (defn- build-reloadable-source
   "Given a site definition, construct the site with previewing
@@ -66,18 +65,46 @@
                       (inject-script reload-script))))
 
 (defn- reloading-site-handler
-  [site source]
-  (let [changes (atom 0)
-        env (:env site)
-        handler (wrap-stacktrace (site-handler source))]
-    (proto/watch source (fn []
-                          (proto/before-build-hook source env)
-                          (swap! changes inc)))
+  [paths-atom]
+  (let [handler (wrap-stacktrace (site-handler paths-atom))]
     (fn [req respond raise]
       (let [path (:uri req)]
         (if (= path "/__reload")
-          (wait-for-change changes respond)
+          (wait-for-change paths-atom respond)
           (use-site-handler handler req respond raise))))))
+
+(defn watch-source [source env]
+  (proto/start source env)
+  (proto/before-build-hook source env)
+  (let [paths (atom (proto/scan source))
+        change-chan (a/chan (a/sliding-buffer 1))
+        update-chan (a/chan (a/sliding-buffer 1))
+        stop-watcher (proto/watch source (fn [] (put! change-chan true)))
+        stop (fn []
+               (stop-watcher)
+               (proto/stop source env)
+               (a/close! change-chan)
+               (a/close! update-chan))]
+    (go-loop []
+      (log/trace "watch-source is waiting for a watcher")
+      (when (<! change-chan)
+        (log/trace "watch-source watcher fired. setting timer.")
+        (loop []
+          (a/alt! change-chan (do
+                                (log/trace "watch-source received another update, restarting timer.")
+                                (recur))
+                  (a/timeout 500) nil))
+        (log/trace "watch-source is notifying of an update")
+        (when (>! update-chan true)
+          (recur))))
+    (future
+      (loop []
+        (when (<!! update-chan)
+          (log/trace "watch-source is updating the paths atom")
+          (reset! paths (proto/scan source))
+          (log/trace "watch-source has updated the paths atom")
+          (recur))))
+    [paths stop]))
 
 (defn live-preview
   "Start a jetty server that renders a live preview of the provided saison site.
@@ -95,11 +122,10 @@
                             :join? false
                             :async? true}
                            jetty-opts)
-         handler (reloading-site-handler site source)]
-     (proto/start source env)
-     (proto/before-build-hook source env)
+         [paths-atom stop] (watch-source source env)
+         handler (reloading-site-handler paths-atom)]
      (log/info "starting server on port" (:port jetty-opts))
      (let [jetty (run-jetty handler jetty-opts)]
-       (fn stop []
-         (proto/stop source env)
+       (fn shutdown []
+         (stop)
          (.stop jetty))))))

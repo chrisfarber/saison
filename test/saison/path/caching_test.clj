@@ -1,11 +1,11 @@
-(ns saison.caching-path-test
-  (:require [saison.caching-path :as sut]
+(ns saison.path.caching-test
+  (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
+            [saison.path.caching :as sut]
+            [saison.content :as content]
             [saison.content.html :as htmlc]
-            [clojure.java.io :as io]
-            [saison.source.data :as data]
             [saison.path :as path]
-            [saison.content :as content]))
+            [saison.source.data :as data]))
 
 (deftest round-trip-caching
   (is (= 42
