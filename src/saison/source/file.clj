@@ -4,7 +4,8 @@
             [saison.util :as util]
             [pantomime.mime :refer [mime-type-of]]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.tools.logging :as log]))
 
 (def metadata-file-suffix ".meta.edn")
 
@@ -50,7 +51,7 @@
       (let [[name f] item
             absolute-path (.getAbsolutePath f)]
         (when-not (get @cache absolute-path)
-          (println "caching file:" absolute-path)
+          (log/trace "caching file:" absolute-path)
           (swap! cache assoc absolute-path
                  (map->FilePath {:file f
                                  :base-path base-path
@@ -66,7 +67,7 @@
                            absolute-path (.getAbsolutePath f)]
                        (when-not (.isDirectory f)
                          ;; TODO invalidate pairs of [file, metadata-file]
-                         (println "file changed:" absolute-path)
+                         (log/trace "file changed:" absolute-path)
                          (swap! cache dissoc absolute-path)
                          (changed))))
           watcher (hawk/watch! [{:paths [file-root]

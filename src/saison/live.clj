@@ -2,15 +2,16 @@
   "Tools for running a live preview of a saison site.
 
   Primarily, this provides some ring middleware and server."
-  (:require [ring.adapter.jetty :refer [run-jetty]]
+  (:require [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
+            [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
             [saison.transform.inject-script :refer [inject-script]]
-            [saison.util :as util]
-            [clojure.java.io :as io]))
+            [saison.util :as util]))
 
 (def ^{:private true}
   reload-script (slurp (io/resource "saison/reloader.js")))
@@ -29,8 +30,8 @@
               metadata (path/metadata match)
               mime (or (:mime-type metadata)
                        "text/plain")]
-          (println "serving:" pathname)
-          (println "metadata:" metadata)
+          (log/debug "serving" {:pathname pathname
+                                :metadata metadata})
           {:status 200
            :body (content/input-stream (path/content match))
            ;; specify the mime type based on the matching path; this allows index.html to work.
@@ -41,10 +42,10 @@
 
 (defn- wait-for-change [changes-atom respond]
   (let [key (gensym "wait-for-change-")]
-    (println "waiting for change")
+    (log/debug "waiting for change")
     (add-watch changes-atom key (fn [_ _ old new]
                                   (when (not= old new)
-                                    (println "change occurred")
+                                    (log/debug "change occurred")
                                     (respond {:status 204})
                                     (remove-watch changes-atom key))))))
 
@@ -97,6 +98,7 @@
          handler (reloading-site-handler site source)]
      (proto/start source env)
      (proto/before-build-hook source env)
+     (log/info "starting server on port" (:port jetty-opts))
      (let [jetty (run-jetty handler jetty-opts)]
        (fn stop []
          (proto/stop source env)
