@@ -48,6 +48,21 @@
     :map-metadata metadata
     :map-content content}))
 
+(defn handle-meta-and-content
+  [original-path derivation]
+  (if-let [f (:metadata-and-content derivation)]
+    (let [out (delay (f original-path))]
+      (assoc derivation
+             :metadata (fn [_] (first @out))
+             :content (fn [_] (second @out))))
+    derivation))
+
+(defn enhance-derivation [original-path derivation]
+  (reduce (fn [derivation enhancer]
+            (enhancer original-path derivation))
+          derivation
+          [handle-meta-and-content]))
+
 (defn transformer
   "Build a path transformer, which is a function that accepts
    a path and returns a new, modified path.
@@ -57,12 +72,14 @@
    :pathname - a function from a path -> string
    :metadata - a function from a path -> new metadata map
    :content - a function from a path -> new content
+   :metadata-and-content - a function from a path -> [meta, content]
    :cache - a boolean indicating whether the path should cache itself
             default true.
    
    All of the keys are optional. Unspecified aspects of a path
    will be unmodified."
-  [& {:keys [pathname metadata content where cache name]
+  [& {:keys [where cache name]
+      :as opts
       :or {cache true
            where (constantly true)}}]
   (let [derive (if cache
@@ -72,9 +89,7 @@
       (if (where path)
         (do
           (log/debug "applying transform" name (#'pathname path))
-          (derive path {:pathname pathname
-                        :metadata metadata
-                        :content content}))
+          (derive path (enhance-derivation path opts)))
         path))))
 
 (defn find-by-path
