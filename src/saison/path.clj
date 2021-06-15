@@ -1,7 +1,8 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
   (:require [saison.proto :as proto]
-            [saison.path.caching :refer [cached]]))
+            [saison.path.caching :refer [cached]]
+            [clojure.tools.logging :as log]))
 
 (defn pathname
   "returns the url path of the given path"
@@ -61,7 +62,7 @@
    
    All of the keys are optional. Unspecified aspects of a path
    will be unmodified."
-  [& {:keys [pathname metadata content where cache]
+  [& {:keys [pathname metadata content where cache name]
       :or {cache true
            where (constantly true)}}]
   (let [derive (if cache
@@ -69,9 +70,11 @@
                  derive-path)]
     (fn [path]
       (if (where path)
-        (derive path {:pathname pathname
-                      :metadata metadata
-                      :content content})
+        (do
+          (log/debug "applying transform" name (#'pathname path))
+          (derive path {:pathname pathname
+                        :metadata metadata
+                        :content content}))
         path))))
 
 (defn find-by-path

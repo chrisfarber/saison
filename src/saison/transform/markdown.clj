@@ -35,6 +35,7 @@
 
 (defn markdown-transformer []
   (path/transformer
+   :name "markdown"
    :where markdown?
    :pathname ext-to-html
    :metadata parse-metadata

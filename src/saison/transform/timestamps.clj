@@ -40,6 +40,7 @@
 (defn add-timestamps-to-metadata
   [ts-db]
   (path/transformer
+   :name "timestamps"
    :cache false
    :metadata (fn [path]
                (let [pathname (path/pathname path)

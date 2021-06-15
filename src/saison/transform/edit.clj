@@ -5,6 +5,7 @@
 
 (defn apply-edits [pred edits]
   (path/transformer
+   :name "edit-path"
    :where pred
    :content (fn [path]
               (let [content (path/content path)]
