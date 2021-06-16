@@ -20,7 +20,7 @@
 
 (deftest editing-html
   (let [edited (content/string
-                (sut/edit-html*
+                (sut/edit*
                  "<title>hello</title><p></p>"
                  (sut/edits [:title] (html/content "okay"))
                  [(sut/edits [:p] (html/content "there"))]))]

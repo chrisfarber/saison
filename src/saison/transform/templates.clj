@@ -2,7 +2,7 @@
   "transform paths by templating them with enlive"
   (:require [hawk.core :as hawk]
             [net.cgrand.enlive-html :as html]
-            [saison.content.html :as htmlc :refer [edit-html* edits]]
+            [saison.content.html :as htmlc :refer [edit* edits]]
             [saison.source :as source]
             [saison.path :as path]))
 
@@ -34,19 +34,28 @@
 
 (defn apply-template [templates]
   (path/transformer
-   {:content (fn [path]
-               (let [metadata (path/metadata path)
-                     template (get templates (:template metadata))
-                     {:keys [file content-selector]} template
-                     apply-template ((insert-content content-selector) path)
-                     edit-builders (:edits template)
-                     apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
-                                       (fn? edit-builders) (edit-builders path)
-                                       :else identity)]
-                 (edit-html*
-                  (slurp file)
-                  apply-template
-                  apply-edits)))}))
+   :name "template"
+   ;; TODO - cache the templates when possible
+   :cache false
+   :where (fn [path]
+            (let [m (path/metadata path)
+                  template (:template m)]
+              (and template
+                   (path/html? path)
+                   (get templates template))))
+   :content (fn [path]
+              (let [metadata (path/metadata path)
+                    template (get templates (:template metadata))
+                    {:keys [file content-selector]} template
+                    apply-template ((insert-content content-selector) path)
+                    edit-builders (:edits template)
+                    apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
+                                      (fn? edit-builders) (edit-builders path)
+                                      :else identity)]
+                (edit*
+                 (slurp file)
+                 apply-template
+                 apply-edits)))))
 
 (defn templates
   "A source step that applies templates to paths.
@@ -75,15 +84,9 @@
                                      template)))
                           {}
                           template-defs)
-        files-to-watch (map :file template-defs)
-        find-template (fn [path]
-                        (let [m (path/metadata path)
-                              template (:template m)]
-                          (and template
-                               (path/html? path)
-                               (get templates template))))]
+        files-to-watch (map :file template-defs)]
     (source/steps
-     (source/map-paths-where find-template (apply-template templates))
+     (source/transform-paths (apply-template templates))
      (source/add-watcher
       (fn [cb]
         (let [template-watcher (hawk/watch! [{:paths files-to-watch

@@ -1,37 +1,37 @@
 (ns saison.transform.aliases
-  (:require [saison.content.html :refer [edit-html]]
+  (:require [saison.content.html :refer [edit]]
             [saison.path :as path]
             [saison.source :as source]))
 
 (defn alias-expansions
   [paths]
   (reduce (fn [expansions path]
-            (let [alias (-> path
-                            path/metadata
-                            :alias)]
-              (if alias
-                (assoc expansions alias (path/pathname path))
-                expansions)))
+            (if-let [alias (-> path path/metadata :alias)]
+              (assoc expansions alias (path/pathname path))
+              expansions))
           {}
           paths))
 
-(defn resolve-aliases-in-content [path]
-  (let [content (path/content path)
-        url-expansion-map (alias-expansions path/*paths*)]
-    (edit-html content
-               [#{:link :a}]
-               (fn [node]
-                 (let [href (get-in node [:attrs :href])
-                       resolved-href (get url-expansion-map href)]
-                   (if resolved-href
-                     (assoc-in node [:attrs :href] resolved-href)
-                     node))))))
+(defn resolve-aliases-in-content [url-expansion-map]
+  (fn [path]
+    (let [content (path/content path)]
+      (edit content
+            [#{:link :a}]
+            (fn [node]
+              (let [href (get-in node [:attrs :href])
+                    resolved-href (get url-expansion-map href)]
+                (if resolved-href
+                  (assoc-in node [:attrs :href] resolved-href)
+                  node)))))))
 
-(def resolve-aliases-in-path
-  (path/transformer
-   {:content resolve-aliases-in-content}))
+(defn resolve-aliases-in-path [paths]
+  (let [expansion-map (alias-expansions paths)]
+    (path/transformer
+     :name "resolve-path-aliases"
+     :where path/html?
+     :content (resolve-aliases-in-content expansion-map))))
 
 (defn resolve-path-aliases
   "A source step for resolving path aliases in HTML files."
   []
-  (source/map-paths-where path/html? resolve-aliases-in-path))
+  (source/transform-paths-contextually resolve-aliases-in-path))

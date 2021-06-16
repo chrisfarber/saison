@@ -1,30 +1,31 @@
 (ns saison.transform.edit
-  (:require [saison.source :as source]
+  (:require [saison.content.html :as htmlc]
             [saison.path :as path]
-            [saison.content.html :as htmlc]
-            [net.cgrand.enlive-html :as html]))
+            [saison.source :as source]))
 
-(defn apply-edits [build-edit-ops]
+(defn apply-edits [pred edits]
   (path/transformer
-   {:content (fn [path]
-               (let [content (path/content path)]
-                 (htmlc/edit-html* content (build-edit-ops path))))}))
+   :name "edit-path"
+   :where pred
+   :content (fn [path]
+              (let [content (path/content path)]
+                (htmlc/edit* content edits)))))
 
 (defn pred-for [pathname-or-pred]
-  (cond (string? pathname-or-pred) (fn [path] (= pathname-or-pred
-                                                 (path/pathname path)))
-        (fn? pathname-or-pred) pathname-or-pred))
+  (cond (string? pathname-or-pred)
+        (fn [path] (= pathname-or-pred
+                      (path/pathname path)))
+
+        (fn? pathname-or-pred)
+        pathname-or-pred))
 
 (defn edit-path*
-  [pred build-edit-ops]
-  (source/map-paths-where pred (apply-edits build-edit-ops)))
+  [path-name-or-pred & edit-fns]
+  (source/transform-paths
+   (apply-edits (pred-for path-name-or-pred)
+                edit-fns)))
 
 (defmacro edit-path
-  {:style/indent [2 :defn]}
-  [path-name-or-pred path-binding & forms]
-  {:pre [(vector? path-binding)
-         (= 1 (count path-binding))]}
-  `(edit-path*
-    (pred-for ~path-name-or-pred)
-    (fn ~path-binding
-      ~@forms)))
+  [path-name-or-pred & rules]
+  `(edit-path* ~path-name-or-pred
+               (htmlc/edits ~@rules)))

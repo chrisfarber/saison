@@ -3,6 +3,8 @@
             [saison.build :as build]
             [saison.live :as live]))
 
+(System/setProperty "tika.config" "saison/resources/tika-config.xml")
+
 (defn resolve-site [ns-str]
   (try
     (-> ns-str

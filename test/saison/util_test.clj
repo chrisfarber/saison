@@ -9,7 +9,7 @@
     (is (= relative-paths
            #{"/image.png"
              "/robots.txt"
-             "/robots.txt.edn"
+             "/robots.txt.meta.edn"
              "/sub/thing.html"}))))
 
 (deftest add-path-component

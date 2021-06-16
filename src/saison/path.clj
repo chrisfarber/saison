@@ -1,14 +1,8 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
-  (:require [saison.proto :as proto]))
-
-(def ^:dynamic *paths*
-  "bound to a seq of other paths that have been discovered within the site"
-  nil)
-
-(def ^:dynamic *env*
-  "bound to a map of environment info about the site"
-  nil)
+  (:require [saison.proto :as proto]
+            [saison.path.caching :refer [cached]]
+            [clojure.tools.logging :as log]))
 
 (defn pathname
   "returns the url path of the given path"
@@ -16,30 +10,16 @@
   (proto/pathname path))
 
 (defn metadata
-  "metadata for the given path.
-
-  if `paths` and `env` are suppplied, they will automatically be bound
-  to `*paths*` and `*env*`, respectively."
+  "metadata for the given path."
 
   ([path]
-   (proto/metadata path))
-  ([path paths env]
-   (binding [*paths* paths
-             *env* env]
-     (proto/metadata path))))
+   (proto/metadata path)))
 
 (defn content
-  "compute content for the given path.
-
-  if `paths` and `env` are suppplied, they will automatically be bound
-  to `*paths*` and `*env*`, respectively."
+  "compute content for the given path."
 
   ([path]
-   (proto/content path))
-  ([path paths env]
-   (binding [*paths* paths
-             *env* env]
-     (proto/content path))))
+   (proto/content path)))
 
 (defrecord DerivedPath
            [original map-path map-metadata map-content]
@@ -68,21 +48,47 @@
     :map-metadata metadata
     :map-content content}))
 
+(defn handle-meta-and-content
+  [original-path derivation]
+  (if-let [f (:metadata-and-content derivation)]
+    (let [out (delay (f original-path))]
+      (assoc derivation
+             :metadata (fn [_] (:metadata @out))
+             :content (fn [_] (:content @out))))
+    derivation))
+
+(defn enhance-derivation [original-path derivation]
+  (reduce (fn [derivation enhancer]
+            (enhancer original-path derivation))
+          derivation
+          [handle-meta-and-content]))
+
 (defn transformer
   "Build a path transformer, which is a function that accepts
    a path and returns a new, modified path.
    
-   Accepts a map with the keys:
+   The following options are accepted:
+   :where - a predicate from path -> boolean
    :pathname - a function from a path -> string
    :metadata - a function from a path -> new metadata map
    :content - a function from a path -> new content
+   :metadata-and-content - a function from a path -> [meta, content]
+   :cache - a boolean indicating whether the path should cache itself
+            default true.
    
    All of the keys are optional. Unspecified aspects of a path
    will be unmodified."
-  [modifiers]
-  (fn [path]
-    (derive-path path modifiers)))
-
+  [& {:keys [where cache name]
+      :as opts
+      :or {cache true
+           where (constantly true)}}]
+  (let [derive (if cache
+                 (comp cached derive-path)
+                 derive-path)]
+    (fn [path]
+      (if (where path)
+        (derive path (enhance-derivation path opts))
+        path))))
 
 (defn find-by-path
   "Given a list of paths, find the first exact match"
