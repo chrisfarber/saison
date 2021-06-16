@@ -9,7 +9,7 @@
    :where pred
    :content (fn [path]
               (let [content (path/content path)]
-                (htmlc/edit-html* content edits)))))
+                (htmlc/edit* content edits)))))
 
 (defn pred-for [pathname-or-pred]
   (cond (string? pathname-or-pred)

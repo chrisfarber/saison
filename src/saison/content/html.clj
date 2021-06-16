@@ -48,7 +48,7 @@
   [html edit-fn]
   (edit-fn html))
 
-(defn edit-html*
+(defn edit*
   "Applies whatever edits are supplied to `content`.
 
   The content is coerced to html automatically, and the resulting
@@ -63,11 +63,11 @@
            (html content)
            (flatten edit-fns))))
 
-(defmacro edit-html
+(defmacro edit
   "Parse content as html and apply the specified enlive rules to it.
 
   Calls `as-html` on the result for you."
   {:style/indent [1 :form]}
   [content & rules]
-  `(edit-html* ~content
-               (edits ~@rules)))
+  `(edit* ~content
+          (edits ~@rules)))

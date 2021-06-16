@@ -2,7 +2,7 @@
   "transform paths by templating them with enlive"
   (:require [hawk.core :as hawk]
             [net.cgrand.enlive-html :as html]
-            [saison.content.html :as htmlc :refer [edit-html* edits]]
+            [saison.content.html :as htmlc :refer [edit* edits]]
             [saison.source :as source]
             [saison.path :as path]))
 
@@ -52,7 +52,7 @@
                     apply-edits (cond (sequential? edit-builders) (map #(% path) edit-builders)
                                       (fn? edit-builders) (edit-builders path)
                                       :else identity)]
-                (edit-html*
+                (edit*
                  (slurp file)
                  apply-template
                  apply-edits)))))

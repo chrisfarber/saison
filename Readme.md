@@ -122,7 +122,7 @@ Consider the following example:
             [saison.content :as content]))
 
 (content/string
-  (htmlc/edit-html "<p>this is a <span>normal</span> paragraph</p>"
+  (htmlc/edit "<p>this is a <span>normal</span> paragraph</p>"
     [:span] (html/content "special")))
 
 ;; => "<p>this is a <span>special</span> paragraph</p>"

@@ -1,5 +1,5 @@
 (ns saison.transform.aliases
-  (:require [saison.content.html :refer [edit-html]]
+  (:require [saison.content.html :refer [edit]]
             [saison.path :as path]
             [saison.source :as source]))
 
@@ -15,14 +15,14 @@
 (defn resolve-aliases-in-content [url-expansion-map]
   (fn [path]
     (let [content (path/content path)]
-      (edit-html content
-                 [#{:link :a}]
-                 (fn [node]
-                   (let [href (get-in node [:attrs :href])
-                         resolved-href (get url-expansion-map href)]
-                     (if resolved-href
-                       (assoc-in node [:attrs :href] resolved-href)
-                       node)))))))
+      (edit content
+            [#{:link :a}]
+            (fn [node]
+              (let [href (get-in node [:attrs :href])
+                    resolved-href (get url-expansion-map href)]
+                (if resolved-href
+                  (assoc-in node [:attrs :href] resolved-href)
+                  node)))))))
 
 (defn resolve-aliases-in-path [paths]
   (let [expansion-map (alias-expansions paths)]
