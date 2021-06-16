@@ -14,3 +14,22 @@
     (is (= {:a true
             :b "new"}
            (sut/metadata derived)))))
+
+(deftest resolving-paths
+  (is (= "/something/somewhere.html"
+         (sut/resolve (data/path {:pathname "/something/else.html"})
+                      "somewhere.html")))
+  (is (= "/something/somewhere.html"
+         (sut/resolve (data/path {:pathname "/something/else.html"})
+                      "./somewhere.html")))
+  (is (= "/different/somewhere.html"
+         (sut/resolve (data/path {:pathname "/something/else.html"})
+                      "/different/somewhere.html")))
+  (is (= "/a/b/c"
+         (sut/resolve (data/path {:pathname "/a/d/g"})
+                      "../b/c"))))
+
+(deftest canonicalizing-paths
+  (is (= "https://atomicobject.com/a/b/c.html"
+         (sut/canonicalize "https://atomicobject.com/a"
+                           "b/c.html"))))

@@ -1,13 +1,20 @@
 (ns saison.path
   "Functions for manipulating paths and collections of paths."
-  (:require [saison.proto :as proto]
-            [saison.path.caching :refer [cached]]
-            [clojure.tools.logging :as log]))
+  (:require [saison.path.caching :refer [cached]]
+            [saison.proto :as proto])
+  (:refer-clojure :exclude [resolve])
+  (:import [java.net URI]))
 
 (defn pathname
   "returns the url path of the given path"
   [path]
-  (proto/pathname path))
+  (cond
+    (satisfies? proto/Path path)
+    (proto/pathname path)
+
+    (string? path) path
+
+    :else (throw (ex-info "Can't make pathname" {:from path}))))
 
 (defn metadata
   "metadata for the given path."
@@ -107,3 +114,16 @@
   [path-or-meta]
   (= "text/html"
      (mime-type path-or-meta)))
+
+(defn resolve
+  "Given a Path and a relative url path, return a full pathname."
+  [path rel-url]
+  (let [pathname (pathname path)
+        uri (URI. pathname)]
+    (str (.resolve uri rel-url))))
+
+(defn canonicalize
+  "Given a root URL and a Path or pathname, build a full URL."
+  [root-url path-or-pathname]
+  (str (.resolve (URI. (str root-url "/"))
+                 (str "./" (pathname path-or-pathname)))))
