@@ -17,6 +17,14 @@
   (java.io.File. (.getParent file)
                  (str (.getName file) metadata-file-suffix)))
 
+(defn files-affected-by [^java.io.File file]
+  (if (file-is-metadata file)
+    [file
+     (let [path-str (.getAbsolutePath file)]
+       (io/file (.substring path-str 0 (- (count path-str)
+                                          (count metadata-file-suffix)))))]
+    [file]))
+
 (defrecord FilePath
            [file base-path path metadata read-metadata-file]
   proto/Path
@@ -72,9 +80,9 @@
                      (let [f (:file e)
                            absolute-path (.getAbsolutePath f)]
                        (when-not (.isDirectory f)
-                         ;; TODO invalidate pairs of [file, metadata-file]
                          (log/trace "file event:" (:kind e) absolute-path)
-                         (swap! cache dissoc absolute-path)
+                         (apply swap! cache dissoc
+                                (map str (files-affected-by f)))
                          (changed))))
           watcher (hawk/watch! [{:paths [file-root]
                                  :handler notifier}])]
