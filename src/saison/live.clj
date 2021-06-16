@@ -114,12 +114,14 @@
 
   ([site] (live-preview site {}))
   ([site jetty-opts]
-   (let [source (build-reloadable-source site)
-         env (:env site)
-         jetty-opts (merge {:port 1931
+   (let [jetty-opts (merge {:port 1931
                             :join? false
                             :async? true}
                            jetty-opts)
+         site (assoc-in site [:env :public-url]
+                        (str "http://localhost:" (:port jetty-opts) "/"))
+         source (build-reloadable-source site)
+         env (:env site)
          [paths-atom stop] (watch-source source env)
          handler (reloading-site-handler paths-atom)]
      (log/info "starting server on port" (:port jetty-opts))
