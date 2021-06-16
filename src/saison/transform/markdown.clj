@@ -24,7 +24,8 @@
                                (assoc m k (first v)))
                              (assoc existing-meta :mime-type "text/html")
                              metadata)]
-    [new-metadata html]))
+    {:metadata new-metadata
+     :content html}))
 
 (defn markdown?
   [path]

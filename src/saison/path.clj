@@ -53,8 +53,8 @@
   (if-let [f (:metadata-and-content derivation)]
     (let [out (delay (f original-path))]
       (assoc derivation
-             :metadata (fn [_] (first @out))
-             :content (fn [_] (second @out))))
+             :metadata (fn [_] (:metadata @out))
+             :content (fn [_] (:content @out))))
     derivation))
 
 (defn enhance-derivation [original-path derivation]
@@ -87,9 +87,7 @@
                  derive-path)]
     (fn [path]
       (if (where path)
-        (do
-          (log/debug "applying transform" name (#'pathname path))
-          (derive path (enhance-derivation path opts)))
+        (derive path (enhance-derivation path opts))
         path))))
 
 (defn find-by-path

@@ -27,11 +27,9 @@
           match (or (path/find-by-path paths path)
                     (path/find-by-path paths (util/add-path-component path "index.html")))]
       (if (some? match)
-        (let [pathname (path/pathname match)
-              metadata (path/metadata match)
+        (let [metadata (path/metadata match)
               mime (or (:mime-type metadata)
                        "text/plain")]
-          (log/debug "serving" pathname)
           {:status 200
            :body (content/input-stream (path/content match))
            ;; specify the mime type based on the matching path; this allows index.html to work.
@@ -42,10 +40,10 @@
 
 (defn- wait-for-change [changes-atom respond]
   (let [key (gensym "wait-for-change-")]
-    (log/debug "browser waiting for change" key)
+    (log/trace "browser waiting for change" key)
     (add-watch changes-atom key (fn [_ _ old new]
                                   (when (not= old new)
-                                    (log/debug "notifying browser of change" key)
+                                    (log/trace "notifying browser of change" key)
                                     (respond {:status 204})
                                     (remove-watch changes-atom key))))))
 
