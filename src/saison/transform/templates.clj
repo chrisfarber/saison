@@ -33,10 +33,9 @@
        [content-selector] (html/substitute html-content)))))
 
 (defn apply-template [templates]
-  ;; TODO when transformer caching is implemented, make sure we invalidate it
-  ;;      when templates change.
   (path/transformer
    :name "template"
+   ;; TODO - cache the templates when possible
    :cache false
    :where (fn [path]
             (let [m (path/metadata path)

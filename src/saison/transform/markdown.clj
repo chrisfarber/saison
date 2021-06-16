@@ -29,7 +29,6 @@
 
 (defn markdown?
   [path]
-  ;; TODO use the mime type rather than path extension
   (#{"md" "markdown"} (util/path-extension (path/pathname path))))
 
 (defn markdown-transformer []
