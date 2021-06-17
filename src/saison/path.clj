@@ -53,7 +53,9 @@
    {:original path-inst
     :map-path pathname
     :map-metadata metadata
-    :map-content content}))
+    :map-content content
+    ;; TODO the following is a hack for equality semantics:
+    :extra (rand)}))
 
 (defn handle-meta-and-content
   [original-path derivation]
