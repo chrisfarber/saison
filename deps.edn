@@ -9,6 +9,7 @@
   ring/ring {:mvn/version "1.9.3"}
 
   markdown-clj/markdown-clj {:mvn/version "1.10.5"}
+  com.vladsch.flexmark/flexmark-all {:mvn/version "0.62.2"}
 
   org.clojure/data.xml {:mvn/version "0.0.8"}
 
