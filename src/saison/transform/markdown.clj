@@ -1,43 +1,38 @@
 (ns saison.transform.markdown
   "Source and generator for basic markdown-templated files"
-  (:require [markdown.core :refer [md-to-html-string-with-meta]]
-            [saison.content :as content]
+  (:require [saison.content :as content]
             [saison.path :as path]
             [saison.source :as source]
-            [saison.util :as util]
-            [clojure.java.io :as io])
-  (:import [com.vladsch.flexmark.html HtmlRenderer]
+            [saison.util :as util])
+  (:import [com.vladsch.flexmark.ext.tables TablesExtension]
+           [com.vladsch.flexmark.html HtmlRenderer]
            [com.vladsch.flexmark.parser Parser]
-           [com.vladsch.flexmark.util.data MutableDataSet]
-           [com.vladsch.flexmark.ext.yaml.front.matter YamlFrontMatterExtension]))
+           [com.vladsch.flexmark.util.data MutableDataSet]))
 
 (defn ext-to-html [path]
   (util/set-path-extension (path/pathname path) "html"))
 
-(defn parse-markdown [stream]
+(defn parse-markdown [str]
   (let [options (doto (MutableDataSet.)
-                  (.set Parser/EXTENSIONS [(YamlFrontMatterExtension/create)]))
+                  (.set TablesExtension/COLUMN_SPANS false)
+                  (.set TablesExtension/APPEND_MISSING_COLUMNS true)
+                  (.set TablesExtension/DISCARD_EXTRA_COLUMNS true)
+                  (.set TablesExtension/HEADER_SEPARATOR_COLUMN_MATCH true)
+                  (.set Parser/EXTENSIONS [(TablesExtension/create)]))
         parser (.build (Parser/builder options))
         renderer (.build (HtmlRenderer/builder options))
-        document (with-open [rdr (io/reader stream)]
-                   (.parseReader parser rdr))]
-    {:html (.render renderer document)
-     :metadata {}}))
+        document (.parse parser str)]
+    (.render renderer document)))
+
+(defn update-mime [path]
+  (assoc (path/metadata path)
+         :mime-type "text/html"))
 
 (defn parse-markdown-from-path [path]
-  (let [existing-meta (path/metadata path)
-        markdown-content (path/content path)
-        markdown-stream (content/input-stream markdown-content)
-        {:keys [metadata html]} (parse-markdown markdown-stream)
-        ;; md-to-meta gives us a map of keywords to arrays of strings.
-        ;; (because you could supply the same header twice)
-        ;; here I arbitrarily take the first value.
-        new-metadata (reduce (fn [m [k v]]
-                               (assoc m k (first v)))
-                             (assoc existing-meta :mime-type "text/html")
-                             metadata)]
-    {:metadata new-metadata
-     :content html}))
+  (let [markdown-content (path/content path)
+        markdown-string (content/string markdown-content)
+        html (parse-markdown markdown-string)]
+    html))
 
 (defn markdown?
   [path]
@@ -48,7 +43,8 @@
    :name "markdown"
    :where markdown?
    :pathname ext-to-html
-   :metadata-and-content parse-markdown-from-path))
+   :metadata update-mime
+   :content parse-markdown-from-path))
 
 (defn markdown
   "A source step that will parse any markdown path into HTML."

@@ -5,7 +5,8 @@
             [saison.proto :as proto]
             [saison.source :as source]
             [saison.source.data :as data]
-            [saison.transform.markdown :as sut]))
+            [saison.transform.markdown :as sut]
+            [saison.content :as content]))
 
 (deftest markdown-test
   (let [src (source/construct
@@ -51,3 +52,12 @@ bye"})
     ;; the mime type is set to html
     (is (= "text/html"
            (path/mime-type metadata)))))
+
+(deftest markdown-with-no-content-outputs-empty-string
+  (let [src (source/construct
+             (data/source {:pathname "/hi.md"
+                           :content ""})
+             (sut/markdown))
+        path (path/find-by-path (proto/scan src) "/hi.html")
+        content (content/string (path/content path))]
+    (is (= "" content))))
