@@ -99,8 +99,11 @@
       (loop []
         (when (<!! update-chan)
           (log/trace "watch-source is updating the paths atom")
-          (reset! paths (proto/scan source))
-          (log/trace "watch-source has updated the paths atom")
+          (try
+            (reset! paths (proto/scan source))
+            (log/trace "watch-source has updated the paths atom")
+            (catch Throwable e
+              (log/error e "failed to scan the source")))
           (recur))))
     [paths stop]))
 
