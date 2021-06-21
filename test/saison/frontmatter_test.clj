@@ -32,8 +32,6 @@ but no frontmatter")
          (sut/frontmatter (content/input-stream ex-simple)))))
 
 (deftest skip-frontmatter-with-no-frontmatter
-  (println "huh" (sut/skip-frontmatter
-                  (content/input-stream ex-no-frontmatter)))
   (is (= ex-no-frontmatter (str/trim
                             (sut/skip-frontmatter
                              (content/input-stream ex-no-frontmatter))))))

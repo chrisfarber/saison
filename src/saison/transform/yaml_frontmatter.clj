@@ -8,10 +8,12 @@
 (defn parse-yaml-frontmatter
   [path]
   (with-open [stream (content/input-stream (path/content path))]
-    (let [meta-str (fm/frontmatter stream)
-          meta (yaml/parse-string meta-str)]
-      (merge (path/metadata path)
-             meta))))
+    (let [orig-meta (path/metadata path)
+          meta-str (fm/frontmatter stream)]
+      (if meta-str
+        (merge orig-meta
+               (yaml/parse-string meta-str))
+        orig-meta))))
 
 (defn skip-yaml-frontmatter
   [path]
@@ -27,5 +29,9 @@
    :content skip-yaml-frontmatter))
 
 (defn yaml-frontmatter
+  "Parse YAML frontmatter from path content. The frontmatter will be
+   merged into the path's metadata and removed from its content.
+   You must supply a `:where` predicate that decides which paths will
+   be scanned for frontmatter."
   [& {:keys [where]}]
   (source/transform-paths (yaml-frontmatter-transformer where)))
