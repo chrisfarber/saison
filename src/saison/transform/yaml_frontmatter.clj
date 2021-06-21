@@ -11,8 +11,8 @@
     (let [orig-meta (path/metadata path)
           meta-str (fm/frontmatter stream)]
       (if meta-str
-        (merge orig-meta
-               (yaml/parse-string meta-str))
+        (merge-with merge orig-meta
+                    (yaml/parse-string meta-str))
         orig-meta))))
 
 (defn skip-yaml-frontmatter

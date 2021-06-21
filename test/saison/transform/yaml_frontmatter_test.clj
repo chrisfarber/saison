@@ -10,10 +10,14 @@
 (deftest yaml-frontmatter-reads-metadata
   (let [src (source/construct
              (data/source {:pathname "/index.md"
-                           :metadata {:extra true}
+                           :metadata {:extra true
+                                      :html-meta {:a 1
+                                                  :b 1}}
                            :content "
 ---
 from-yaml: true
+html-meta:
+  b: 2
 ---
 
 this is more content
@@ -24,14 +28,18 @@ this is more content
         metadata (path/metadata path)
         content (content/string (path/content path))]
     (is (= {:extra true
+            :html-meta {:a 1
+                        :b 2}
             :from-yaml true}
            metadata))
     (is (= "\nthis is more content\n" content))))
 
 (deftest yaml-frontmatter-is-not-present
-  (let [content-str "a
+  (let [content-str "a line that is not frontmatter
 ---
 from-yaml: true
+html-meta:
+  b: 2
 ---
 
 this is more content
