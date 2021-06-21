@@ -6,6 +6,7 @@
             [saison.source :as source]
             [saison.source.data :as data]
             [saison.transform.markdown :as sut]
+            [saison.transform.yaml-frontmatter :refer [yaml-frontmatter]]
             [saison.content :as content]))
 
 (deftest markdown-test
@@ -25,9 +26,11 @@
              (data/source
               {:pathname "/index.md"
                :metadata {:extra true}
-               :content "Title: a title
-Title: a second title
-Date: 2020-09-25
+               :content "
+---
+title: a nice title
+date: 2020-09-25
+---
 
 # a blog post
 
@@ -39,6 +42,7 @@ This is some content
 ## subheading
 
 bye"})
+             (yaml-frontmatter :where sut/markdown?)
              (sut/markdown))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
@@ -47,7 +51,7 @@ bye"})
     (is (true?
          (:extra metadata)))
     ;; metadata comes from markdown metadata
-    (is (= "a title"
+    (is (= "a nice title"
            (:title metadata)))
     ;; the mime type is set to html
     (is (= "text/html"
