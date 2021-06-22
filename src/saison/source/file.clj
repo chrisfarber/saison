@@ -1,6 +1,5 @@
 (ns saison.source.file
   (:require [hawk.core :as hawk]
-            [saison.path.caching :refer [cached]]
             [saison.proto :as proto]
             [saison.util :as util]
             [pantomime.mime :refer [mime-type-of]]
@@ -62,16 +61,11 @@
         (when-not (get @cache absolute-path)
           (log/trace "caching file:" absolute-path)
           (swap! cache assoc absolute-path
-                 (cached
-                  ;; immediately wrap the path with (cached) so that it
-                  ;; has a unique equality value. If we don't do this, then
-                  ;; a source/transform-paths step will use cached data when
-                  ;; it should not
-                  (map->FilePath {:file f
-                                  :base-path base-path
-                                  :path name
-                                  :metadata metadata
-                                  :read-metadata-file read-metadata-files}))))))
+                 (map->FilePath {:file f
+                                 :base-path base-path
+                                 :path name
+                                 :metadata metadata
+                                 :read-metadata-file read-metadata-files})))))
     (vals @cache))
 
   (watch
@@ -99,7 +93,7 @@
 
 (defn files
   "create a source from files on the filesystem.
-   
+
    the following options can be supplied:
    :root - required. the relative path of a folder to read files from.
    :base-path - if specified, prefix all pathnames with the base path

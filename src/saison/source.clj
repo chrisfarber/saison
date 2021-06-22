@@ -1,5 +1,6 @@
 (ns saison.source
-  (:require [saison.proto :as proto]))
+  (:require [saison.proto :as proto])
+  (:import [java.util IdentityHashMap]))
 
 (def ^:dynamic *previewing*
   "true when the the site needs to be live-reloadable"
@@ -59,22 +60,22 @@
 
 (defn transform-paths
   "Apply a transformation to each path that flows through the source.
-   
+
    By default, the transformed paths are cached. This can be disabled via the
    :cache option."
   [transformer & {:keys [cache] :or {cache true}}]
   (if-not cache
     [[:scan #(mapv transformer %)]]
-    (let [xf-cache (atom {})]
+    (let [xf-cache (atom (IdentityHashMap.))]
       [[:scan
         (fn [paths]
           (let [previous @xf-cache
-                next (reduce (fn [c path]
-                               (assoc c path (if-let [derived (previous path)]
-                                               derived
-                                               (transformer path))))
-                             {}
-                             paths)]
+                next (IdentityHashMap. (count paths))]
+            (doseq [path paths]
+              (.put next path
+                    (if-let [derived (.get previous path)]
+                      derived
+                      (transformer path))))
             (reset! xf-cache next)
             (into [] (vals next))))]
        [:stop (fn [_] (reset! xf-cache {}))]])))
@@ -82,9 +83,9 @@
 (defn transform-paths-contextually
   "Similar to `transform-paths`, but where the transform is dependent upon
    the entire set of paths, rather than a specific individual path.
-   
+
    Use sparingly, as this defeats various optimizations and caching strategies.
-   
+
    `transform-builder` is expected to return a transformer and will be called
    with the vector of paths that have been emitted so far."
   [transform-builder]

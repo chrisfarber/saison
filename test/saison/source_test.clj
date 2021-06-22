@@ -2,7 +2,9 @@
   (:require [clojure.test :as t :refer [deftest is]]
             [saison.proto :as proto]
             [saison.source :as sut]
-            [saison.source.data :as data]))
+            [saison.source.data :as data]
+            [saison.path :as path]
+            [saison.content :as content]))
 
 (deftest concat-sources
   (let [src (sut/construct
@@ -62,3 +64,32 @@
     (proto/before-publish-hook merged {})
     (is (= 1 @build-count))
     (is (= 1 @publish-count))))
+
+(deftest transform-paths-caches-on-object-identity
+  (let [path-out (atom nil)
+        content-fn (fn [] @path-out)
+        build-path #(data/path {:pathname "a.html"
+                                :content content-fn})
+        current-path (atom (build-path))
+        src (sut/construct
+             (sut/modify-paths
+              (fn [paths]
+                (conj paths @current-path)))
+             (sut/transform-paths (path/transformer)))
+        set (fn [content]
+              (reset! path-out content)
+              (reset! current-path (build-path)))
+        read-path #(path/find-by-path (proto/scan src) "a.html")
+        read #(content/string (read-path))]
+    ;; each build-path invocation should give a unique object that is
+    ;; equal to the last. this mimics the behavior of saison.file.FilePath
+    (is (not (identical? (build-path) (build-path))))
+    (is (= (build-path) (build-path)))
+    (set "abcd")
+    (is (= "abcd" (read)))
+    (set "abc")
+    (is (= "abc" (read)))
+    (set "abcd")
+    (is (= "abcd" (read)))
+    ;; repeat reads should yield identical objects
+    (is (identical? (read-path) (read-path)))))
