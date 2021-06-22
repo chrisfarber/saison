@@ -23,6 +23,6 @@
              (sut/resolve-path-aliases))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
-        content (content/string (path/content path))]
+        content (content/string path)]
     (is (str/index-of content "href=\"/about.html\""))
     (is (str/index-of content "href=\"/thereee\""))))

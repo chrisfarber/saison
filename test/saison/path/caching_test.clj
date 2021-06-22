@@ -20,7 +20,7 @@
   (is (nil? (sut/content-to-cache (io/file "Readme.md"))))
   (let [p (sut/cached (data/path {:pathname "Readme.md"
                                   :content (io/file "Readme.md")}))]
-    (is (some? (content/string (path/content p))))))
+    (is (some? (content/string p)))))
 
 (deftest content-to-cache-give-bytes-for-stream
   (is (bytes? (sut/content-to-cache (content/input-stream "hi")))))
@@ -30,8 +30,8 @@
         path (data/path {:pathname "/hello.txt"
                          :content #(content/input-stream @content-val)})
         cached (sut/cached path)]
-    (is (= "hi" (content/string (path/content path))))
-    (is (= "hi" (content/string (path/content cached))))
+    (is (= "hi" (content/string path)))
+    (is (= "hi" (content/string cached)))
     (reset! content-val "different")
-    (is (= "different" (content/string (path/content path))))
-    (is (= "hi" (content/string (path/content cached))))))
+    (is (= "different" (content/string path)))
+    (is (= "hi" (content/string cached)))))

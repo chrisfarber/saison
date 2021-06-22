@@ -17,7 +17,7 @@
              (sut/markdown))
         paths (proto/scan src)
         path (path/find-by-path paths "/index.html")
-        content (path/content path)]
+        content (content/string path)]
     (is (str/index-of content "<h1>"))
     (is (str/index-of content "Hello"))))
 
@@ -63,5 +63,5 @@ bye"})
                            :content ""})
              (sut/markdown))
         path (path/find-by-path (proto/scan src) "/hi.html")
-        content (content/string (path/content path))]
+        content (content/string path)]
     (is (= "" content))))

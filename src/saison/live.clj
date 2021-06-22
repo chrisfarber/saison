@@ -31,7 +31,7 @@
               mime (or (:mime-type metadata)
                        "text/plain")]
           {:status 200
-           :body (content/input-stream (path/content match))
+           :body (content/input-stream match)
            ;; specify the mime type based on the matching path; this allows index.html to work.
            :headers {"Content-Type" mime}})
         {:status 404

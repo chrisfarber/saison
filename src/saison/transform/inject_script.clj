@@ -6,7 +6,7 @@
 
 (defn content-script-injector [script-text]
   (fn [path]
-    (edit (path/content path)
+    (edit path
           [:body]
           (html/append {:tag "script"
                         :attrs {"type" "module"}

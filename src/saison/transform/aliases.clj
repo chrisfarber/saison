@@ -17,7 +17,7 @@
 (defn resolve-aliases-in-content [url-expansion-map]
   (fn [path]
     (htmlc/edit*
-     (path/content path)
+     path
      (url/edit-urls
       (fn [href]
         (or (get url-expansion-map href) href))))))

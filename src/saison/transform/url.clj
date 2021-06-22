@@ -23,7 +23,7 @@
 (defn canonicalize-urls-in-content [public-url]
   (fn [path]
     (htmlc/edit*
-     (path/content path)
+     path
      (edit-urls #(canonicalize-url public-url path %)))))
 
 (defn canonicalize-path

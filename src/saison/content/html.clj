@@ -1,7 +1,9 @@
 (ns saison.content.html
   (:require [clojure.string :as str]
+            [saison.proto]
             [net.cgrand.enlive-html :as html]
-            [saison.content :as content]))
+            [saison.content :as content]
+            [saison.proto :as proto]))
 
 (defmethod content/string ::html
   [html-seq]
@@ -34,6 +36,10 @@
 (defmethod html ::html
   [content]
   content)
+
+(defmethod html saison.proto.Path
+  [path]
+  (html (proto/content path)))
 
 (defn select [content selector]
   (as-html

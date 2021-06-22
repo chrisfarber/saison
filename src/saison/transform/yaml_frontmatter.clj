@@ -8,7 +8,7 @@
 
 (defn parse-yaml-frontmatter
   [path]
-  (with-open [stream (content/input-stream (path/content path))]
+  (with-open [stream (content/input-stream path)]
     (let [orig-meta (path/metadata path)
           meta-str (fm/frontmatter stream)]
       (if meta-str
@@ -18,7 +18,7 @@
 
 (defn skip-yaml-frontmatter
   [path]
-  (with-open [stream (content/input-stream (path/content path))]
+  (with-open [stream (content/input-stream path)]
     (fm/skip-frontmatter stream)))
 
 (defn yaml-frontmatter-transformer

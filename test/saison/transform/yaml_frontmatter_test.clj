@@ -26,7 +26,7 @@ this is more content
         paths (proto/scan src)
         path (first paths)
         metadata (path/metadata path)
-        content (content/string (path/content path))]
+        content (content/string path)]
     (is (= {:extra true
             :html-meta {:a 1
                         :b 2}
@@ -52,7 +52,7 @@ this is more content
         paths (proto/scan src)
         path (first paths)
         metadata (path/metadata path)
-        content (content/string (path/content path))]
+        content (content/string path)]
     (is (= {:extra true}
            metadata))
     (is (= content-str content))))

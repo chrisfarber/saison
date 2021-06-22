@@ -26,6 +26,6 @@
                                        [:h1] (html/content title))))
         paths (proto/scan edited)
         path (path/find-by-path paths "/thing/2.html")
-        content (content/string (path/content path))]
+        content (content/string path)]
     (is (str/index-of content "<h1>thing 1</h1>"))
     (is (str/index-of content "<h1>thing 2</h1>"))))

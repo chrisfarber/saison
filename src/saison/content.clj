@@ -1,5 +1,6 @@
 (ns saison.content
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [saison.proto :as proto]))
 
 (defmulti input-stream
   "Coerce content to an input stream.
@@ -24,6 +25,10 @@
       .getBytes
       java.io.ByteArrayInputStream.))
 
+(defmethod input-stream saison.proto.Path
+  [path]
+  (input-stream (proto/content path)))
+
 (defmethod string ::streamable
   [streamable]
   (with-open [stream (io/input-stream streamable)]
@@ -32,3 +37,7 @@
 (defmethod string String
   [s]
   s)
+
+(defmethod string saison.proto.Path
+  [path]
+  (string (proto/content path)))

@@ -36,8 +36,7 @@
   [build-parser-options]
   (let [parser (markdown-parser build-parser-options)]
     (fn [path]
-      (let [markdown-content (path/content path)
-            markdown-string (content/string markdown-content)]
+      (let [markdown-string (content/string path)]
         (parser markdown-string)))))
 
 (defn markdown?

@@ -27,8 +27,7 @@
 (defn- insert-content
   [content-selector]
   (fn [path]
-    (let [content (path/content path)
-          html-content (htmlc/html content)]
+    (let [html-content (htmlc/html path)]
       (edits
        [content-selector] (html/substitute html-content)))))
 
