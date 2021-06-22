@@ -50,7 +50,7 @@
         content (path/content robots)]
     (is (some? content))))
 
-(deftest changed-files-are-not-equal
+(deftest changed-files-are-not-identical
   (let [dir (make-temp-dir "changed-files-are-not-equal")
         source (sut/files {:root (str dir)})
         temp (.resolve dir "test.html")
@@ -62,4 +62,4 @@
       (write "b")
       (proto/start source {})
       (let [path' (-> source proto/scan first)]
-        (is (not= path path'))))))
+        (is (not (identical? path path')))))))

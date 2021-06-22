@@ -53,9 +53,7 @@
    {:original path-inst
     :map-path pathname
     :map-metadata metadata
-    :map-content content
-    ;; TODO the following is a hack for equality semantics:
-    :extra (rand)}))
+    :map-content content}))
 
 (defn handle-meta-and-content
   [original-path derivation]
@@ -75,7 +73,7 @@
 (defn transformer
   "Build a path transformer, which is a function that accepts
    a path and returns a new, modified path.
-   
+
    The following options are accepted:
    :where - a predicate from path -> boolean
    :pathname - a function from a path -> string
@@ -84,7 +82,7 @@
    :metadata-and-content - a function from a path -> [meta, content]
    :cache - a boolean indicating whether the path should cache itself
             default true.
-   
+
    All of the keys are optional. Unspecified aspects of a path
    will be unmodified."
   [& {:keys [where cache name]
