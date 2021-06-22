@@ -66,19 +66,18 @@
   [transformer & {:keys [cache] :or {cache true}}]
   (if-not cache
     [[:scan #(mapv transformer %)]]
-    (let [xf-cache (atom (IdentityHashMap.))]
+    (let [xf-cache (atom nil)]
       [[:scan
         (fn [paths]
           (let [previous @xf-cache
                 next (IdentityHashMap. (count paths))]
             (doseq [path paths]
               (.put next path
-                    (if-let [derived (.get previous path)]
-                      derived
-                      (transformer path))))
+                    (or (get previous path)
+                        (transformer path))))
             (reset! xf-cache next)
             (into [] (vals next))))]
-       [:stop (fn [_] (reset! xf-cache {}))]])))
+       [:stop (fn [_] (reset! xf-cache nil))]])))
 
 (defn transform-paths-contextually
   "Similar to `transform-paths`, but where the transform is dependent upon
