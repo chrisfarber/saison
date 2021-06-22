@@ -51,5 +51,3 @@
 
       (when (< 0 (.length sb))
         (str sb)))))
-
-(defn frontmatter-and-content [str])
