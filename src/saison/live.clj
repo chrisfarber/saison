@@ -60,7 +60,7 @@
   [{:keys [env constructor]}]
   (binding [source/*previewing* true]
     (source/construct (constructor env)
-                      (inject-script reload-script))))
+                      (inject-script :script-text reload-script))))
 
 (defn- reloading-site-handler
   [paths-atom]

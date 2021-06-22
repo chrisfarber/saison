@@ -56,13 +56,13 @@
       (save-missing-timestamp ts-db ts (path/pathname path) key))))
 
 (defn timestamp-database
-  [timestamp-db-path]
-  (let [db (atom (read-db timestamp-db-path))]
+  [& {:keys [path]}]
+  (let [db (atom (read-db path))]
     (source/steps
      (source/transform-paths (add-timestamps-to-metadata db) :cache false)
      (source/before-build (fn [{:keys [source]}]
                             (save-missing-timestamps db (proto/scan source) :created-at)
-                            (write-db timestamp-db-path @db)))
+                            (write-db path @db)))
      (source/before-publish (fn [{:keys [source]}]
                               (save-missing-timestamps db (proto/scan source) :published-at)
-                              (write-db timestamp-db-path @db))))))
+                              (write-db path @db))))))

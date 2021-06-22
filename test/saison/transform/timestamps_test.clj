@@ -15,7 +15,7 @@
                   :content "hi"})
           ts (source/construct
               input
-              (sut/timestamp-database t))]
+              (sut/timestamp-database :path t))]
       (proto/before-build-hook ts {})
       (let [paths (proto/scan ts)
             path (first paths)
@@ -36,7 +36,7 @@
                     :content "hi"})
             ts (source/construct
                 input
-                (sut/timestamp-database t))]
+                (sut/timestamp-database :path t))]
         (proto/before-build-hook ts {})
         (let [paths (proto/scan ts)
               path (first paths)

@@ -37,5 +37,5 @@
   "Canonicalize hrefs. Any non-absolute URI in any HTML page
    will be converted into an absolute URI relative to the supplied
    :public-url."
-  [{:keys [public-url]}]
+  [& {:keys [public-url]}]
   (source/transform-paths (canonicalize-path public-url)))

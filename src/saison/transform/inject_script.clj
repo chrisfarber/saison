@@ -24,5 +24,5 @@
 (defn inject-script
   "A source step that will inject the supplied script text
    into any html path."
-  [script-text]
+  [& {:keys [script-text]}]
   (source/transform-paths (script-injector script-text)))
