@@ -3,7 +3,8 @@
             [saison.path :as path]
             [saison.frontmatter :as fm]
             [clj-yaml.core :as yaml]
-            [saison.content :as content]))
+            [saison.content :as content]
+            [saison.util :as util]))
 
 (defn parse-yaml-frontmatter
   [path]
@@ -11,8 +12,8 @@
     (let [orig-meta (path/metadata path)
           meta-str (fm/frontmatter stream)]
       (if meta-str
-        (merge-with merge orig-meta
-                    (yaml/parse-string meta-str))
+        (util/deep-merge orig-meta
+                         (yaml/parse-string meta-str))
         orig-meta))))
 
 (defn skip-yaml-frontmatter
