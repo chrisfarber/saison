@@ -17,12 +17,13 @@
 (defn apply-html-metadata
   [path]
   (let [metadata (path/metadata path)
-        html-meta (:html-meta-tags metadata)]
+        html-meta (:html-meta metadata)]
     (edits
-     [:head [:meta html/first-of-type]]
-     (html/clone-for [[prop value] html-meta]
-                     [:meta] (html/set-attr :name prop
-                                            :content value)))))
+     [:head]
+     (html/append (map (fn [[prop value]]
+                         {:tag :meta
+                          :attrs {:name (name prop) :content value}})
+                       html-meta)))))
 
 (defn- insert-content
   [content-selector]
