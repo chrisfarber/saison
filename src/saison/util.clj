@@ -61,3 +61,11 @@
 
 (defn rfc3339 [time]
   (t/format "u-MM-dd'T'HH:mm:ss.SSXXX" time))
+
+;; https://clojure.atlassian.net/browse/CLJ-1468
+(defn deep-merge
+  "Like merge, but merges maps recursively."
+  [& maps]
+  (if (every? map? maps)
+    (apply merge-with deep-merge maps)
+    (last maps)))

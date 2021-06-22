@@ -1,44 +1,59 @@
 (ns saison.transform.markdown
   "Source and generator for basic markdown-templated files"
-  (:require [markdown.core :refer [md-to-html-string-with-meta]]
-            [saison.content :as content]
+  (:require [saison.content :as content]
             [saison.path :as path]
             [saison.source :as source]
-            [saison.util :as util]))
+            [saison.util :as util])
+  (:import [com.vladsch.flexmark.ext.tables TablesExtension]
+           [com.vladsch.flexmark.html HtmlRenderer]
+           [com.vladsch.flexmark.parser Parser]
+           [com.vladsch.flexmark.util.data MutableDataSet]))
 
 (defn ext-to-html [path]
   (util/set-path-extension (path/pathname path) "html"))
 
-(defn parse-markdown [path]
-  (let [existing-meta (path/metadata path)
-        markdown-str (-> path path/content content/string)
-        {:keys [metadata html]} (md-to-html-string-with-meta
-                                 markdown-str
-                                 :parse-meta? true
-                                 :footnotes? true
-                                 :reference-links? true)
-        ;; md-to-meta gives us a map of keywords to arrays of strings.
-        ;; (because you could supply the same header twice)
-        ;; here I arbitrarily take the first value.
-        new-metadata (reduce (fn [m [k v]]
-                               (assoc m k (first v)))
-                             (assoc existing-meta :mime-type "text/html")
-                             metadata)]
-    {:metadata new-metadata
-     :content html}))
+(defn build-default-parser-options []
+  (doto (MutableDataSet.)
+    (.set TablesExtension/COLUMN_SPANS false)
+    (.set TablesExtension/APPEND_MISSING_COLUMNS true)
+    (.set TablesExtension/DISCARD_EXTRA_COLUMNS true)
+    (.set TablesExtension/HEADER_SEPARATOR_COLUMN_MATCH true)
+    (.set Parser/EXTENSIONS [(TablesExtension/create)])))
+
+(defn markdown-parser [build-parser-options]
+  (let [options (build-parser-options)
+        parser (.build (Parser/builder options))
+        renderer (.build (HtmlRenderer/builder options))]
+    (fn [str]
+      (let [document (.parse parser str)]
+        (.render renderer document)))))
+
+(defn update-mime [path]
+  (assoc (path/metadata path)
+         :mime-type "text/html"))
+
+(defn parse-markdown-from-path
+  [build-parser-options]
+  (let [parser (markdown-parser build-parser-options)]
+    (fn [path]
+      (let [markdown-content (path/content path)
+            markdown-string (content/string markdown-content)]
+        (parser markdown-string)))))
 
 (defn markdown?
   [path]
   (#{"md" "markdown"} (util/path-extension (path/pathname path))))
 
-(defn markdown-transformer []
+(defn markdown-transformer [build-parser-options]
   (path/transformer
    :name "markdown"
    :where markdown?
    :pathname ext-to-html
-   :metadata-and-content parse-markdown))
+   :metadata update-mime
+   :content (parse-markdown-from-path build-parser-options)))
 
 (defn markdown
   "A source step that will parse any markdown path into HTML."
-  []
-  (source/transform-paths (markdown-transformer)))
+  [& {:keys [build-parser-options]
+      :or {build-parser-options build-default-parser-options}}]
+  (source/transform-paths (markdown-transformer build-parser-options)))
