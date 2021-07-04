@@ -118,18 +118,14 @@
   ([site] (live-preview site {}))
   ([site jetty-opts]
    (let [jetty-opts (merge {:port 1931
-                            :host "localhost"
                             :join? false
                             :async? true}
                            jetty-opts)
-         {:keys [host port]} jetty-opts
-         site (assoc-in site [:env :public-url]
-                        (str "http://" host ":" port "/"))
          source (build-reloadable-source site)
          env (:env site)
          [paths-atom stop] (watch-source source env)
          handler (reloading-site-handler paths-atom)]
-     (log/info "starting server on" (str host ":" port))
+     (log/info "starting server with public-url:" (:public-url env))
      (let [jetty (run-jetty handler jetty-opts)]
        (fn shutdown []
          (stop)

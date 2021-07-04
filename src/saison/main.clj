@@ -2,7 +2,8 @@
   (:require [cli-matic.core :refer [run-cmd]]
             [saison.build :as build]
             [saison.live :as live]
-            [saison.nic :as nic]))
+            [saison.nic :as nic])
+  (:import java.net.URL))
 
 (System/setProperty "tika.config" "saison/resources/tika-config.xml")
 
@@ -24,10 +25,13 @@
     (build/build-site site {:verbose? true
                             :publish? publish})))
 
-(defn preview [{:keys [site host port]}]
-  (let [site (resolve-site site)]
-    (live/live-preview site {:host (or host (nic/guess-local-ip))
-                             :port port
+(defn preview [{:keys [site public-url port]}]
+  (let [site (resolve-site site)
+        public-url (or public-url
+                       (str (URL. "http" (or (nic/guess-local-ip) "localhost")
+                                  port "/")))
+        site (assoc-in site [:env :public-url] public-url)]
+    (live/live-preview site {:port port
                              :join? true})))
 
 (def configuration
@@ -56,11 +60,10 @@
                           :as "the port to listen on (http)"
                           :type :int
                           :default 1931}
-                         {:option "host"
-                          :short "h"
-                          :as "the hostname or ip to listen on"
-                          :type :string
-                          :default nil}]
+                         {:option "public-url"
+                          :short "u"
+                          :as "the public-url the site will be built with"
+                          :type :string}]
                   :runs preview}]})
 
 (defn -main [& args]
