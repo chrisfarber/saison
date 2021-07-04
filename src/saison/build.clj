@@ -4,7 +4,9 @@
             [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
-            [saison.source :as source]))
+            [saison.source :as source]
+            [clojure.tools.logging :as log])
+  (:import [java.util.concurrent ConcurrentLinkedQueue]))
 
 (defn write-file
   "Write data to an ouput file.
@@ -30,12 +32,34 @@
   (let [data (path/content path)]
     (write-file dest-file data)))
 
+(defn process-queue [queue dest-file]
+  (loop []
+    (when-let [path (.poll queue)]
+      (let [output-path (str "." (path/pathname path))
+            output-file (io/file dest-file output-path)]
+        (log/info "Writing file:" (-> output-file
+                                      .getCanonicalFile
+                                      .getPath))
+        #_(when verbose? (println "Writing file:" (-> output-file
+                                                      .getCanonicalFile
+                                                      .getPath)))
+        (write-path path output-file))
+      (recur))))
+
+(defn concurrent-build-paths [paths dest-file]
+  (let [cpus (.availableProcessors (Runtime/getRuntime))
+        queue (ConcurrentLinkedQueue. paths)
+        procs (map (fn [_] (future (process-queue queue dest-file)))
+                   (range cpus))]
+    (dorun procs)
+    (doseq [proc procs]
+      @proc)))
+
 (defn build-site
   ([site] (build-site site nil))
 
-  ([site {:keys [verbose? publish?]
-          :or {verbose? false
-               publish? false}}]
+  ([site {:keys [publish?]
+          :or {publish? false}}]
    (binding [source/*publishing* publish?]
      (let [dest-path (:output-to site)
            {:keys [env constructor]} site
@@ -46,11 +70,5 @@
          (proto/before-publish-hook source env))
        (let [dest-file (io/file dest-path)
              all-paths (proto/scan source)]
-         (doseq [p all-paths]
-           (let [output-path (str "." (path/pathname p))
-                 output-file (io/file dest-file output-path)]
-             (when verbose? (println "Writing file:" (-> output-file
-                                                         .getCanonicalFile
-                                                         .getPath)))
-             (write-path p output-file))))
+         (concurrent-build-paths all-paths dest-file))
        (proto/stop source env)))))
