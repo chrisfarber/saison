@@ -1,7 +1,8 @@
 (ns saison.main
   (:require [cli-matic.core :refer [run-cmd]]
             [saison.build :as build]
-            [saison.live :as live]))
+            [saison.live :as live]
+            [saison.nic :as nic]))
 
 (System/setProperty "tika.config" "saison/resources/tika-config.xml")
 
@@ -23,9 +24,10 @@
     (build/build-site site {:verbose? true
                             :publish? publish})))
 
-(defn preview [{:keys [site port]}]
+(defn preview [{:keys [site host port]}]
   (let [site (resolve-site site)]
-    (live/live-preview site {:port port
+    (live/live-preview site {:host (or host (nic/guess-local-ip))
+                             :port port
                              :join? true})))
 
 (def configuration
@@ -53,7 +55,12 @@
                           :short "p"
                           :as "the port to listen on (http)"
                           :type :int
-                          :default 1931}]
+                          :default 1931}
+                         {:option "host"
+                          :short "h"
+                          :as "the hostname or ip to listen on"
+                          :type :string
+                          :default nil}]
                   :runs preview}]})
 
 (defn -main [& args]
