@@ -1,6 +1,5 @@
 (ns saison.content.html
   (:require [clojure.string :as str]
-            [saison.proto]
             [net.cgrand.enlive-html :as html]
             [saison.content :as content]
             [saison.proto :as proto]))
