@@ -1,5 +1,5 @@
 (ns saison.source.file
-  (:require [hawk.core :as hawk]
+  (:require [saison.fs-watch :as fsw]
             [saison.proto :as proto]
             [saison.util :as util]
             [pantomime.mime :refer [mime-type-of]]
@@ -70,18 +70,18 @@
 
   (watch
     [_ changed]
-    (let [notifier (fn [_ e]
+    (let [notifier (fn [e]
                      (let [f (:file e)
                            absolute-path (.getAbsolutePath f)]
                        (when-not (.isDirectory f)
-                         (log/trace "file event:" (:kind e) absolute-path)
+                         (log/trace "file event:" (:type e) absolute-path)
                          (apply swap! cache dissoc
                                 (map str (files-affected-by f)))
                          (changed))))
-          watcher (hawk/watch! [{:paths [file-root]
-                                 :handler notifier}])]
+          watcher (fsw/watch! :paths [file-root]
+                              :handler notifier)]
       (fn []
-        (hawk/stop! watcher))))
+        (fsw/stop! watcher))))
 
   (start [_ _]
     (reset! cache nil))

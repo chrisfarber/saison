@@ -1,6 +1,6 @@
 (ns saison.transform.templates
   "transform paths by templating them with enlive"
-  (:require [hawk.core :as hawk]
+  (:require [saison.fs-watch :as fsw]
             [net.cgrand.enlive-html :as html]
             [saison.content.html :as htmlc :refer [edit* edits]]
             [saison.source :as source]
@@ -89,6 +89,6 @@
      (source/transform-paths (apply-template templates))
      (source/add-watcher
       (fn [cb]
-        (let [template-watcher (hawk/watch! [{:paths files-to-watch
-                                              :handler (fn [_ _] (cb))}])]
-          #(hawk/stop! template-watcher)))))))
+        (let [template-watcher (fsw/watch! :paths files-to-watch
+                                           :handler (fn [_] (cb)))]
+          #(fsw/stop! template-watcher)))))))

@@ -16,7 +16,7 @@
   enlive/enlive {:mvn/version "1.1.6"}
 
   cli-matic/cli-matic {:mvn/version "0.4.3"}
-  hawk/hawk {:mvn/version "0.2.11"}
+  io.methvin/directory-watcher {:mvn/version "0.15.0"}
   tick/tick {:mvn/version "0.4.27-alpha"}
 
   com.novemberain/pantomime {:mvn/version "2.11.0"}}
