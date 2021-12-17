@@ -4,8 +4,7 @@
             [saison.content :as content]
             [saison.path :as path]
             [saison.proto :as proto]
-            [saison.source :as source]
-            [clojure.tools.logging :as log])
+            [saison.source :as source])
   (:import [java.util.concurrent ConcurrentLinkedQueue]))
 
 (defn write-file
@@ -37,12 +36,9 @@
     (when-let [path (.poll queue)]
       (let [output-path (str "." (path/pathname path))
             output-file (io/file dest-file output-path)]
-        (log/info "Writing file:" (-> output-file
-                                      .getCanonicalFile
-                                      .getPath))
-        #_(when verbose? (println "Writing file:" (-> output-file
-                                                      .getCanonicalFile
-                                                      .getPath)))
+        (println "Writing file:" (-> output-file
+                                     .getCanonicalFile
+                                     .getPath))
         (write-path path output-file))
       (recur))))
 
