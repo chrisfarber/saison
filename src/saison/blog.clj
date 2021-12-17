@@ -22,11 +22,13 @@
              matching)))
 
 (defn most-recent-date [paths]
-  (apply t/max (flatten (map (fn [path]
-                               (let [meta (path/metadata path)]
-                                 [(:created-at meta)
-                                  (:published-at meta)]))
-                             paths))))
+  (let [dates (flatten (map (fn [path]
+                              (let [meta (path/metadata path)]
+                                [(:created-at meta)
+                                 (:published-at meta)]))
+                            paths))]
+    (when (not-empty dates)
+      (apply t/max dates))))
 
 (defn get-content [path selector?]
   (let [content (path/content path)]
