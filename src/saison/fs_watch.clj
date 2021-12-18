@@ -1,4 +1,5 @@
 (ns saison.fs-watch
+  (:require [clojure.tools.logging :as log])
   (:import [io.methvin.watcher
             DirectoryWatcher
             DirectoryChangeEvent
@@ -26,7 +27,9 @@
 (defn make-listener [f]
   (reify DirectoryChangeListener
     (onEvent [this evt]
-      (f (convert-dw-event evt)))))
+      (let [converted-evt (convert-dw-event evt)]
+        (log/trace "file event received" converted-evt)
+        (f converted-evt)))))
 
 (defn make-watcher [{:keys [paths listener]}]
   (.build
@@ -43,10 +46,11 @@
   [& {:keys [paths
              handler]}]
   (try
-    (let [paths (paths-from-strings paths)
+    (let [j-paths (paths-from-strings paths)
           listener (make-listener handler)
-          watcher (make-watcher {:paths paths
+          watcher (make-watcher {:paths j-paths
                                  :listener listener})]
+      (log/trace "starting watch on path(s)" paths)
       (.watchAsync watcher)
       watcher)
     (catch java.nio.file.NoSuchFileException e
