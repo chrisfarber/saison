@@ -8,11 +8,13 @@
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [saison.content :as content]
+            [saison.nic :as nic]
             [saison.path :as path]
             [saison.proto :as proto]
             [saison.source :as source]
             [saison.transform.inject-script :refer [inject-script]]
-            [saison.util :as util]))
+            [saison.util :as util])
+  (:import java.net.URL))
 
 (def ^{:private true}
   reload-script (slurp (io/resource "saison/reloader.js")))
@@ -107,26 +109,51 @@
           (recur))))
     [paths stop]))
 
-(defn live-preview
+(defn configure-env
+  "Derive a new site map with the environment ready for live previewing.
+  Will auto-configure the public-url to be ready for local-network browsing if none
+  is supplied. A custom :port may also be provided."
+  [site {:keys [public-url port]
+         :or {port 1931}}]
+  (let [intended-url (or public-url
+                         (if port
+                           (str (URL. "http" (or (nic/guess-local-ip) "localhost") port "/"))
+                           (str (URL. "http" (or (nic/guess-local-ip) "localhost")))))]
+    (assoc-in site [:env :public-url] intended-url)))
+
+(configure-env {} {})
+
+(defn preview!
   "Start a jetty server that renders a live preview of the provided saison site.
 
   A map of jetty parameters may optionally be supplied. By default, the server
   will run on port 1931, the year Orval was founded.
 
-  Returns a function that can be called to stop the server."
+  The returned value will be a map of data. Call `stop!` on this to shutdown the
+  server"
 
-  ([site] (live-preview site {}))
-  ([site jetty-opts]
+  ([site] (preview! site {}))
+  ([site & {:keys [jetty-opts
+                   public-url]}]
    (let [jetty-opts (merge {:port 1931
                             :join? false
                             :async? true}
                            jetty-opts)
+         site (configure-env site {:public-url public-url
+                                   :port (:port jetty-opts)})
          source (build-reloadable-source site)
          env (:env site)
          [paths-atom stop] (watch-source source env)
          handler (reloading-site-handler paths-atom)]
      (log/info "starting server with public-url:" (:public-url env))
      (let [jetty (run-jetty handler jetty-opts)]
-       (fn shutdown []
-         (stop)
-         (.stop jetty))))))
+       {:paths paths-atom
+        :site site
+        :stop-watching stop
+        :jetty jetty}))))
+
+(defn stop!
+  [inst]
+  (let [{:keys [stop-watching jetty]} inst]
+    (stop-watching)
+    (.stop jetty)))

@@ -1,9 +1,8 @@
 (ns saison.main
-  (:require [cli-matic.core :refer [run-cmd]]
-            [saison.build :as build]
-            [saison.live :as live]
-            [saison.nic :as nic])
-  (:import java.net.URL))
+  (:require
+   [cli-matic.core :refer [run-cmd]]
+   [saison.build :as build]
+   [saison.live :as live]))
 
 (System/setProperty "tika.config" "saison/resources/tika-config.xml")
 
@@ -26,13 +25,10 @@
                             :publish? publish})))
 
 (defn preview [{:keys [site public-url port]}]
-  (let [site (resolve-site site)
-        public-url (or public-url
-                       (str (URL. "http" (or (nic/guess-local-ip) "localhost")
-                                  port "/")))
-        site (assoc-in site [:env :public-url] public-url)]
-    (live/live-preview site {:port port
-                             :join? true})))
+  (let [site (resolve-site site)]
+    (live/preview! site {:public-url public-url
+                             :jetty-opts {:port port
+                                          :join? true}})))
 
 (def configuration
   {:command "saison"
