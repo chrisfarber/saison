@@ -5,18 +5,21 @@
             [pantomime.mime :refer [mime-type-of]]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log])
+  (:import [java.io File]))
+
+(set! *warn-on-reflection* true)
 
 (def metadata-file-suffix ".meta.edn")
 
-(defn file-is-metadata [^java.io.File file]
+(defn file-is-metadata [^File file]
   (-> file .getAbsolutePath (.endsWith metadata-file-suffix)))
 
-(defn metadata-file-for [^java.io.File file]
-  (java.io.File. (.getParent file)
+(defn metadata-file-for ^File [^File file]
+  (File. (.getParent file)
                  (str (.getName file) metadata-file-suffix)))
 
-(defn files-affected-by [^java.io.File file]
+(defn files-affected-by [^File file]
   (if (file-is-metadata file)
     [file
      (let [path-str (.getAbsolutePath file)]
@@ -30,8 +33,8 @@
   (pathname [_] (util/add-path-component base-path path))
   (metadata [_]
     (let [known-mime (mime-type-of file)
-          meta-file (and read-metadata-file
-                         (metadata-file-for file))
+          ^File meta-file (and read-metadata-file
+                                       (metadata-file-for file))
           meta-exists (and meta-file (.exists meta-file))]
       (merge (when known-mime
                {:mime-type known-mime})
@@ -56,7 +59,7 @@
   proto/Source
   (scan [_]
     (doseq [item (eligible-files file-root read-metadata-files)]
-      (let [[name f] item
+      (let [[name ^File f] item
             absolute-path (.getAbsolutePath f)]
         (when-not (get @cache absolute-path)
           (log/trace "caching file:" absolute-path)
@@ -71,7 +74,7 @@
   (watch
     [_ changed]
     (let [notifier (fn [e]
-                     (let [f (:file e)
+                     (let [^File f (:file e)
                            absolute-path (.getAbsolutePath f)]
                        (when-not (.isDirectory f)
                          (log/trace "file event:" (:type e) absolute-path)

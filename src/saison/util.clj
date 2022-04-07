@@ -2,7 +2,10 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [tick.alpha.api :as t])
-  (:import java.net.URL))
+  (:import java.net.URL
+           java.io.File))
+
+(set! *warn-on-reflection* true)
 
 (defn list-files
   "Return a seq of files in a directory.
@@ -14,12 +17,12 @@
 
   (let [root (io/file path)]
     (filter
-     (fn [[_ f]] (.isFile f))
+     (fn [[_ ^File f]] (.isFile f))
      (tree-seq
-      (fn [[^String _ ^java.io.File f]] (.isDirectory f))
-      (fn [[^String relPath ^java.io.File d]]
-        (map (fn [^java.io.File f]
-               [(str relPath java.io.File/separator (.getName f)) f])
+      (fn [[^String _ ^File f]] (.isDirectory f))
+      (fn [[^String relPath ^File d]]
+        (map (fn [^File f]
+               [(str relPath File/separator (.getName f)) f])
              (.listFiles d)))
       ["" root]))))
 
@@ -53,9 +56,9 @@
 
 (defn append-url-component
   [base addition]
-  (let [base (if (instance? URL base)
-               base
-               (URL. base))
+  (let [^URL base (if (instance? URL base)
+                    base
+                    (URL. base))
         base-path (.getPath base)]
     (str (URL. base (add-path-component base-path addition)))))
 
