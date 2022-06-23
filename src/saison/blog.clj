@@ -39,7 +39,7 @@
 
 (defn paths-in-feed
   "Find current paths that belong in the feed, and sort them
-  by creation date (descending)."
+  by creation date (`:created-at`) (descending)."
   [paths feed-id]
   (sorted-blog-entries paths (feed? {:feed-id feed-id})))
 

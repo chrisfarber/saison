@@ -1,11 +1,13 @@
 (ns saison.transform.timestamps
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [saison.path :as path]
-            [saison.proto :as proto]
-            [saison.source :as source]
-            [tick.alpha.api :as t]
-            time-literals.read-write))
+  (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.pprint :refer [pprint]]
+   [saison.path :as path]
+   [saison.proto :as proto]
+   [saison.source :as source]
+   [tick.alpha.api :as t]
+   [time-literals.read-write]))
 
 (defn read-edn [f not-found]
   (try
@@ -18,7 +20,7 @@
 (defn write-edn [f data]
   (with-open [wtr (io/writer f)]
     (binding [*out* wtr]
-      (pr data))))
+      (pprint data))))
 
 (defn read-db
   [db-path]
