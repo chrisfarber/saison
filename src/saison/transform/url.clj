@@ -7,10 +7,16 @@
 (defn absolute? [href]
   (.isAbsolute (URI. href)))
 
+(defn update-href
+  [node attr f]
+  (if (contains? (:attrs node) attr)
+    (update-in node [:attrs attr] f)
+    node))
+
 (defn edit-urls [f]
   (htmlc/edits
-   [#{:link :a}] (fn [node] (update-in node [:attrs :href] f))
-   [#{:img :script}] (fn [node] (update-in node [:attrs :src] f))))
+   [#{:link :a}] (fn [node] (update-href node :href f))
+   [#{:img :script}] (fn [node] (update-href node :src f))))
 
 (defn canonicalize-url
   [public-url path href]
