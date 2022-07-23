@@ -13,7 +13,7 @@
   (util/set-path-extension (path/pathname path) "html"))
 
 (defn build-default-parser-options []
-  (doto (MutableDataSet.)
+  (doto (new MutableDataSet)
     (.set TablesExtension/COLUMN_SPANS false)
     (.set TablesExtension/APPEND_MISSING_COLUMNS true)
     (.set TablesExtension/DISCARD_EXTRA_COLUMNS true)
