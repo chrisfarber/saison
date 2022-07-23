@@ -49,5 +49,4 @@
                      :content
                      :frontmatter)))))
 
-      (when (< 0 (.length sb))
-        (str sb)))))
+      (str sb))))

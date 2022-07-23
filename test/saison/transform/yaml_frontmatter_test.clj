@@ -56,3 +56,19 @@ this is more content
     (is (= {:extra true}
            metadata))
     (is (= content-str content))))
+
+(deftest empty-content-is-not-null
+  (let [content-str "
+---
+hello: true
+---
+"
+        src (source/construct
+             (data/source {:pathname "/index.md"
+                           :content content-str})
+             (sut/yaml-frontmatter :where (constantly true)))
+        paths (proto/scan src)
+        path (first paths)
+        content (content/string path)]
+    (is (not (nil? content)))
+    (is (string? content))))
