@@ -46,7 +46,12 @@
     (add-watch changes-atom key (fn [_ _ old new]
                                   (when (not= old new)
                                     (log/trace "notifying browser of change" key)
-                                    (respond {:status 204})
+                                    (try
+                                      (respond {:status 204})
+                                      ;; There's no way to know ahead of time if the connection
+                                      ;; has since been closed; here we just ignore any exception
+                                      ;; so that it doesn't interrupt the paths atom.
+                                      (catch Exception _))
                                     (remove-watch changes-atom key))))))
 
 (defn- use-site-handler [handler req respond raise]
