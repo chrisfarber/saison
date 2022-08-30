@@ -6,7 +6,7 @@
    [saison.path :as path]
    [saison.proto :as proto]
    [saison.source :as source]
-   [tick.alpha.api :as t]
+   [tick.core :as t]
    [time-literals.read-write]))
 
 (defn read-edn [f not-found]

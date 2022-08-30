@@ -7,7 +7,7 @@
             [saison.source :as source]
             [saison.source.data :as data]
             [saison.util :as util]
-            [tick.alpha.api :as t]))
+            [tick.core :as t]))
 
 (defn- feed? [{:keys [feed-id]}]
   (fn [path]

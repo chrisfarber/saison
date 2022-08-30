@@ -1,7 +1,7 @@
 (ns saison.util
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [tick.alpha.api :as t])
+            [tick.core :as t])
   (:import java.net.URL
            java.io.File))
 

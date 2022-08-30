@@ -6,7 +6,7 @@
             [saison.source.data :as data]
             [saison.tempfile :refer [with-tempfile]]
             [saison.transform.timestamps :as sut]
-            [tick.alpha.api :as tick]))
+            [tick.core :as tick]))
 
 (deftest timestamps-created-from-scratch
   (with-tempfile [t "temp"]
@@ -29,7 +29,7 @@
 
 (deftest timestamps-left-in-place
   (with-tempfile [t "temp"]
-    (let [previous-date (tick/- (tick/zoned-date-time) (tick/new-period 3 :days))]
+    (let [previous-date (tick/<< (tick/zoned-date-time) (tick/new-period 3 :days))]
       (sut/write-db t {"/hello.txt" {:created-at previous-date}})
       (let [input (data/source
                    {:pathname "/hello.txt"
