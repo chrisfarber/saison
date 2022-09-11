@@ -17,6 +17,7 @@
    to the end of the body tag for any path given to it."
   [script-text]
   (path/transformer
+   :cache false
    :name "inject-script"
    :where path/html?
    :content (content-script-injector script-text)))
