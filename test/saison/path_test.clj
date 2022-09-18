@@ -33,3 +33,21 @@
   (is (= "https://atomicobject.com/a/b/c.html"
          (sut/canonicalize "https://atomicobject.com/a"
                            "b/c.html"))))
+
+(deftest path-info
+  (let [paths (data/paths {:pathname "/hello"
+                           :metadata {:a true}
+                           :content "."}
+                          {:pathname "/a"
+                           :metadata {:something true}
+                           :content "."}
+                          {:pathname "b"
+                           :metadata {:something false}
+                           :content "."}
+                          {:pathname "/hello"
+                           :metadata {:b true}
+                           :content "."})]
+    (is (= {"/hello" {:a true}
+            "b" {:something false}
+            "/a" {:something true}}
+           (sut/path-info paths)))))

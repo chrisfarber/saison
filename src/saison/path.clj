@@ -127,3 +127,15 @@
   [root-url path-or-pathname]
   (str (.resolve (URI. (str root-url "/"))
                  (str "./" (pathname path-or-pathname)))))
+
+(defn path-info
+  "Process a seq of paths into a map structure containing the paths
+   name and metadata as regular data. Path content is elided."
+  [path-seq]
+  (reduce (fn [m path]
+            (let [pname (pathname path)]
+              (if (contains? m pname)
+                m
+                (assoc m pname (metadata path)))))
+          {}
+          path-seq))

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>saison</title>
+    <meta name="viewport" content="initial-scale=1">
+  </head>
+  <body>
+    <main>
+      <h1>Component examples</h1>
+      <h3>Paths:</h3>
+      <Path-list></Path-list>
+
+      <br>
+
+      <path-metadata />
+
+      <h3>component with content</h3>
+      <component-with-content>
+        <h3>text</h3>
+        <p class="something">something</p>
+        <div>
+          1
+          2
+          <p>3</p>
+          <dl id="something" class="a-class or-two">
+            <dt style="color: blue">a</dt>
+            <dd>one</dd>
+            <dt>b</dt>
+            <dd>two</dd>
+          </dl>
+        </div>
+      </component-with-content>
+      <br>
+      <component-with-content />
+      <br>
+      <component-with-content>
+        <path-metadata />
+        <component-with-content>
+          <p>before nested component</p>
+          <path-metadata />
+          <p>after nested component</p>
+        </component-with-content>
+      </component-with-content>
+    </main>
+  </body>
+</html>
