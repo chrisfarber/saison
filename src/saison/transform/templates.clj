@@ -35,7 +35,6 @@
 (defn apply-template [templates]
   (path/transformer
    :name "template"
-   ;; TODO - cache the templates when possible
    :cache false
    :where (fn [path]
             (let [m (path/metadata path)
