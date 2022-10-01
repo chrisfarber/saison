@@ -107,14 +107,15 @@
 (defn- render-components-in-paths
   [path-vec]
   ;; unclear whether caching the path-info map will cause problems.
-  (let [path-info-map (path/path-info path-vec)]
+  (let [path-info-map (path/path-info path-vec)
+        source-env source/*env*]
     (path/transformer
      :cache false
      :where path/html?
      :content #(render-components-in-path % {:path {:pathname (path/pathname %)
                                                     :metadata (path/metadata %)}
                                              :paths path-info-map
-                                             :source-env source/*env*}))))
+                                             :source-env source-env}))))
 
 (defn- watch-registry [cb]
   (let [watch-key (gensym "registry-watcher")]

@@ -86,7 +86,7 @@
                         (transformer path))))
             (reset! xf-cache next)
             (into [] (vals next))))]
-       [:stop (fn [_] (reset! xf-cache nil))]])))
+       [:stop (fn [] (reset! xf-cache nil))]])))
 
 (defn transform-paths-contextually
   "Similar to `transform-paths`, but where the transform is dependent upon
