@@ -66,6 +66,15 @@
   []
   (:paths *env*))
 
+(defn publishing?
+  "Is the component being rendered while the site is publishing?"
+  []
+  (-> *env* :source-env :publishing))
+
+(def previewing?
+  "Is the component being rendered while the site is previewing?"
+  (complement publishing?))
+
 ;; Rendering components
 
 (defn- render-component [component-fn attrs env]
@@ -104,7 +113,8 @@
      :where path/html?
      :content #(render-components-in-path % {:path {:pathname (path/pathname %)
                                                     :metadata (path/metadata %)}
-                                             :paths path-info-map}))))
+                                             :paths path-info-map
+                                             :source-env source/*env*}))))
 
 (defn- watch-registry [cb]
   (let [watch-key (gensym "registry-watcher")]
