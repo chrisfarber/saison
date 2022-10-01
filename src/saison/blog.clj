@@ -55,12 +55,13 @@
      [:title nil title]
      [:link {:href url}]
      [:id nil url]
-     [:updated nil (util/rfc3339 updated-at)]
+     (when updated-at
+       [:updated nil (util/rfc3339 updated-at)])
      (when published-at
        [:published nil (util/rfc3339 published-at)])
      [:content {:type "html"} (content/string (get-content path content-selector))]]))
 
-(defn- compile-atom-feed [opts entries]
+(defn- compile-atom-feed [opts public-url entries]
   (let [{:keys [feed-path
                 feed-title
                 feed-icon
@@ -69,7 +70,6 @@
                 author-name
                 author-email]
          :or {feed-items 10}} opts
-        public-url (:public-url source/*env*)
         feed-url (util/append-url-component public-url feed-path)
         entries-to-include (take feed-items entries)
         items (map #(element-for-item % public-url content-selector) entries-to-include)
@@ -96,13 +96,14 @@
 
 (defn- build-feed [paths opts]
   (let [{:keys [feed-path
-                feed-id]} opts]
+                feed-id]} opts
+        public-url (:public-url source/*env*)]
     (data/path {:pathname feed-path
                 :metadata {:mime-type "application/xml"
                            :alias (str "feed-" feed-id)}
                 :content (fn []
                            (let [entries (sorted-blog-entries paths (feed? opts))]
-                             (compile-atom-feed opts entries)))})))
+                             (compile-atom-feed opts public-url entries)))})))
 
 (defn- add-feed [paths opts]
   (conj paths (build-feed paths opts)))
