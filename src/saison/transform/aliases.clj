@@ -25,6 +25,7 @@
 (defn resolve-transformer [expansion-map]
   (path/transformer
    :name "resolve-path-aliases"
+   :cache false
    :where path/html?
    :content (resolve-aliases-in-content expansion-map)))
 
