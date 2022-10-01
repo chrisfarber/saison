@@ -1,5 +1,6 @@
 (ns saison.source.file
   (:require [saison.fs-watch :as fsw]
+            [saison.source :as source]
             [saison.proto :as proto]
             [saison.util :as util]
             [pantomime.mime :refer [mime-type-of]]
@@ -17,7 +18,7 @@
 
 (defn metadata-file-for ^File [^File file]
   (File. (.getParent file)
-                 (str (.getName file) metadata-file-suffix)))
+         (str (.getName file) metadata-file-suffix)))
 
 (defn files-affected-by [^File file]
   (if (file-is-metadata file)
@@ -34,7 +35,7 @@
   (metadata [_]
     (let [known-mime (mime-type-of file)
           ^File meta-file (and read-metadata-file
-                                       (metadata-file-for file))
+                               (metadata-file-for file))
           meta-exists (and meta-file (.exists meta-file))]
       (merge (when known-mime
                {:mime-type known-mime})
@@ -52,48 +53,6 @@
       (filter (fn [[_ f]] ((complement file-is-metadata) f)) items)
       items)))
 
-(defrecord FileSource
-           [file-root base-path metadata
-            cache read-metadata-files]
-
-  proto/Source
-  (scan [_]
-    (doseq [item (eligible-files file-root read-metadata-files)]
-      (let [[name ^File f] item
-            absolute-path (.getAbsolutePath f)]
-        (when-not (get @cache absolute-path)
-          (log/trace "caching file:" absolute-path)
-          (swap! cache assoc absolute-path
-                 (map->FilePath {:file f
-                                 :base-path base-path
-                                 :path name
-                                 :metadata metadata
-                                 :read-metadata-file read-metadata-files})))))
-    (vals @cache))
-
-  (watch
-    [_ changed]
-    (let [notifier (fn [e]
-                     (let [^File f (:file e)
-                           absolute-path (.getAbsolutePath f)]
-                       (when-not (.isDirectory f)
-                         (log/trace "file event:" (:type e) absolute-path)
-                         (apply swap! cache dissoc
-                                (map str (files-affected-by f)))
-                         (changed))))
-          watcher (fsw/watch! :paths [file-root]
-                              :handler notifier)]
-      (fn []
-        (fsw/stop! watcher))))
-
-  (start [_ _]
-    (reset! cache nil))
-  (stop [_ _]
-    (reset! cache nil))
-
-  (before-build-hook [_ _])
-  (before-publish-hook [_ _]))
-
 (defn files
   "create a source from files on the filesystem.
 
@@ -109,9 +68,36 @@
            metadata
            parse-metadata]
     :or {parse-metadata true}}]
-  (map->FileSource
-   {:file-root root
-    :base-path base-path
-    :metadata metadata
-    :cache (atom nil)
-    :read-metadata-files parse-metadata}))
+  (let [cache (atom nil)]
+    (source/construct
+     (source/on-start #(reset! cache nil))
+     (source/on-stop #(reset! cache nil))
+     (source/emit
+      (fn emitter []
+        (doseq [item (eligible-files root parse-metadata)]
+          (let [[name ^File f] item
+                absolute-path (.getAbsolutePath f)]
+            (when-not (get @cache absolute-path)
+              (log/trace "caching file:" absolute-path)
+              (swap! cache assoc absolute-path
+                     (map->FilePath {:file f
+                                     :base-path base-path
+                                     :path name
+                                     :metadata metadata
+                                     :read-metadata-file parse-metadata})))))
+        (vals @cache)))
+
+     (source/on-watch
+      (fn watcher [changed]
+        (let [notifier (fn [e]
+                         (let [^File f (:file e)
+                               absolute-path (.getAbsolutePath f)]
+                           (when-not (.isDirectory f)
+                             (log/trace "file event:" (:type e) absolute-path)
+                             (apply swap! cache dissoc
+                                    (map str (files-affected-by f)))
+                             (changed))))
+              watcher (fsw/watch! :paths [root]
+                                  :handler notifier)]
+          (fn []
+            (fsw/stop! watcher))))))))

@@ -1,60 +1,69 @@
 (ns saison.source
-  (:require [saison.proto :as proto])
   (:import [java.util IdentityHashMap]))
 
-(def ^:dynamic *previewing*
-  "true when the the site needs to be live-reloadable"
-  false)
+(def ^:dynamic *env*)
 
-(def ^:dynamic *publishing*
-  "true when the site is being published (and should be minified, have timestamps updated, etc)"
-  false)
+(defn publishing? []
+  (:publishing *env*))
 
-(defn from
-  "A step that consumes the provided `sources`."
-  [& sources]
-  (let [sources (flatten sources)]
-    (reduce (fn [hooks src]
-              (into hooks
-                    [[:scan (fn [paths] (into paths (proto/scan src)))]
-                     [:watch (fn [cb] (proto/watch src cb))]
-                     [:start (fn [env] (proto/start src env))]
-                     [:stop (fn [env] (proto/stop src env))]
-                     [:before-build (fn [env] (proto/before-build-hook src env))]
-                     [:before-publish (fn [env] (proto/before-publish-hook src env))]]))
-            []
-            sources)))
+(def previewing? (complement publishing?))
 
 (defn emit
-  "A step that adds the provided `paths` to the source's output."
-  [& paths]
-  [[:scan (fn [other-paths] (into other-paths (flatten paths)))]])
+  "A step that emits paths from the source when it is scanned.
+   
+   The `paths-or-fns` can be a (nested) sequence of paths to be emitted
+   or functions that produce paths to be emitted. The functions will be
+   called at scan-time."
+  [& paths-or-fns]
+  [[:scan (fn emitter [existing-paths]
+            (transduce
+             (comp (map (fn [path-or-fn]
+                          (if (fn? path-or-fn)
+                            (path-or-fn)
+                            path-or-fn)))
+                   (map (fn [paths-or-path]
+                          (if (sequential? paths-or-path)
+                            (into [] paths-or-path)
+                            [paths-or-path]))))
+             (completing into)
+             existing-paths
+             (flatten paths-or-fns)))]])
 
-(defn add-watcher
+(defn set-default-env
+  "A step that will set a value in the environment _only_ if it is not
+   already defined"
+  [k v]
+  [[:env (fn [env]
+           (if (contains? env k)
+             env
+             (assoc env k v)))]])
+
+(defn set-env
+  "A step that sets a value in the environment during construction"
+  [k v]
+  [[:env #(assoc % k v)]])
+
+(defn on-watch
   [watcher]
   [[:watch watcher]])
 
-(defn start
-  "A function to be invoked when the source is started. Will receive a single map,
-   containing the keys `:source` and `:env`"
+(defn on-start
+  "A function to be invoked when the source is started."
   [f]
   [[:start f]])
 
-(defn stop
-  "A function to be invoked when the source is stopped. Will receive a single map,
-   containing the keys `:source` and `:env`"
+(defn on-stop
+  "A function to be invoked when the source is stopped."
   [f]
   [[:stop f]])
 
-(defn before-build
-  "A function to be invoked before building the source. Will receive a single map,
-   containing the keys `:source` and `:env`"
+(defn before-build-hook
+  "A function to be invoked before building the source."
   [f]
   [[:before-build f]])
 
-(defn before-publish
-  "A function to be invoked before publishing the source. Will receive a single map,
-   containing the keys `:source` and `:env`"
+(defn before-publish-hook
+  "A function to be invoked before publishing the source."
   [f]
   [[:before-publish f]])
 
@@ -96,76 +105,128 @@
 
 (defn modify-paths
   "A source step that receives the vector of all paths and can return a new path vector."
-  [fn]
-  [[:scan fn]])
-
-(defn- notify-hooks [fns & args]
-  (doseq [fn fns]
-    (apply fn args)))
+  [f]
+  [[:scan f]])
 
 (defn steps
-  "Combine multiple step vectors into one.
-
-  If a source is provided, it will be wrapped automatically using `from`.
-  If nil is provided, it is ignored."
+  "Combine multiple step vectors into one, ignoring nils."
   [& step-vecs]
-  (transduce (comp (filter some?)
-                   (map #(if (satisfies? saison.proto/Source %)
-                           (from %)
-                           %)))
+  (transduce (filter some?)
              (completing into)
              []
              step-vecs))
 
+(defn- wrap-step-with-predicate
+  [pred step]
+  (let [[step-t f] step]
+    (cond
+      (#{:start :stop :before-build :before-publish} step-t)
+      [step-t (fn conditional-hook []
+                (when (pred)
+                  (f)))]
+
+      (= :watch step-t)
+      [step-t (fn conditional-watch [cb]
+                (if (pred)
+                  (f cb)
+                  (fn [])))]
+
+      (#{:scan :env} step-t)
+      [step-t (fn conditional-thread [val]
+                (if (pred)
+                  (f val)
+                  val))]
+
+      :else
+      (throw (ex-info
+              (str "Can't make step conditional " step-t)
+              {:step step
+               :pred pred})))))
+
 (defn when-previewing
   "Run the provided steps only when the site is constructed for live-reloading."
   [& step-vecs]
-  (if *previewing*
-    (apply steps step-vecs)
-    []))
+  (let [merged-steps (apply steps step-vecs)]
+    (into [] (map #(wrap-step-with-predicate previewing? %)) merged-steps)))
 
 (defn when-publishing
   "Run the provided steps only when the site is constructed for publishing."
   [& step-vecs]
-  (if *publishing*
-    (apply steps step-vecs)
-    []))
+  (let [merged-steps (apply steps step-vecs)]
+    (into [] (map #(wrap-step-with-predicate publishing? %)) merged-steps)))
 
-(defn construct [& step-vecs]
-  (let [hooks (apply steps step-vecs)
-        grouped-hooks (group-by first hooks)
-        get-hooks (fn [n] (map second (-> grouped-hooks n (or []))))
-        scanners (get-hooks :scan)
-        watchers (get-hooks :watch)
-        start-fns (get-hooks :start)
-        stop-fns (get-hooks :stop)
-        before-build-fns (get-hooks :before-build)
-        before-publish-fns (get-hooks :before-publish)]
-    (reify proto/Source
-      (scan [_]
-        (reduce (fn [paths step]
-                  (step paths))
-                []
-                scanners))
+(defn construct
+  [& step-vecs]
+  (apply steps step-vecs))
 
-      (watch [_ cb]
-        (let [close-fns (doall (map #(% cb) watchers))]
-          (fn stop-watching []
-            (doseq [close-fn close-fns]
-              (close-fn)))))
+(defn- step-pred
+  [step-t]
+  (fn step-matcher
+    [step]
+    (= step-t (first step))))
 
-      (start [this env]
-        (notify-hooks start-fns {:source this
-                                 :env env}))
+(defn- extract-fns-of-step
+  [step-t]
+  (comp (filter (step-pred step-t))
+        (map second)))
 
-      (stop [this env]
-        (notify-hooks stop-fns {:source this
-                                :env env}))
+(defn- thread-value-through-steps
+  [source step-t initial-value]
+  (transduce (extract-fns-of-step step-t)
+             (completing (fn [val f] (f val)))
+             initial-value
+             source))
 
-      (before-build-hook [this env]
-        (notify-hooks before-build-fns {:source this
-                                        :env env}))
+(defn- notify-hooks
+  [source step-t]
+  (doseq [[step f] source]
+    (when (= step step-t)
+      (f)))
+  nil)
 
-      (before-publish-hook [this env]
-        (notify-hooks before-publish-fns {:source this
-                                          :env env})))))
+(defn environment-for
+  "Given a source, and optionally a map containing default environment data,
+   construct the actual environment."
+  ([source] (environment-for source {}))
+  ([source env]
+   (thread-value-through-steps source :env env)))
+
+(defn start
+  "Run a source's on-start hooks.
+   Ensure `*env*` is bound."
+  [source]
+  (notify-hooks source :start))
+
+(defn stop
+  "Run a source's on-stop hooks.
+   Ensure `*env*` is bound."
+  [source]
+  (notify-hooks source :stop))
+
+(defn scan
+  "Find paths emitted by the source.
+   Ensure `*env*` is bound."
+  [source]
+  (thread-value-through-steps source :scan []))
+
+(defn watch
+  "Begin watching the source for changes. `cb` should be zero-arity,
+   and will be called whenever a change has been detected. May be called
+   very frequently; it's up to the caller to apply any throttling logic.
+
+   Returns a zero-arity fn that can be called to stop watching.
+
+   Ensure `*env*` is bound."
+  [source cb]
+  (let [watch-fns (into [] (extract-fns-of-step :watch) source)
+        stop-watchers (doall (map (fn [start-watch] (start-watch cb))
+                                  watch-fns))]
+    (fn stop-watching []
+      (doseq [close-fn stop-watchers]
+        (close-fn)))))
+
+(defn before-build [source]
+  (notify-hooks source :before-build))
+
+(defn before-publish [source]
+  (notify-hooks source :before-publish))

@@ -2,8 +2,6 @@
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
             [saison.content :as content]
-            [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source]
             [saison.source.data :as data]
             [saison.transform.templates :as sut]
@@ -24,7 +22,7 @@
                   :content-selector :div#content
                   :edits [sut/apply-html-metadata
                           sut/set-title]}))
-        paths (proto/scan source)
+        paths (source/scan source)
         path (first paths)
         content (content/string path)]
     (is (str/index-of content "<meta charset=\"utf-8\" />"))

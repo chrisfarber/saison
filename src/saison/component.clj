@@ -123,4 +123,4 @@
   []
   (source/steps
    (source/transform-paths-contextually #'render-components-in-paths)
-   (source/add-watcher #'watch-registry)))
+   (source/on-watch #'watch-registry)))

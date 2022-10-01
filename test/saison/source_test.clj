@@ -1,6 +1,5 @@
 (ns saison.source-test
   (:require [clojure.test :as t :refer [deftest is]]
-            [saison.proto :as proto]
             [saison.source :as sut]
             [saison.source.data :as data]
             [saison.path :as path]
@@ -14,7 +13,7 @@
                            :content "hi robots"})
              (data/source {:pathname "/stuff.md"
                            :content "stuff"}))
-        outputs (proto/scan src)]
+        outputs (sut/scan src)]
     (is (= 3 (count outputs)))))
 
 (deftest concat-sources-handles-watching
@@ -22,22 +21,22 @@
         watchers-2 (volatile! 0)
         fires (volatile! 0)
         source-1 (sut/construct
-                  (sut/add-watcher (fn [cb]
-                                     (vswap! watchers-1 inc)
-                                     (cb)
-                                     (fn []
-                                       (vswap! watchers-1 dec)))))
+                  (sut/on-watch (fn [cb]
+                                  (vswap! watchers-1 inc)
+                                  (cb)
+                                  (fn []
+                                    (vswap! watchers-1 dec)))))
         source-2 (sut/construct
-                  (sut/add-watcher (fn [cb]
-                                     (vswap! watchers-2 inc)
-                                     (cb)
-                                     (fn []
-                                       (vswap! watchers-2 dec)))))
+                  (sut/on-watch (fn [cb]
+                                  (vswap! watchers-2 inc)
+                                  (cb)
+                                  (fn []
+                                    (vswap! watchers-2 dec)))))
         merged (sut/construct source-1 source-2)]
     (is (zero? @watchers-1))
     (is (zero? @watchers-2))
     (is (zero? @fires))
-    (let [close-fn (proto/watch merged (fn [] (vswap! fires inc)))]
+    (let [close-fn (sut/watch merged (fn [] (vswap! fires inc)))]
       (is (= 1 @watchers-1))
       (is (= 1 @watchers-2))
       (is (= 2 @fires))
@@ -50,18 +49,14 @@
   (let [build-count (volatile! 0)
         publish-count (volatile! 0)
         s1 (sut/construct
-            (sut/before-build (fn [_]
-                                (vswap! build-count inc))))
+            (sut/before-build-hook #(vswap! build-count inc)))
         s2 (sut/construct
-            (sut/before-publish (fn [_]
-                                  (vswap! publish-count inc))))
-        s1-and-s2 (list s1 s2)
-        merged (sut/construct
-                (sut/from s1-and-s2))]
-    (proto/before-build-hook merged {})
+            (sut/before-publish-hook #(vswap! publish-count inc)))
+        merged (sut/construct s1 s2)]
+    (sut/before-build merged)
     (is (= 1 @build-count))
     (is (zero? @publish-count))
-    (proto/before-publish-hook merged {})
+    (sut/before-publish merged)
     (is (= 1 @build-count))
     (is (= 1 @publish-count))))
 
@@ -79,7 +74,7 @@
         set (fn [content]
               (reset! path-out content)
               (reset! current-path (build-path)))
-        read-path #(path/find-by-path (proto/scan src) "a.html")
+        read-path #(path/find-by-path (sut/scan src) "a.html")
         read #(content/string (read-path))]
     ;; each build-path invocation should give a unique object that is
     ;; equal to the last. this mimics the behavior of saison.file.FilePath
@@ -93,3 +88,27 @@
     (is (= "abcd" (read)))
     ;; repeat reads should yield identical objects
     (is (identical? (read-path) (read-path)))))
+
+(deftest construction-and-environment
+  (let [src (sut/construct
+             (sut/when-previewing
+              [[:env #(assoc % :hello true)]
+               [:env #(assoc % :how "unknown")]
+               [:env #(assoc % :n 42)]]
+              (sut/emit 1
+                        [(fn [] [7])]
+                        (fn [] 8))
+              [[:env #(update % :n inc)]
+               [:env #(assoc % :goodbye true)]]
+              (sut/emit 2))
+             (sut/when-publishing
+              (sut/emit 42)))]
+
+    (is (= {:extra true, :hello true, :how "unknown", :n 43, :goodbye true}
+           (sut/environment-for src {:extra true})))
+
+    (binding [sut/*env* (sut/environment-for src {:publishing false})]
+      (is (= [1 7 8 2] (sut/scan src))))
+
+    (binding [sut/*env* (sut/environment-for src {:publishing true})]
+      (is (= [42] (sut/scan src))))))

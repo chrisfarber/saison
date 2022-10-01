@@ -3,7 +3,6 @@
             [clojure.test :as t :refer [deftest is]]
             [saison.source :as source]
             [saison.source.data :as data]
-            [saison.proto :as proto]
             [saison.path :as path]
             [saison.content :as content]))
 
@@ -23,7 +22,7 @@ html-meta:
 this is more content
 "})
              (sut/yaml-frontmatter :where (constantly true)))
-        paths (proto/scan src)
+        paths (source/scan src)
         path (first paths)
         metadata (path/metadata path)
         content (content/string path)]
@@ -49,7 +48,7 @@ this is more content
                            :metadata {:extra true}
                            :content content-str})
              (sut/yaml-frontmatter :where (constantly true)))
-        paths (proto/scan src)
+        paths (source/scan src)
         path (first paths)
         metadata (path/metadata path)
         content (content/string path)]
@@ -67,7 +66,7 @@ hello: true
              (data/source {:pathname "/index.md"
                            :content content-str})
              (sut/yaml-frontmatter :where (constantly true)))
-        paths (proto/scan src)
+        paths (source/scan src)
         path (first paths)
         content (content/string path)]
     (is (not (nil? content)))

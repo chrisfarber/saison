@@ -86,7 +86,7 @@
         files-to-watch (map :file template-defs)]
     (source/steps
      (source/transform-paths (apply-template templates))
-     (source/add-watcher
+     (source/on-watch
       (fn [cb]
         (let [template-watcher (fsw/watch! :paths files-to-watch
                                            :handler (fn [_] (cb)))]

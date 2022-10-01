@@ -227,22 +227,6 @@ Most often, you'll want to apply a transformation:
   (source/transform-paths (my-transformation 42)))
 ```
 
-### Site Definition
-
-Finally, the site definition is just a clojure map that wraps up a few
-things:
-
-- `:constructor`, a function that creates the site's source
-- `:env`, common configuration or data available to sources and paths
-- `:output-to`, the folder where files will be written during build
-
-The environment map can have anything you find useful in it. It will
-be bound to the var `saison.path/*env*` when invoking the `metadata`
-or `content` functions on any path.
-
-The `:env` should contain the key `:public-url`, which will be used to
-generate absolute URLs.
-
 #### Example site
 
 ```clj
@@ -255,8 +239,9 @@ generate absolute URLs.
             [saison.source :as source]
             [saison.live :as live]))
 
-(defn constructor [env]
+(def site
   (source/construct
+   (source/set-default-env :public-url "https://my-project.github.io")
    (files {:root "pages"
            :metadata {:template "page"}})
    (file-metadata)
@@ -268,27 +253,20 @@ generate absolute URLs.
              templ/apply-html-metadata]})
    (aliases/resolve-path-aliases))
 
-(def site
-  {:output-to "dist"
-   :env {:public-url "https://my-project.github.io"}
-   :constructor  constructor)})
-
-(defonce live-preview-server (atom nil))
+(defonce preview (atom nil))
 
 (defn stop! []
-  (when-let [server @live-preview-server]
-    (.stop server)
-    (reset! live-preview-server nil)))
+  (when-let [inst @preview]
+    (live/stop! inst)
+    (reset! preview nil)))
 
 (defn start! []
   (stop!)
-  (let [local-site (assoc-in site [:env :public-url] "http://localhost:1931")
-        server (live/live-preview local-site {:port 1931})]
-    (reset! live-preview-server server)))
+  (let [inst (live/preview! site)]
+    (reset! preview inst)
+    nil))
 
-(comment
-  (start!)
-  )
+(start!)
 ```
 
 #### Reloading the site
@@ -303,8 +281,8 @@ reloading in a repl workflow.
 If using cider, you may want to add these to .dir-locals.el:
 
 ```elisp
-((nil . ((cider-ns-refresh-before-fn . "docs/stop!")
-	 (cider-ns-refresh-after-fn . "docs/start!")
+((nil . ((cider-ns-refresh-before-fn . "example.site/stop!")
+	 (cider-ns-refresh-after-fn . "example.site/start!")
 	 )))
 ```
 

@@ -6,14 +6,14 @@
    [saison.build :as sut]
    [saison.tempfile :as tf]))
 
-(defn example-site-constructor [_]
+(def example-source
   (source/construct
-   (source/start (fn [{:keys [env]}]
-                   (when-let [starts (:starts env)]
-                     (swap! starts inc))))
-   (source/stop (fn [{:keys [env]}]
-                  (when-let [stops (:stops env)]
-                    (swap! stops inc))))
+   (source/on-start (fn []
+                      (when-let [starts (:starts source/*env*)]
+                        (swap! starts inc))))
+   (source/on-stop (fn []
+                     (when-let [stops (:stops source/*env*)]
+                       (swap! stops inc))))
    (data/source {:pathname "/a.html"
                  :content "a"})
    (source/when-publishing
@@ -25,11 +25,12 @@
         out-path (-> out .toFile .getAbsolutePath)
         starts (atom 0)
         stops (atom 0)
-        site {:env {:starts starts
-                    :stops stops}
-              :output-to out-path
-              :constructor example-site-constructor}]
-    (sut/build-site site {:publish? false})
+        site (source/construct
+              (source/set-env :starts starts)
+              (source/set-env :stops stops)
+              example-source)]
+    (sut/build-site site {:publish? false
+                          :output-to out-path})
     (is (.exists (.toFile (.resolve out "a.html"))))
     (is (not (.exists (.toFile (.resolve out "only-publishing.html")))))
     (is (= 1 @starts))
@@ -37,10 +38,8 @@
 
 (deftest building-a-site-for-publishing
   (let [out (tf/make-temp-dir "out")
-        out-path (-> out .toFile .getAbsolutePath)
-        site {:env {}
-              :output-to out-path
-              :constructor example-site-constructor}]
-    (sut/build-site site {:publish? true})
+        out-path (-> out .toFile .getAbsolutePath)]
+    (sut/build-site example-source {:publish? true
+                                    :output-to out-path})
     (is (= "a" (slurp (.toFile (.resolve out "a.html")))))
     (is (= "pub" (slurp (.toFile (.resolve out "only-publishing.html")))))))

@@ -3,7 +3,6 @@
   (:require [clojure.java.io :as io]
             [saison.content :as content]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source])
   (:import [java.util.concurrent ConcurrentLinkedQueue]))
 
@@ -52,19 +51,18 @@
       @proc)))
 
 (defn build-site
-  ([site] (build-site site nil))
+  ([source] (build-site source {:publish? false
+                                :output-to "dist"}))
 
-  ([site {:keys [publish?]
-          :or {publish? false}}]
-   (binding [source/*publishing* publish?]
-     (let [dest-path (:output-to site)
-           {:keys [env constructor]} site
-           source (constructor env)]
-       (proto/start source env)
-       (proto/before-build-hook source env)
-       (when publish?
-         (proto/before-publish-hook source env))
-       (let [dest-file (io/file dest-path)
-             all-paths (proto/scan source)]
-         (concurrent-build-paths all-paths dest-file))
-       (proto/stop source env)))))
+  ([source {:keys [publish?
+                   output-to]
+            :or {publish? false}}]
+   (binding [source/*env* (source/environment-for source {:publishing publish?})]
+     (source/start source)
+     (source/before-build source)
+     (when publish?
+       (source/before-publish source))
+     (let [dest-file (io/file output-to)
+           all-paths (source/scan source)]
+       (concurrent-build-paths all-paths dest-file))
+     (source/stop source))))

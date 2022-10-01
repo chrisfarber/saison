@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [clojure.test :as t :refer [deftest is]]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source]
             [saison.source.data :as data]
             [saison.transform.markdown :as sut]
@@ -15,7 +14,7 @@
               {:pathname "/index.md"
                :content "# Hello"})
              (sut/markdown))
-        paths (proto/scan src)
+        paths (source/scan src)
         path (path/find-by-path paths "/index.html")
         content (content/string path)]
     (is (str/index-of content "<h1>"))
@@ -44,7 +43,7 @@ This is some content
 bye"})
              (yaml-frontmatter :where sut/markdown?)
              (sut/markdown))
-        paths (proto/scan src)
+        paths (source/scan src)
         path (path/find-by-path paths "/index.html")
         metadata (path/metadata path)]
     ;; metadata comes from the original path
@@ -62,6 +61,6 @@ bye"})
              (data/source {:pathname "/hi.md"
                            :content ""})
              (sut/markdown))
-        path (path/find-by-path (proto/scan src) "/hi.html")
+        path (path/find-by-path (source/scan src) "/hi.html")
         content (content/string path)]
     (is (= "" content))))

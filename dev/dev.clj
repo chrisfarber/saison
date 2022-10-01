@@ -7,16 +7,12 @@
             [saison.component :refer [render-components]]
             [components]))
 
-(defn init [_env]
+(def site
   (source/construct
    (files {:root "fixtures/dev"})
    (yaml-frontmatter :where markdown?)
    (markdown)
    (render-components)))
-
-(def site
-  {:output-to "dev_dist"
-   :constructor #'init})
 
 (defonce preview (atom nil))
 
@@ -27,7 +23,7 @@
 
 (defn start! []
   (stop!)
-  (let [inst (live/preview! site {:port 1931})]
+  (let [inst (live/preview! site)]
     (reset! preview inst)
     nil))
 

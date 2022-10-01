@@ -10,7 +10,6 @@
             [saison.content :as content]
             [saison.nic :as nic]
             [saison.path :as path]
-            [saison.proto :as proto]
             [saison.source :as source]
             [saison.transform.inject-script :refer [inject-script]]
             [saison.util :as util])
@@ -64,10 +63,9 @@
   "Given a site definition, construct the site with previewing
    enabled (`source/*previewing*) and automatically inject the
    reload script into all javascript files."
-  [{:keys [env constructor]}]
-  (binding [source/*previewing* true]
-    (source/construct (constructor env)
-                      (inject-script :script-text reload-script))))
+  [source]
+  (source/construct source
+                    (inject-script :script-text reload-script)))
 
 (defn- reloading-site-handler
   [paths-atom]
@@ -78,55 +76,54 @@
           (wait-for-change paths-atom respond)
           (use-site-handler handler req respond raise))))))
 
-(defn watch-source [source env]
-  (proto/start source env)
-  (proto/before-build-hook source env)
-  (let [paths (atom (proto/scan source))
-        change-chan (a/chan (a/sliding-buffer 1))
-        update-chan (a/chan (a/sliding-buffer 1))
-        stop-watcher (proto/watch source (fn [] (put! change-chan true)))
-        stop (fn []
-               (stop-watcher)
-               (proto/stop source env)
-               (a/close! change-chan)
-               (a/close! update-chan))]
-    (go-loop []
-      (log/trace "watch-source is waiting for a watcher")
-      (when (<! change-chan)
-        (log/trace "watch-source watcher fired. setting timer.")
+(defn watch-source [source default-env]
+  (binding [source/*env* (source/environment-for source default-env)]
+    (source/start source)
+    (source/before-build source)
+    (let [paths (atom (source/scan source))
+          change-chan (a/chan (a/sliding-buffer 1))
+          update-chan (a/chan (a/sliding-buffer 1))
+          stop-watcher (source/watch source (fn [] (put! change-chan true)))
+          stop (fn []
+                 (stop-watcher)
+                 (source/stop source)
+                 (a/close! change-chan)
+                 (a/close! update-chan))]
+      (go-loop []
+        (log/trace "watch-source is waiting for a watcher")
+        (when (<! change-chan)
+          (log/trace "watch-source watcher fired. setting timer.")
+          (loop []
+            (a/alt! change-chan (do
+                                  (log/trace "watch-source received another update, restarting timer.")
+                                  (recur))
+                    (a/timeout 500) nil))
+          (log/trace "watch-source is notifying of an update")
+          (when (>! update-chan true)
+            (recur))))
+      (future
         (loop []
-          (a/alt! change-chan (do
-                                (log/trace "watch-source received another update, restarting timer.")
-                                (recur))
-                  (a/timeout 500) nil))
-        (log/trace "watch-source is notifying of an update")
-        (when (>! update-chan true)
-          (recur))))
-    (future
-      (loop []
-        (when (<!! update-chan)
-          (log/trace "watch-source is updating the paths atom")
-          (try
-            (reset! paths (proto/scan source))
-            (log/trace "watch-source has updated the paths atom")
-            (catch Throwable e
-              (log/error e "failed to scan the source")))
-          (recur))))
-    [paths stop]))
+          (when (<!! update-chan)
+            (log/trace "watch-source is updating the paths atom")
+            (try
+              (reset! paths (source/scan source))
+              (log/trace "watch-source has updated the paths atom")
+              (catch Throwable e
+                (log/error e "failed to scan the source")))
+            (recur))))
+      [paths stop])))
 
 (defn configure-env
   "Derive a new site map with the environment ready for live previewing.
   Will auto-configure the public-url to be ready for local-network browsing if none
   is supplied. A custom :port may also be provided."
-  [site {:keys [public-url port]
-         :or {port 1931}}]
+  [{:keys [public-url port]
+    :or {port 1931}}]
   (let [intended-url (or public-url
                          (if port
                            (str (URL. "http" (or (nic/guess-local-ip) "localhost") port "/"))
                            (str (URL. "http" (or (nic/guess-local-ip) "localhost")))))]
-    (assoc-in site [:env :public-url] intended-url)))
-
-(configure-env {} {})
+    {:public-url intended-url}))
 
 (defn preview!
   "Start a jetty server that renders a live preview of the provided saison site.
@@ -144,13 +141,12 @@
                             :join? false
                             :async? true}
                            jetty-opts)
-         site (configure-env site {:public-url public-url
-                                   :port (:port jetty-opts)})
+         default-env (configure-env {:public-url public-url
+                                     :port (:port jetty-opts)})
          source (build-reloadable-source site)
-         env (:env site)
-         [paths-atom stop] (watch-source source env)
+         [paths-atom stop] (watch-source source default-env)
          handler (reloading-site-handler paths-atom)]
-     (log/info "starting server with public-url:" (:public-url env))
+     (log/info "starting server with public-url:" (:public-url default-env))
      (let [jetty (run-jetty handler jetty-opts)]
        {:paths paths-atom
         :site site
