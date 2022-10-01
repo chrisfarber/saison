@@ -37,7 +37,8 @@
   (path/transformer
    :name "canonicalize-urls"
    :where path/html?
-   :content (canonicalize-urls-in-content public-url)))
+   :content (canonicalize-urls-in-content (or public-url
+                                              (:public-url source/*env*)))))
 
 (defn canonicalize-urls
   "Canonicalize hrefs. Any non-absolute URI in any HTML page

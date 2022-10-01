@@ -66,10 +66,10 @@
                 feed-icon
                 feed-items
                 content-selector
-                public-url
                 author-name
                 author-email]
          :or {feed-items 10}} opts
+        public-url (:public-url source/*env*)
         feed-url (util/append-url-component public-url feed-path)
         entries-to-include (take feed-items entries)
         items (map #(element-for-item % public-url content-selector) entries-to-include)
@@ -118,7 +118,6 @@
   - :feed-icon, a path to the icon to use for the feed
   - :feed-items, the number of items to include. default 10.
   - :content-selector, an enlive selector that will be used to extract the content
-  - :public-url, all urls in the feed will be subpaths of this
   - :author-name
   - :author-email"
   [opts]
