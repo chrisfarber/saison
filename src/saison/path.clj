@@ -81,13 +81,13 @@
    :content - a function from a path -> new content
    :metadata-and-content - a function from a path -> [meta, content]
    :cache - a boolean indicating whether the path should cache itself
-            default true.
+            default false
 
    All of the keys are optional. Unspecified aspects of a path
    will be unmodified."
   [& {:keys [where cache name]
       :as opts
-      :or {cache true
+      :or {cache false
            where (constantly true)}}]
   (let [derive (if cache
                  (comp cached derive-path)
