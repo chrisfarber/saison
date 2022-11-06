@@ -17,18 +17,16 @@
                                                         :underlying-error e})))))
 
 (defn build [{:keys [site output-to publish]}]
-  (let [site (resolve-site site)
-        site (if output-to
-               (assoc site :output-to output-to)
-               site)]
+  (let [site (resolve-site site)]
     (build/build-site site {:verbose? true
+                            :output-to output-to
                             :publish? publish})))
 
 (defn preview [{:keys [site public-url port]}]
   (let [site (resolve-site site)]
     (live/preview! site {:public-url public-url
-                             :jetty-opts {:port port
-                                          :join? true}})))
+                         :jetty-opts {:port port
+                                      :join? true}})))
 
 (def configuration
   {:command "saison"
