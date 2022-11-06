@@ -46,8 +46,10 @@
 (defn- element-for-item [path public-url content-selector]
   (let [metadata (path/metadata path)
         {:keys [title
+                date
                 created-at
                 published-at]} metadata
+        published-at (or published-at date)
         pathname (path/pathname path)
         updated-at (or published-at created-at)
         url (util/append-url-component public-url pathname)]
@@ -56,9 +58,9 @@
      [:link {:href url}]
      [:id nil url]
      (when updated-at
-       [:updated nil (util/rfc3339 updated-at)])
+       [:updated nil (util/offset-iso-8601 updated-at)])
      (when published-at
-       [:published nil (util/rfc3339 published-at)])
+       [:published nil (util/offset-iso-8601 published-at)])
      [:content {:type "html"} (content/string (get-content path content-selector))]]))
 
 (defn- compile-atom-feed [opts public-url entries]
@@ -88,7 +90,7 @@
         [:icon nil (util/append-url-component public-url feed-icon)])
       [:id nil feed-url]
       (when update-date
-        [:updated nil (util/rfc3339 update-date)])
+        [:updated nil (util/offset-iso-8601 update-date)])
       [:generator {:uri "https://github.com/chrisfarber/saison"} "saison"]
       [:link {:rel "self" :href feed-url}]
       [:link {:rel "alternate" :href public-url}]

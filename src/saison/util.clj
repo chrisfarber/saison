@@ -62,8 +62,8 @@
         base-path (.getPath base)]
     (str (URL. base (add-path-component base-path addition)))))
 
-(defn rfc3339 [time]
-  (t/format "u-MM-dd'T'HH:mm:ss.SSXXX" time))
+(defn offset-iso-8601 [time]
+  (t/format java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME time))
 
 ;; https://clojure.atlassian.net/browse/CLJ-1468
 (defn deep-merge
