@@ -15,9 +15,14 @@
      (= feed-id (:feed-id (path/metadata path)))
      (path/html? path))))
 
+(defn sorting-date [path]
+  (let [meta (path/metadata path)
+        {:keys [published-at date]} meta]
+    (or published-at date)))
+
 (defn- sorted-blog-entries [paths pred]
   (let [matching (filter pred paths)]
-    (sort-by #(:created-at (path/metadata %))
+    (sort-by sorting-date
              (comp - compare)
              matching)))
 
@@ -25,7 +30,8 @@
   (let [dates (filter some?
                       (flatten (map (fn [path]
                                       (let [meta (path/metadata path)]
-                                        [(:created-at meta)
+                                        [(:date meta)
+                                         (:created-at meta)
                                          (:published-at meta)]))
                                     paths)))]
     (when (not-empty dates)
